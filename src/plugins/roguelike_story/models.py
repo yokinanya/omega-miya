@@ -41,7 +41,7 @@ class Story(BaseRoguelikeStoryEventModel):
     @property
     def characters_overview(self) -> str:
         """抽取并格式化人物描述"""
-        return '\n'.join(x.overview for x in self.characters)
+        return '\n\n'.join(x.overview for x in self.characters)
 
     @property
     def overview(self) -> str:

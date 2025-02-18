@@ -9,15 +9,19 @@
 """
 
 from nonebot import get_plugin_config, logger
-from pydantic import BaseModel, ConfigDict, ValidationError
+from pydantic import BaseModel, ConfigDict, Field, ValidationError
 
 
 class RoguelikeStoryPluginConfig(BaseModel):
     """RoguelikeStory 插件配置"""
     # 使用的 AI 服务名称, 为 None 则使用默认配置
-    roguelike_story_plugin_ai_service_name: str | None = None
+    roguelike_story_plugin_ai_service_name: str | None = Field(default=None)
     # 使用的 AI 模型名称, 为 None 则使用默认配置
-    roguelike_story_plugin_ai_model_name: str | None = None
+    roguelike_story_plugin_ai_model_name: str | None = Field(default=None)
+    # 生成时的 Max Tokens 参数值
+    roguelike_story_plugin_ai_temperature: float = Field(default=0.5, ge=0, le=2)
+    # 生成时的 Max Tokens 参数值
+    roguelike_story_plugin_ai_max_tokens: int = Field(default=4096)
 
     model_config = ConfigDict(extra='ignore')
 

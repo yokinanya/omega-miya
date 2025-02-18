@@ -14,10 +14,11 @@ from typing import TYPE_CHECKING
 from sqlalchemy.exc import NoResultFound
 
 from .consts import ATTR_PREFIX, MODULE_NAME, PLUGIN_NAME, INTRO_TEXT
+from .session import StorySession
 
 if TYPE_CHECKING:
     from src.service import OmegaMatcherInterface as OmMI
-    from .session import StorySession
+    from .models import RollResults
 
 
 async def handle_story_init(story_session: 'StorySession', interface: 'OmMI', description: str | None) -> None:
@@ -28,12 +29,11 @@ async def handle_story_init(story_session: 'StorySession', interface: 'OmMI', de
     if description is None:
         await interface.reject_arg_reply('description', INTRO_TEXT)
 
-    await interface.send_reply('肉鸽娘正在编写剧本中_<, 请稍后')
+    await interface.send_reply('肉鸽娘正在编写剧本中_<, 请稍候')
 
     story = await story_session.init(description=description)
-    await interface.send_reply(story.background)
+    await interface.send_reply(f'{story.background}\n\n{story.story_summary}')
     await interface.send_reply(story.characters_overview)
-    await interface.send_reply(story.story_summary)
     await interface.send_reply(story.prologue)
 
     await interface.reject_arg_reply('description', '你的下一步行动是？')
@@ -48,13 +48,43 @@ async def handle_story_continue(story_session: 'StorySession', interface: 'OmMI'
         await interface.send_reply(story_session.current_situation)
         await interface.reject_arg_reply('description', '你的下一步行动是？')
 
-    await interface.send_reply('骰子姬正在编写剧本中_<, 请稍后')
+    await interface.send_reply('骰子姬正在编写剧本中_<, 请稍候')
     roll_result = await story_session.roll(action=description)
 
     # 判定用户属性, 决定骰子事件后续发展
     attr_value = await check_user_characteristics(interface, roll_result.characteristics)
     checking_value = randint(1, 100)
+    result_msg = get_roll_result_text(roll_result=roll_result, attr_value=attr_value, checking_value=checking_value)
 
+    await interface.send_reply(
+        f'你进行了【{roll_result.characteristics}】检定\n1D100=>{checking_value}=>{result_msg}'
+    )
+    await interface.send_reply('肉鸽娘正在编写剧本中_<, 请稍候')
+
+    # 编写下一步剧情故事
+    continue_story = await story_session.continue_story(player_action=description, roll_result=result_msg)
+    await interface.send_reply(continue_story.next_situation)
+    await interface.send_reply(continue_story.player_options)
+
+    await interface.reject_arg_reply('description', '你的下一步行动是？')
+
+
+async def handle_fast_roll_action(interface: 'OmMI', description: str) -> None:
+    """处理快速行动检定"""
+    await interface.send_reply('骰子姬正在编写剧本中_<, 请稍候')
+
+    roll_result = await StorySession.fast_roll(action=description)
+    attr_value = await check_user_characteristics(interface, roll_result.characteristics)
+    checking_value = randint(1, 100)
+    result_msg = get_roll_result_text(roll_result=roll_result, attr_value=attr_value, checking_value=checking_value)
+
+    await interface.send_reply(
+        f'你进行了【{roll_result.characteristics}】检定\n1D100=>{checking_value}=>{result_msg}'
+    )
+
+
+def get_roll_result_text(roll_result: 'RollResults', attr_value: int, checking_value: int) -> str:
+    """进行掷骰判定并格式化结果文本"""
     if attr_value > checking_value:
         if checking_value < attr_value * 0.1:
             result_msg = f'大成功！！\n{roll_result.completed_success}'
@@ -66,17 +96,7 @@ async def handle_story_continue(story_session: 'StorySession', interface: 'OmMI'
         else:
             result_msg = f'失败~\n{roll_result.failure}'
 
-    await interface.send_reply(
-        f'你进行了【{roll_result.characteristics}】检定\n1D100=>{checking_value}=>{result_msg}'
-    )
-    await interface.send_reply('肉鸽娘正在编写剧本中_<, 请稍后')
-
-    # 编写下一步剧情故事
-    continue_story = await story_session.continue_story(player_action=description, roll_result=result_msg)
-    await interface.send_reply(continue_story.next_situation)
-    await interface.send_reply(continue_story.player_options)
-
-    await interface.reject_arg_reply('description', '你的下一步行动是？')
+    return result_msg
 
 
 async def check_user_characteristics(interface: 'OmMI', characteristics: str) -> int:
@@ -100,5 +120,6 @@ async def check_user_characteristics(interface: 'OmMI', characteristics: str) ->
 __all__ = [
     'handle_story_init',
     'handle_story_continue',
+    'handle_fast_roll_action',
     'check_user_characteristics',
 ]

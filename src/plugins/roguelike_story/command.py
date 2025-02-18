@@ -19,7 +19,7 @@ from nonebot.plugin import CommandGroup
 from src.params.handler import get_command_str_single_arg_parser_handler
 from src.service import OmegaMatcherInterface as OmMI
 from src.service import enable_processor_state
-from .helpers import handle_story_init, handle_story_continue
+from .helpers import handle_story_init, handle_story_continue, handle_fast_roll_action
 from .session import get_story_session, remove_story_session
 
 roguelike_story = CommandGroup(
@@ -30,6 +30,7 @@ roguelike_story = CommandGroup(
         level=30,
         cooldown=60,
     ),
+    expire_time=timedelta(minutes=2),
 )
 
 
@@ -37,7 +38,6 @@ roguelike_story = CommandGroup(
     'start',
     aliases={'故事肉鸽启动', '肉鸽故事启动', '继续故事肉鸽', '继续肉鸽故事'},
     handlers=[get_command_str_single_arg_parser_handler('description', ensure_key=True)],
-    expire_time=timedelta(minutes=5),
 ).got('description')
 async def handle_story_start(
         interface: Annotated[OmMI, Depends(OmMI.depend('event'))],
@@ -65,7 +65,7 @@ async def handle_story_start(
     'remove',
     aliases={'结束故事肉鸽', '结束肉鸽故事', '故事肉鸽重开', '肉鸽故事重开'},
     handlers=[get_command_str_single_arg_parser_handler('ensure', ensure_key=True)],
-).got('description')
+).got('ensure')
 async def handle_story_remove(
         interface: Annotated[OmMI, Depends(OmMI.depend('event'))],
         ensure: Annotated[str | None, ArgStr('ensure')],
@@ -83,6 +83,24 @@ async def handle_story_remove(
     except Exception as e:
         logger.warning(f'Roguelike Story | {interface.entity}获取故事会话失败, {e}')
         await interface.finish_reply(f'获取故事会话失败, 请稍后再试或联系管理员处理')
+
+
+@roguelike_story.command(
+    'action',
+    aliases={'快速行动检定', '行动检定'},
+    handlers=[get_command_str_single_arg_parser_handler('description')],
+).got('description', prompt='请输入需要检定的行动或任务描述')
+async def handle_action_checking(
+        interface: Annotated[OmMI, Depends(OmMI.depend('user'))],
+        description: Annotated[str, ArgStr('description')],
+) -> None:
+    try:
+        await handle_fast_roll_action(interface=interface, description=description)
+    except MatcherException:
+        raise
+    except Exception as e:
+        logger.warning(f'Roguelike Story | 生成失败, {e}')
+        await interface.finish_reply(f'肉鸽姬还没有想好接下来会发生什么, 请稍后再试QAQ')
 
 
 __all__ = []

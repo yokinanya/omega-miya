@@ -15,7 +15,8 @@ __plugin_meta__ = PluginMetadata(
     description='【肉鸽故事插件】\n'
                 '基于AI的肉鸽故事，快来开始你的冒险吧!',
     usage='/故事肉鸽启动\n'
-          '/结束故事肉鸽',
+          '/结束故事肉鸽\n'
+          '/快速行动检定',
     extra={'author': 'Ailitonia'},
 )
 

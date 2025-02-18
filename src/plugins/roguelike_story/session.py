@@ -62,8 +62,8 @@ class StorySession:
             story = await _create_chat_session(init_system_message=STORY_CREATE_PROMPT).chat_query_schema(
                 description,
                 model_type=Story,
-                temperature=0.5,
-                max_tokens=8192,
+                temperature=roguelike_story_plugin_config.roguelike_story_plugin_ai_temperature,
+                max_tokens=roguelike_story_plugin_config.roguelike_story_plugin_ai_max_tokens,
                 timeout=90,
             )
 
@@ -77,6 +77,17 @@ class StorySession:
         self._is_inited = True
         return story
 
+    @classmethod
+    async def fast_roll(cls, action: str) -> RollResults:
+        """快速掷骰, 无需前文预设"""
+        return await _create_chat_session(init_system_message=ROLL_PROMPT).chat_query_schema(
+            RollCondition(current_situation='你可以任意地假设故事发生的背景', action=action).model_dump_json(),
+            model_type=RollResults,
+            temperature=roguelike_story_plugin_config.roguelike_story_plugin_ai_temperature,
+            max_tokens=roguelike_story_plugin_config.roguelike_story_plugin_ai_max_tokens,
+            timeout=90,
+        )
+
     async def roll(self, action: str) -> RollResults:
         """根据提供的玩家行动描述, 对行动结果进行掷骰, 返回可能的不同结果的事件描述"""
         if not self._is_inited:
@@ -86,8 +97,8 @@ class StorySession:
             roll_result = await self.roll_session.chat_query_schema(
                 RollCondition(current_situation=self.current_situation, action=action).model_dump_json(),
                 model_type=RollResults,
-                temperature=0.5,
-                max_tokens=8192,
+                temperature=roguelike_story_plugin_config.roguelike_story_plugin_ai_temperature,
+                max_tokens=roguelike_story_plugin_config.roguelike_story_plugin_ai_max_tokens,
                 timeout=90,
             )
         return roll_result
@@ -105,8 +116,8 @@ class StorySession:
                     roll_result=roll_result,
                 ).model_dump_json(),
                 model_type=NextSituation,
-                temperature=0.5,
-                max_tokens=8192,
+                temperature=roguelike_story_plugin_config.roguelike_story_plugin_ai_temperature,
+                max_tokens=roguelike_story_plugin_config.roguelike_story_plugin_ai_max_tokens,
                 timeout=90,
             )
         self.current_situation = continued_result.next_situation
