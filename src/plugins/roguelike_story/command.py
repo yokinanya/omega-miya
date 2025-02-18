@@ -93,7 +93,13 @@ async def handle_action_checking(
         description: Annotated[str, ArgStr('description')],
 ) -> None:
     try:
-        await handle_fast_roll_action(interface=interface, description=description)
+        story_session = get_story_session(interface=interface)
+    except Exception as e:
+        logger.warning(f'Roguelike Story | {interface.entity}获取故事会话失败, {e}')
+        await interface.finish_reply(f'获取故事会话失败, 请稍后再试或联系管理员处理')
+
+    try:
+        await handle_fast_roll_action(story_session=story_session, interface=interface, description=description)
     except MatcherException as e:
         raise e
     except Exception as e:

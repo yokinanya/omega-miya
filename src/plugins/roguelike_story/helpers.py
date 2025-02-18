@@ -68,11 +68,14 @@ async def handle_story_continue(story_session: 'StorySession', interface: 'OmMI'
     await interface.reject_arg_reply('description', '你的下一步行动是？')
 
 
-async def handle_fast_roll_action(interface: 'OmMI', description: str) -> None:
+async def handle_fast_roll_action(story_session: 'StorySession', interface: 'OmMI', description: str) -> None:
     """处理快速行动检定"""
+    if story_session.is_processing:
+        await interface.finish_reply('骰子姬正在努力工作中_<, 请稍后再试')
+
     await interface.send_reply('骰子姬正在编写剧本中_<, 请稍候')
 
-    roll_result = await StorySession.fast_roll(action=description)
+    roll_result = await story_session.fast_roll(action=description)
     attr_value = await check_user_characteristics(interface, roll_result.characteristics)
     checking_value = randint(1, 100)
     result_msg = get_roll_result_text(roll_result=roll_result, attr_value=attr_value, checking_value=checking_value)
