@@ -60,7 +60,7 @@ async def handle_story_continue(story_session: 'StorySession', interface: 'OmMI'
     continue_story = await story_session.continue_story(player_action=description, roll_result=result_msg)
 
     await interface.send_reply(
-        f'你进行了【{roll_result.characteristics}】检定\n1D100=>{checking_value}=>{result_msg}'
+        f'你进行了【{roll_result.characteristics}({attr_value})】检定\n1D100=>{checking_value}=>{result_msg}'
     )
     await interface.send_reply(continue_story.next_situation)
     await interface.send_reply(continue_story.player_options)
@@ -81,7 +81,7 @@ async def handle_fast_roll_action(story_session: 'StorySession', interface: 'OmM
     result_msg = get_roll_result_text(roll_result=roll_result, attr_value=attr_value, checking_value=checking_value)
 
     await interface.send_reply(
-        f'你进行了【{roll_result.characteristics}】检定\n1D100=>{checking_value}=>{result_msg}'
+        f'你进行了【{roll_result.characteristics}({attr_value})】检定\n1D100=>{checking_value}=>{result_msg}'
     )
 
 
