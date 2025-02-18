@@ -48,7 +48,7 @@ async def handle_story_continue(story_session: 'StorySession', interface: 'OmMI'
         await interface.send_reply(story_session.current_situation)
         await interface.reject_arg_reply('description', '你的下一步行动是？')
 
-    await interface.send_reply('骰子姬正在编写剧本中_<, 请稍候')
+    await interface.send_reply('肉鸽娘正在编写剧本中_<, 请稍候')
     roll_result = await story_session.roll(action=description)
 
     # 判定用户属性, 决定骰子事件后续发展
@@ -56,13 +56,12 @@ async def handle_story_continue(story_session: 'StorySession', interface: 'OmMI'
     checking_value = randint(1, 100)
     result_msg = get_roll_result_text(roll_result=roll_result, attr_value=attr_value, checking_value=checking_value)
 
+    # 编写下一步剧情故事
+    continue_story = await story_session.continue_story(player_action=description, roll_result=result_msg)
+
     await interface.send_reply(
         f'你进行了【{roll_result.characteristics}】检定\n1D100=>{checking_value}=>{result_msg}'
     )
-    await interface.send_reply('肉鸽娘正在编写剧本中_<, 请稍候')
-
-    # 编写下一步剧情故事
-    continue_story = await story_session.continue_story(player_action=description, roll_result=result_msg)
     await interface.send_reply(continue_story.next_situation)
     await interface.send_reply(continue_story.player_options)
 

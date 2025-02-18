@@ -8,7 +8,6 @@
 @Software       : PyCharm
 """
 
-from datetime import timedelta
 from typing import Annotated
 
 from nonebot.exception import MatcherException
@@ -28,9 +27,8 @@ roguelike_story = CommandGroup(
     state=enable_processor_state(
         name='RoguelikeStory',
         level=30,
-        cooldown=60,
+        cooldown=120,
     ),
-    expire_time=timedelta(minutes=2),
 )
 
 
@@ -54,8 +52,8 @@ async def handle_story_start(
             await handle_story_init(story_session=story_session, interface=interface, description=description)
         else:
             await handle_story_continue(story_session=story_session, interface=interface, description=description)
-    except MatcherException:
-        raise
+    except MatcherException as e:
+        raise e
     except Exception as e:
         logger.warning(f'Roguelike Story | 生成失败, {e}')
         await interface.finish_reply(f'肉鸽姬还没有想好接下来会发生什么, 请稍后再试QAQ')
@@ -78,8 +76,8 @@ async def handle_story_remove(
             await interface.finish_reply('目前的肉鸽故事已移除，你可以重新开始新的冒险了~')
         else:
             await interface.finish_reply('已取消操作')
-    except MatcherException:
-        raise
+    except MatcherException as e:
+        raise e
     except Exception as e:
         logger.warning(f'Roguelike Story | {interface.entity}获取故事会话失败, {e}')
         await interface.finish_reply(f'获取故事会话失败, 请稍后再试或联系管理员处理')
@@ -96,8 +94,8 @@ async def handle_action_checking(
 ) -> None:
     try:
         await handle_fast_roll_action(interface=interface, description=description)
-    except MatcherException:
-        raise
+    except MatcherException as e:
+        raise e
     except Exception as e:
         logger.warning(f'Roguelike Story | 生成失败, {e}')
         await interface.finish_reply(f'肉鸽姬还没有想好接下来会发生什么, 请稍后再试QAQ')

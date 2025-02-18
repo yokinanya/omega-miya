@@ -58,13 +58,16 @@ class StorySession:
         if self._is_inited:
             raise RuntimeError('StorySession has already been initialized')
 
+        if self.is_processing:
+            raise RuntimeError('StorySession is processing')
+
         async with self._lock:
             story = await _create_chat_session(init_system_message=STORY_CREATE_PROMPT).chat_query_schema(
                 description,
                 model_type=Story,
                 temperature=roguelike_story_plugin_config.roguelike_story_plugin_ai_temperature,
                 max_tokens=roguelike_story_plugin_config.roguelike_story_plugin_ai_max_tokens,
-                timeout=90,
+                timeout=roguelike_story_plugin_config.roguelike_story_plugin_ai_timeout,
             )
 
         current_continue_prompt = f'{CONTINUE_PROMPT}\n\n{story.overview}'
@@ -85,7 +88,7 @@ class StorySession:
             model_type=RollResults,
             temperature=roguelike_story_plugin_config.roguelike_story_plugin_ai_temperature,
             max_tokens=roguelike_story_plugin_config.roguelike_story_plugin_ai_max_tokens,
-            timeout=90,
+            timeout=roguelike_story_plugin_config.roguelike_story_plugin_ai_timeout,
         )
 
     async def roll(self, action: str) -> RollResults:
@@ -93,13 +96,16 @@ class StorySession:
         if not self._is_inited:
             raise RuntimeError('StorySession has not been initialized')
 
+        if self.is_processing:
+            raise RuntimeError('StorySession is processing')
+
         async with self._lock:
             roll_result = await self.roll_session.chat_query_schema(
                 RollCondition(current_situation=self.current_situation, action=action).model_dump_json(),
                 model_type=RollResults,
                 temperature=roguelike_story_plugin_config.roguelike_story_plugin_ai_temperature,
                 max_tokens=roguelike_story_plugin_config.roguelike_story_plugin_ai_max_tokens,
-                timeout=90,
+                timeout=roguelike_story_plugin_config.roguelike_story_plugin_ai_timeout,
             )
         return roll_result
 
@@ -107,6 +113,9 @@ class StorySession:
         """根据当前故事进度、玩家行为及掷骰结果, 生成后续故事"""
         if not self._is_inited:
             raise RuntimeError('StorySession has not been initialized')
+
+        if self.is_processing:
+            raise RuntimeError('StorySession is processing')
 
         async with self._lock:
             continued_result = await self.continued_session.chat_query_schema(
@@ -118,7 +127,7 @@ class StorySession:
                 model_type=NextSituation,
                 temperature=roguelike_story_plugin_config.roguelike_story_plugin_ai_temperature,
                 max_tokens=roguelike_story_plugin_config.roguelike_story_plugin_ai_max_tokens,
-                timeout=90,
+                timeout=roguelike_story_plugin_config.roguelike_story_plugin_ai_timeout,
             )
         self.current_situation = continued_result.next_situation
         return continued_result

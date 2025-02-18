@@ -22,6 +22,8 @@ class RoguelikeStoryPluginConfig(BaseModel):
     roguelike_story_plugin_ai_temperature: float = Field(default=0.5, ge=0, le=2)
     # 生成时的 Max Tokens 参数值
     roguelike_story_plugin_ai_max_tokens: int = Field(default=4096)
+    # 生成时的请求超时时间
+    roguelike_story_plugin_ai_timeout: int = Field(default=120)
 
     model_config = ConfigDict(extra='ignore')
 
