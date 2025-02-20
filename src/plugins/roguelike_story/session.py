@@ -87,7 +87,7 @@ class StorySession:
 
         async with self._lock:
             roll_result = await _create_chat_session(init_system_message=ROLL_PROMPT).chat_query_schema(
-                RollCondition(current_situation='你可以任意地假设故事发生的背景', action=action).model_dump_json(),
+                RollCondition(current_situation='', action=action).model_dump_json(),
                 model_type=RollResults,
                 temperature=roguelike_story_plugin_config.roguelike_story_plugin_ai_temperature,
                 max_tokens=roguelike_story_plugin_config.roguelike_story_plugin_ai_max_tokens,
