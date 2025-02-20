@@ -14,11 +14,11 @@ from typing import TYPE_CHECKING
 from sqlalchemy.exc import NoResultFound
 
 from .consts import ATTR_PREFIX, MODULE_NAME, PLUGIN_NAME, INTRO_TEXT
-from .session import StorySession
 
 if TYPE_CHECKING:
     from src.service import OmegaMatcherInterface as OmMI
     from .models import RollResults
+    from .session import StorySession
 
 
 async def handle_story_init(story_session: 'StorySession', interface: 'OmMI', description: str | None) -> None:

@@ -61,7 +61,7 @@ async def handle_story_start(
 
 @roguelike_story.command(
     'remove',
-    aliases={'结束故事肉鸽', '结束肉鸽故事', '故事肉鸽重开', '肉鸽故事重开'},
+    aliases={'结束故事肉鸽', '结束肉鸽故事', '移除故事肉鸽', '移除肉鸽故事', '故事肉鸽重开', '肉鸽故事重开'},
     handlers=[get_command_str_single_arg_parser_handler('ensure', ensure_key=True)],
 ).got('ensure')
 async def handle_story_remove(
