@@ -167,19 +167,24 @@ class Message(BaseOpenAIModel):
     chat_messages: list[MessageContent] = Field(default_factory=list)
     prefix_messages: list[MessageContent] = Field(default_factory=list)
 
+    def clear_chat_messages(self) -> Self:
+        self.chat_messages = list()
+        return self
+
     def set_prefix_content(
             self,
             system_text: str,
             *,
             assistant_text: str | None = None,
             use_developer: bool = False,
-    ) -> None:
+    ) -> Self:
         if use_developer:
             self.prefix_messages.append(MessageContent.developer().set_plain_text(system_text))
         else:
             self.prefix_messages.append(MessageContent.system().set_plain_text(system_text))
         if assistant_text:
             self.prefix_messages.append(MessageContent.assistant().set_plain_text(assistant_text))
+        return self
 
     def add_content(self, content: MessageContent) -> Self:
         self.chat_messages.append(content)

@@ -29,11 +29,12 @@ class ChatSession:
             init_system_message: str | None = None,
             init_assistant_message: str | None = None,
             use_developer_message: bool = False,
+            max_messages: int = 20,
     ) -> None:
         self.client = BaseOpenAIClient.init_from_config(service_name=service_name, model_name=model_name)
         self.default_user_name = default_user_name
         self.model = model_name
-        self.message = Message()
+        self.message = Message(max_messages=max_messages)
         if init_system_message is not None:
             self.message.set_prefix_content(
                 system_text=init_system_message,
@@ -60,6 +61,10 @@ class ChatSession:
             init_assistant_message=init_assistant_message,
             use_developer_message=use_developer_message,
         )
+
+    def reset_chat(self) -> None:
+        """重置会话到初始状态"""
+        self.message.clear_chat_messages()
 
     async def chat(
             self,
