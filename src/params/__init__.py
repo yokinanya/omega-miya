@@ -10,7 +10,7 @@
 
 from typing import Any
 
-from nonebot.internal.adapter.message import Message
+from nonebot.adapters import Message as BaseMessage
 from nonebot.matcher import Matcher
 from nonebot.params import Depends
 from nonebot.typing import T_State
@@ -28,7 +28,7 @@ class StatePlainTextInner:
             raise KeyError(f'State has not key: {self.key}')
         elif isinstance(value, str):
             return value
-        elif isinstance(value, Message):
+        elif isinstance(value, BaseMessage):
             return value.extract_plain_text()
         else:
             return str(value)
@@ -40,5 +40,5 @@ def state_plain_text(key: str) -> str:
 
 
 __all__ = [
-    'state_plain_text'
+    'state_plain_text',
 ]

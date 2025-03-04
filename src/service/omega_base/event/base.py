@@ -10,11 +10,11 @@
 
 from typing import TYPE_CHECKING, override
 
-from nonebot.internal.adapter import Event as BaseEvent
+from nonebot.adapters import Event as BaseEvent
 from nonebot.utils import escape_tag
 
 if TYPE_CHECKING:
-    from nonebot.internal.adapter import Message as BaseMessage
+    from nonebot.adapters import Message as BaseMessage
 
 
 class Event(BaseEvent):

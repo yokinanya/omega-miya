@@ -13,7 +13,7 @@ from collections.abc import Callable
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Annotated, Any
 
-from nonebot.internal.adapter import Event as BaseEvent
+from nonebot.adapters import Event as BaseEvent
 from nonebot.log import logger
 from nonebot.params import Depends
 
@@ -21,7 +21,7 @@ from src.database import get_db_session
 from ...internal import OmegaEntity
 
 if TYPE_CHECKING:
-    from nonebot.internal.adapter import Bot as BaseBot
+    from nonebot.adapters import Bot as BaseBot
     from sqlalchemy.ext.asyncio import AsyncSession
 
     from ...message import Message as OmegaMessage

@@ -13,7 +13,7 @@ from typing import TYPE_CHECKING, Literal, override
 from .base import Event as OmegaEvent
 
 if TYPE_CHECKING:
-    from nonebot.internal.adapter import Message as BaseMessage
+    from nonebot.adapters import Message as BaseMessage
 
 
 class BotActionEvent(OmegaEvent):

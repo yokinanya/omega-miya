@@ -11,8 +11,8 @@
 from datetime import datetime, timedelta
 from typing import Annotated
 
-from nonebot.internal.adapter import Bot as BaseBot
-from nonebot.internal.adapter import Event as BaseEvent
+from nonebot.adapters import Bot as BaseBot
+from nonebot.adapters import Event as BaseEvent
 from nonebot.log import logger
 from nonebot.params import ArgStr, Depends
 from nonebot.permission import SUPERUSER

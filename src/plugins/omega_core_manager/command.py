@@ -11,7 +11,9 @@
 from datetime import timedelta
 from typing import Annotated
 
-from nonebot.internal.adapter import Bot, Event, Message
+from nonebot.adapters import Bot as BaseBot
+from nonebot.adapters import Event as BaseEvent
+from nonebot.adapters import Message as BaseMessage
 from nonebot.log import logger
 from nonebot.matcher import Matcher
 from nonebot.params import ArgStr, CommandArg, Depends
@@ -42,7 +44,7 @@ omega = CommandGroup(
 )
 
 
-async def handle_parse_args(state: T_State, cmd_arg: Annotated[Message, CommandArg()]):
+async def handle_parse_args(state: T_State, cmd_arg: Annotated[BaseMessage, CommandArg()]):
     """首次运行时解析命令参数"""
     cmd_args = cmd_arg.extract_plain_text().strip().split()
 
@@ -104,7 +106,12 @@ async def handle_status(interface: Annotated[OmMI, Depends(OmMI.depend())]):
 
 
 @omega.command('help', aliases={'Help', 'help', '帮助'}, permission=None, priority=10).handle()
-async def handle_help(bot: Bot, event: Event, matcher: Matcher, cmd_arg: Annotated[Message, CommandArg()]):
+async def handle_help(
+        bot: BaseBot,
+        event: BaseEvent,
+        matcher: Matcher,
+        cmd_arg: Annotated[BaseMessage, CommandArg()]
+) -> None:
     plugin_name = cmd_arg.extract_plain_text().strip()
 
     if not plugin_name:

@@ -21,8 +21,8 @@ from ..exception import AdapterNotSupported
 from ..typing import BaseMessageSegType, BaseMessageType, BaseSentMessageType
 
 if TYPE_CHECKING:
-    from nonebot.internal.adapter import Message as BaseMessage
-    from nonebot.internal.adapter import MessageSegment as BaseMessageSegment
+    from nonebot.adapters import Message as BaseMessage
+    from nonebot.adapters import MessageSegment as BaseMessageSegment
 
     from ...message import Message as OmegaMessage
 

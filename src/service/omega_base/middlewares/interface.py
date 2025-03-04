@@ -14,9 +14,9 @@ from collections.abc import Callable, Coroutine
 from functools import wraps
 from typing import TYPE_CHECKING, Annotated, Any, NoReturn, Self, cast
 
+from nonebot.adapters import Bot as BaseBot
+from nonebot.adapters import Event as BaseEvent
 from nonebot.exception import FinishedException, PausedException, RejectedException
-from nonebot.internal.adapter import Bot as BaseBot
-from nonebot.internal.adapter import Event as BaseEvent
 from nonebot.log import logger
 from nonebot.matcher import Matcher, current_bot, current_event, current_matcher
 from nonebot.params import Depends

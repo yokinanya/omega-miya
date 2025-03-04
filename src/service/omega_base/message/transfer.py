@@ -17,7 +17,7 @@ from .message import Message as OmegaMessage
 from .message import MessageSegment as OmegaMessageSegment
 
 if TYPE_CHECKING:
-    from nonebot.internal.adapter import Message as BaseMessage
+    from nonebot.adapters import Message as BaseMessage
 
     from src.resource import TemporaryResource
     from src.service import OmegaMatcherInterface

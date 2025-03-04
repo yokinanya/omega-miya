@@ -20,8 +20,8 @@ from .config import wordcloud_plugin_config, wordcloud_plugin_resource_config
 if TYPE_CHECKING:
     from datetime import datetime
 
-    from nonebot.internal.adapter import Bot as BaseBot
-    from nonebot.internal.adapter import Event as BaseEvent
+    from nonebot.adapters import Bot as BaseBot
+    from nonebot.adapters import Event as BaseEvent
 
     from src.database.internal.history import History
     from src.resource import TemporaryResource

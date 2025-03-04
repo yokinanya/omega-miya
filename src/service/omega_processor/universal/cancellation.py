@@ -11,8 +11,8 @@
 import re
 
 from nonebot import logger
+from nonebot.adapters import Message as BaseMessage
 from nonebot.exception import IgnoredException
-from nonebot.internal.adapter import Message
 from nonebot.matcher import Matcher
 
 CANCEL_PROMPT: str = '操作取消，已退出命令交互'
@@ -21,20 +21,20 @@ CHINESE_CANCELLATION_REGEX_1 = re.compile(r'^那?[算别不停]\w{0,3}了?吧?$'
 CHINESE_CANCELLATION_REGEX_2 = re.compile(r'^那?(?:[给帮]我)?取消了?吧?$')
 
 
-def is_cancellation(message: Message | str) -> bool:
+def is_cancellation(message: BaseMessage | str) -> bool:
     """判断消息是否表示取消
 
     :param message: 消息对象或消息文本
     :return: 是否表示取消的布尔值
     """
-    text = message.extract_plain_text() if isinstance(message, Message) else message
+    text = message.extract_plain_text() if isinstance(message, BaseMessage) else message
     return any(kw in text for kw in CHINESE_CANCELLATION_WORDS) and bool(
         CHINESE_CANCELLATION_REGEX_1.match(text)
         or CHINESE_CANCELLATION_REGEX_2.match(text)
     )
 
 
-async def preprocessor_cancellation(matcher: Matcher, message: Message):
+async def preprocessor_cancellation(matcher: Matcher, message: BaseMessage):
     """运行预处理, 用户取消操作"""
 
     if matcher.temp:

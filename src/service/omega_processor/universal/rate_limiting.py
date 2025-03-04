@@ -12,9 +12,9 @@ import time
 from datetime import datetime, timedelta
 
 from nonebot import get_driver, logger
+from nonebot.adapters import Bot as BaseBot
+from nonebot.adapters import Event as BaseEvent
 from nonebot.exception import IgnoredException
-from nonebot.internal.adapter import Bot as BaseBot
-from nonebot.internal.adapter import Event as BaseEvent
 
 SUPERUSERS = get_driver().config.superusers
 LOG_PREFIX: str = '<lc>Rate Limiting</lc> | '

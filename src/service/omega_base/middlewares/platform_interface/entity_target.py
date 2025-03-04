@@ -20,7 +20,7 @@ from ..const import SupportedTarget
 from ..exception import BotNoFound, TargetNotSupported
 
 if TYPE_CHECKING:
-    from nonebot.internal.adapter import Bot as BaseBot
+    from nonebot.adapters import Bot as BaseBot
 
     from ...internal import OmegaEntity
     from ..models import EntityTargetRevokeParams, EntityTargetSendParams

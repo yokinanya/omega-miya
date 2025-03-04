@@ -12,9 +12,9 @@ import asyncio
 from typing import Literal
 
 from nonebot import get_driver, logger
+from nonebot.adapters import Bot as BaseBot
+from nonebot.adapters import Event as BaseEvent
 from nonebot.exception import IgnoredException
-from nonebot.internal.adapter import Bot as BaseBot
-from nonebot.internal.adapter import Event as BaseEvent
 from nonebot.matcher import Matcher
 from nonebot.message import handle_event, run_preprocessor
 
