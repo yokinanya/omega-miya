@@ -30,7 +30,7 @@ from .helper import (
 )
 
 if TYPE_CHECKING:
-    from nonebot.internal.driver import CookieTypes
+    from src.utils.omega_common_api.types import CookieTypes
 
     from .model import ShindanMakerResult, ShindanMakerSearchResult
 

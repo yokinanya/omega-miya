@@ -14,7 +14,7 @@ from src.utils import BaseCommonAPI
 from .config import pixiv_config
 
 if TYPE_CHECKING:
-    from nonebot.internal.driver import CookieTypes, HeaderTypes, QueryTypes
+    from src.utils.omega_common_api.types import CookieTypes, HeaderTypes, QueryTypes
 
 
 class BasePixivAPI(BaseCommonAPI):

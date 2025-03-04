@@ -31,7 +31,7 @@ from .config import http_proxy_config
 from .utils import cloudflare_clearance_config
 
 if TYPE_CHECKING:
-    from nonebot.internal.driver import (
+    from .types import (
         ContentTypes,
         CookieTypes,
         DataTypes,

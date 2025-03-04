@@ -17,7 +17,7 @@ from src.compat import AnyUrlStr as AnyUrl
 from src.utils import BaseCommonAPI
 
 if TYPE_CHECKING:
-    from nonebot.internal.driver import QueryTypes
+    from src.utils.omega_common_api.types import QueryTypes
 
 
 class ImageSearchingResult(BaseModel):

@@ -15,7 +15,7 @@ from src.exception import WebSourceException
 from ..omega_requests import OmegaRequests
 
 if TYPE_CHECKING:
-    from nonebot.internal.driver import (
+    from .types import (
         ContentTypes,
         CookieTypes,
         DataTypes,

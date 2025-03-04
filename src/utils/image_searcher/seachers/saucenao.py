@@ -19,7 +19,7 @@ from ..config import image_searcher_config
 from ..model import BaseImageSearcherAPI, ImageSearchingResult
 
 if TYPE_CHECKING:
-    from nonebot.internal.driver import CookieTypes, HeaderTypes
+    from src.utils.omega_common_api.types import CookieTypes, HeaderTypes
 
 
 class BaseSaucenaoModel(BaseModel):

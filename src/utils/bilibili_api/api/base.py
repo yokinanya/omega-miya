@@ -32,9 +32,8 @@ from ..models import (
 )
 
 if TYPE_CHECKING:
-    from nonebot.internal.driver import CookieTypes, Response
-
     from src.resource import TemporaryResource
+    from src.utils.omega_common_api.types import CookieTypes, Response
 
 
 class BilibiliCommon(BaseCommonAPI):

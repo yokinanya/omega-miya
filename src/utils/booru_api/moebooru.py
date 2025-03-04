@@ -27,7 +27,7 @@ from .models.moebooru import (
 )
 
 if TYPE_CHECKING:
-    from nonebot.internal.driver import CookieTypes, HeaderTypes, QueryTypes
+    from src.utils.omega_common_api.types import CookieTypes, HeaderTypes, QueryTypes
 
 
 class BaseMoebooruAPI(BaseCommonAPI, abc.ABC):

@@ -34,9 +34,8 @@ from .model import (
 )
 
 if TYPE_CHECKING:
-    from nonebot.internal.driver import CookieTypes, QueryTypes
-
     from src.resource import TemporaryResource
+    from src.utils.omega_common_api.types import CookieTypes, QueryTypes
 
 
 class _BaseComic18(BaseCommonAPI):

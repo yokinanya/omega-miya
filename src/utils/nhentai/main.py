@@ -29,9 +29,8 @@ from .model import (
 )
 
 if TYPE_CHECKING:
-    from nonebot.internal.driver import CookieTypes, HeaderTypes
-
     from src.resource import TemporaryResource
+    from src.utils.omega_common_api.types import CookieTypes, HeaderTypes
 
 
 class BaseNhentai(BaseCommonAPI):

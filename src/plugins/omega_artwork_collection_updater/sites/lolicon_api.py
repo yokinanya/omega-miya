@@ -16,7 +16,7 @@ from src.service.artwork_collection import PixivArtworkCollection
 from src.utils import BaseCommonAPI, semaphore_gather
 
 if TYPE_CHECKING:
-    from nonebot.internal.driver import CookieTypes, HeaderTypes
+    from src.utils.omega_common_api.types import CookieTypes, HeaderTypes
 
 
 class BaseLoliconModel(BaseModel):
