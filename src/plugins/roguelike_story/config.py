@@ -24,6 +24,8 @@ class RoguelikeStoryPluginConfig(BaseModel):
     roguelike_story_plugin_ai_max_tokens: int = Field(default=4096)
     # 生成时的请求超时时间
     roguelike_story_plugin_ai_timeout: int = Field(default=120)
+    # 要求根据模型架构严格返回 JSON 格式, 有助于数据解析, 若 AI 服务不支持 JSON schema 模式输出则需要设置为 False
+    roguelike_story_plugin_strict_schema: bool = Field(default=True)
 
     model_config = ConfigDict(extra='ignore')
 
