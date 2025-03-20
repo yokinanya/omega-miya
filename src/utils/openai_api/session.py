@@ -8,7 +8,9 @@
 @Software       : PyCharm 
 """
 
-from typing import TYPE_CHECKING, Self
+from typing import TYPE_CHECKING, Any, Self
+
+import ujson as json
 
 from .api import BaseOpenAIClient
 from .models import Message, MessageContent
@@ -86,6 +88,31 @@ class ChatSession:
         reply_message = result.choices[0].message
         self.message.add_content(reply_message)
         return reply_message.plain_text
+
+    async def chat_query_json(
+            self,
+            text: str,
+            *,
+            user_name: str | None = None,
+            **kwargs,
+    ) -> Any:
+        """用户发起对话, 指定 JSON 响应, 并尝试解析响应返回值"""
+        user_name = user_name if user_name is not None else self.default_user_name
+        self.message.add_content(MessageContent.user(name=user_name).set_plain_text(text))
+
+        result = await self.client.create_chat_completion(
+            model=self.model,
+            message=self.message,
+            response_format={'type': 'json_object'},
+            **kwargs,
+        )
+
+        reply_message = result.choices[0].message
+        self.message.add_content(reply_message)
+
+        # 处理被标注的消息格式
+        json_text = reply_message.plain_text.removeprefix('```json').removesuffix('```').strip()
+        return json.loads(json_text)
 
     async def chat_query_schema[T: 'BaseModel'](
             self,
