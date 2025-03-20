@@ -27,7 +27,7 @@ roguelike_story = CommandGroup(
     state=enable_processor_state(
         name='RoguelikeStory',
         level=30,
-        cooldown=120,
+        cooldown=60,
     ),
 )
 

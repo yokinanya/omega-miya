@@ -29,7 +29,7 @@ wordcloud = CommandGroup(
     'wordcloud',
     priority=10,
     block=True,
-    state=enable_processor_state(name='WordCloud', level=10, cooldown=45)
+    state=enable_processor_state(name='WordCloud', level=10, cooldown=15)
 )
 
 
