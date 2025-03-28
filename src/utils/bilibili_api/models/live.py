@@ -29,14 +29,22 @@ class RoomInfoData(BaseBilibiliModel):
     uid: str
     room_id: str
     short_id: str
+    area_id: int = Field(default=-1)
+    area_name: str = Field(default='直播')
+    parent_area_id: int = Field(default=-1)
+    parent_area_name: str = Field(default='直播')
     live_status: LiveStatus
     live_time: datetime | str = Field(default_factory=datetime.now)
-    uname: str = Field('bilibili用户')
+    uname: str = Field(default='bilibili用户')
     title: str
-    description: str = Field('')
-    cover: AnyHttpUrl | str = Field('')
-    user_cover: AnyHttpUrl | str = Field('')
-    cover_from_user: AnyHttpUrl | str = Field('')
+    description: str = Field(default='', exclude=True)
+    tags: str = Field(default='', exclude=True)
+    attention: int = Field(default=-1)
+    online: int = Field(default=-1, exclude=True)
+    live_url: AnyHttpUrl | str = Field(default='', exclude=True)
+    cover: AnyHttpUrl | str = Field(default='', exclude=True)
+    user_cover: AnyHttpUrl | str = Field(default='', exclude=True)
+    cover_from_user: AnyHttpUrl | str = Field(default='', exclude=True)
 
     @property
     def cover_url(self) -> str:
