@@ -119,6 +119,10 @@ class BilibiliLiveRoomStatusUpdate(BaseModel):
             raise ValueError('status update info do not match')
         return values
 
+    @property
+    def update_type(self) -> str:
+        return self.update.__class__.__name__ if self.update is not None else 'BilibiliLiveRoomHoldingState'
+
 
 __all__ = [
     'BilibiliLiveRoomStatus',

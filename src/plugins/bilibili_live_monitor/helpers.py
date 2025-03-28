@@ -14,7 +14,7 @@ from typing import TYPE_CHECKING
 from nonebot import logger
 from nonebot.exception import ActionFailed
 
-from src.database import begin_db_session
+from src.database import SocialMediaContentDAL, begin_db_session
 from src.service import (
     OmegaEntity,
     OmegaMessage,
@@ -48,6 +48,23 @@ if TYPE_CHECKING:
     from src.database.internal.entity import Entity
     from src.database.internal.subscription_source import SubscriptionSource
     from src.utils.bilibili_api.models.live import RoomInfoData
+
+
+async def _record_live_room_update(info: 'RoomInfoData', update_type: str, update_content: str) -> None:
+    """在数据库中添加直播间开播/下播信息"""
+    try:
+        async with begin_db_session() as session:
+            await SocialMediaContentDAL(session=session).upsert(
+                source=BILI_LIVE_SUB_TYPE,
+                m_id=f'{info.room_id}_{datetime.now().strftime("%Y%m%d%H%M%S")}',
+                m_type=update_type,
+                m_uid=info.uid,
+                title='直播间状态变更',
+                content=update_content,
+                ref_content=info.model_dump_json(),
+            )
+    except Exception as e:
+        logger.error(f'BilibiliLiveRoomMonitor | Recording live room({info.room_id}) upgrade failed, {e}')
 
 
 async def _query_room_sub_source(room_id: int | str) -> 'SubscriptionSource':
@@ -112,16 +129,20 @@ async def _format_live_room_update_message(
             start_time = str(room_info.live_time)
         send_message += f'{start_time}\n{room_info.uname}开播啦！\n\n【{room_info.title}】'
         need_url = True
+        await _record_live_room_update(room_info, update_type=update_data.update_type, update_content=send_message)
     elif isinstance(update_data.update, BilibiliLiveRoomStopLiving):
         # 下播
         send_message += f'{room_info.uname}下播了'
+        await _record_live_room_update(room_info, update_type=update_data.update_type, update_content=send_message)
     elif isinstance(update_data.update, BilibiliLiveRoomStopLivingWithPlaylist):
         # 下播转轮播
         send_message += f'{room_info.uname}下播了（轮播中）'
+        await _record_live_room_update(room_info, update_type=update_data.update_type, update_content=send_message)
     elif isinstance(update_data.update, BilibiliLiveRoomTitleChange) and room_info.live_status == 1:
         # 直播中换标题
         send_message += f'{room_info.uname}的直播间换标题啦！\n\n【{room_info.title}】'
         need_url = True
+        await _record_live_room_update(room_info, update_type=update_data.update_type, update_content=send_message)
     else:
         return None
 
