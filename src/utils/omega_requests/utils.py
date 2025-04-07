@@ -20,12 +20,13 @@ class CloudflareClearanceModel(BaseModel):
 
 class DomainCloudflareClearanceCookies(CloudflareClearanceModel):
     cf_clearance: str
-    cf_bm: str | None = Field(None, alias='__cf_bm')
-    cflb: str | None = Field(None, alias='__cflb')
+    cf_bm: str | None = Field(default=None, alias='__cf_bm')
+    cfduid: str | None = Field(default=None, alias='__cfduid')
+    cflb: str | None = Field(default=None, alias='__cflb')
 
 
 class DomainCloudflareClearanceHeaders(CloudflareClearanceModel):
-    user_agent: str | None = Field(None, alias='User-Agent')
+    user_agent: str | None = Field(default=None, alias='User-Agent')
 
 
 class DomainCloudflareClearance(CloudflareClearanceModel):
