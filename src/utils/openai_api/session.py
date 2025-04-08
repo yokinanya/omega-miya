@@ -132,7 +132,7 @@ class ChatSession:
             response_format={
                 'type': 'json_schema',
                 'json_schema': {
-                    'name': 'DatetimeInfo',
+                    'name': model_type.__name__,
                     'schema': model_type.model_json_schema(mode='serialization'),
                     'strict': True,
                 }
