@@ -9,6 +9,7 @@
 """
 
 from .chat import ChatCompletion
+from .embeddings import Embeddings
 from .file import File, FileContent, FileDeleted, FileList
 from .message import Message, MessageContent, MessageRole
 from .model import Model, ModelList
@@ -16,6 +17,7 @@ from .model import Model, ModelList
 
 __all__ = [
     'ChatCompletion',
+    'Embeddings',
     'File',
     'FileContent',
     'FileDeleted',

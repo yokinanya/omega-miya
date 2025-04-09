@@ -15,6 +15,7 @@ from src.utils import BaseCommonAPI
 from .config import openai_service_config
 from .models import (
     ChatCompletion,
+    Embeddings,
     File,
     FileContent,
     FileDeleted,
@@ -126,6 +127,26 @@ class BaseOpenAIClient(BaseCommonAPI):
         }
         response = await self._post_json(url=url, json=data, headers=self.request_headers, timeout=timeout)
         return ChatCompletion.model_validate(response)
+
+    async def create_embeddings(
+            self,
+            input_: str | list[str],
+            model: str,
+            *,
+            encoding_format: Literal['float', 'base64'] = 'float',
+            timeout: int = 60,
+            **kwargs,
+    ) -> Embeddings:
+        """Creates an embedding vector representing the input text."""
+        url = f'{self.base_url}/embeddings'
+        data = {
+            'input': input_,
+            'model': model,
+            'encoding_format': encoding_format,
+            **kwargs,
+        }
+        response = await self._post_json(url=url, json=data, headers=self.request_headers, timeout=timeout)
+        return Embeddings.model_validate(response)
 
     async def list_models(self) -> ModelList:
         """Lists the currently available models, and provides basic information about each one."""

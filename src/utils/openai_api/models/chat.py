@@ -31,9 +31,9 @@ class CompletionTokensDetails(BaseOpenAIModel):
 
 
 class Usage(BaseOpenAIModel):
-    prompt_tokens: int
-    completion_tokens: int
-    total_tokens: int
+    prompt_tokens: int = -1
+    completion_tokens: int = -1
+    total_tokens: int = -1
     prompt_tokens_details: PromptTokensDetails | None = None
     completion_tokens_details: CompletionTokensDetails | None = None
 
