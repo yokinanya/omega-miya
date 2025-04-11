@@ -26,6 +26,12 @@ class AudioContent(BaseOpenAIModel):
     format: str
 
 
+class FileContent(BaseOpenAIModel):
+    file_data: str | None = None
+    file_id: str | None = None
+    filename: str | None = None
+
+
 class ImageContent(BaseOpenAIModel):
     url: str
     detail: str | None = None
@@ -33,6 +39,10 @@ class ImageContent(BaseOpenAIModel):
 
 class AudioMessageContent(BaseMessageContent[Literal['input_audio']]):
     input_audio: AudioContent
+
+
+class FileMessageContent(BaseMessageContent[Literal['file']]):
+    file: FileContent
 
 
 class ImageMessageContent(BaseMessageContent[Literal['image_url']]):
@@ -43,7 +53,12 @@ class TextMessageContent(BaseMessageContent[Literal['text']]):
     text: str
 
 
-type MessageContentType = AudioMessageContent | ImageMessageContent | TextMessageContent
+type MessageContentType = (
+        AudioMessageContent
+        | FileMessageContent
+        | ImageMessageContent
+        | TextMessageContent
+)
 
 
 @unique
@@ -131,7 +146,29 @@ class MessageContent(BaseOpenAIModel):
         }))
         return self
 
-    def add_image_url(self, image_url: str, *, detail: str | None = None) -> Self:
+    def add_file(
+            self,
+            file_data: str | None = None,
+            file_id: str | None = None,
+            filename: str | None = None,
+    ) -> Self:
+        if not any((file_data, file_id, filename)):
+            raise ValueError('None of any "file_data", "file_id", "filename"')
+
+        if isinstance(self.content, str):
+            self.content = [TextMessageContent.model_validate({'type': 'text', 'text': self.content})]
+
+        self.content.append(FileMessageContent.model_validate({
+            'type': 'file',
+            'file': {
+                'file_data': file_data,
+                'file_id': file_id,
+                'filename': filename,
+            },
+        }))
+        return self
+
+    def add_image(self, image_url: str, *, detail: Literal['low', 'high', 'auto'] | None = None) -> Self:
         if isinstance(self.content, str):
             self.content = [TextMessageContent.model_validate({'type': 'text', 'text': self.content})]
 
