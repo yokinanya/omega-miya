@@ -8,15 +8,17 @@
 @Software       : PyCharm 
 """
 
-from typing import TYPE_CHECKING, Any, Self
+from typing import TYPE_CHECKING, Any, Literal, Self
 
 import ujson as json
 
 from .api import BaseOpenAIClient
+from .helpers import encode_local_audio, encode_local_file, encode_local_image
 from .models import Message, MessageContent
 
 if TYPE_CHECKING:
     from pydantic import BaseModel
+    from src.resource import BaseResource
 
 
 class ChatSession:
@@ -68,6 +70,64 @@ class ChatSession:
         """重置会话到初始状态"""
         self.message.clear_chat_messages()
 
+    async def add_chat_audio(
+            self,
+            audio: 'BaseResource',
+            *,
+            user_name: str | None = None,
+    ) -> None:
+        """向会话 Message 序列中添加本地音频"""
+        audio_data, format_ = await encode_local_audio(audio)
+        self.message.add_content(MessageContent.user(name=user_name).add_audio(audio_data, format_=format_))
+
+    async def add_chat_file(
+            self,
+            file: 'BaseResource | None' = None,
+            file_id: str | None = None,
+            filename: str | None = None,
+            *,
+            user_name: str | None = None,
+    ) -> None:
+        """向会话 Message 序列中添加文件, 本地文件优先"""
+        if not any((file, file_id, filename)):
+            raise ValueError('None of any "file", "file_id", "filename"')
+
+        if file is not None:
+            file_data = await encode_local_file(file)
+            message_content = MessageContent.user(name=user_name).add_file(file_data=file_data)
+        else:
+            message_content = MessageContent.user(name=user_name).add_file(file_id=file_id, filename=filename)
+
+        self.message.add_content(message_content)
+
+    async def add_chat_image(
+            self,
+            image: 'BaseResource | str',
+            *,
+            user_name: str | None = None,
+            detail: Literal['low', 'high', 'auto'] | None = None
+    ) -> None:
+        """向会话 Message 序列中添加图片
+
+        :param image: 图片文件或图片 url
+        :param user_name: An optional name for the participant.
+        :param detail: What level of detail to use when processing and understanding the image
+        """
+        image_url = image if isinstance(image, str) else (await encode_local_image(image))
+        self.message.add_content(MessageContent.user(name=user_name).add_image(image_url, detail=detail))
+
+    async def simple_chat(self, **kwargs) -> str:
+        """使用现有 Message 序列发起对话, 返回响应对话内容"""
+        result = await self.client.create_chat_completion(
+            model=self.model,
+            message=self.message,
+            **kwargs,
+        )
+
+        reply_message = result.choices[0].message
+        self.message.add_content(reply_message)
+        return reply_message.plain_text
+
     async def chat(
             self,
             text: str,
@@ -79,15 +139,7 @@ class ChatSession:
         user_name = user_name if user_name is not None else self.default_user_name
         self.message.add_content(MessageContent.user(name=user_name).set_plain_text(text))
 
-        result = await self.client.create_chat_completion(
-            model=self.model,
-            message=self.message,
-            **kwargs,
-        )
-
-        reply_message = result.choices[0].message
-        self.message.add_content(reply_message)
-        return reply_message.plain_text
+        return await self.simple_chat(**kwargs)
 
     async def chat_query_json(
             self,
@@ -100,19 +152,13 @@ class ChatSession:
         user_name = user_name if user_name is not None else self.default_user_name
         self.message.add_content(MessageContent.user(name=user_name).set_plain_text(text))
 
-        result = await self.client.create_chat_completion(
-            model=self.model,
-            message=self.message,
+        reply_text = await self.simple_chat(
             response_format={'type': 'json_object'},
             **kwargs,
         )
 
-        reply_message = result.choices[0].message
-        self.message.add_content(reply_message)
-
         # 处理被标注的消息格式
-        json_text = reply_message.plain_text.removeprefix('```json').removesuffix('```').strip()
-        return json.loads(json_text)
+        return json.loads(reply_text.removeprefix('```json').removesuffix('```').strip())
 
     async def chat_query_schema[T: 'BaseModel'](
             self,
@@ -126,9 +172,7 @@ class ChatSession:
         user_name = user_name if user_name is not None else self.default_user_name
         self.message.add_content(MessageContent.user(name=user_name).set_plain_text(text))
 
-        result = await self.client.create_chat_completion(
-            model=self.model,
-            message=self.message,
+        reply_text = await self.simple_chat(
             response_format={
                 'type': 'json_schema',
                 'json_schema': {
@@ -140,12 +184,8 @@ class ChatSession:
             **kwargs,
         )
 
-        reply_message = result.choices[0].message
-        self.message.add_content(reply_message)
-
         # 处理被标注的消息格式
-        json_text = reply_message.plain_text.removeprefix('```json').removesuffix('```').strip()
-        return model_type.model_validate_json(json_text)
+        return model_type.model_validate_json(reply_text.removeprefix('```json').removesuffix('```').strip())
 
 
 __all__ = [
