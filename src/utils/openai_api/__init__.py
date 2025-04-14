@@ -9,7 +9,7 @@
 """
 
 from .api import BaseOpenAIClient
-from .helpers import encode_local_audio, encode_local_file, encode_local_image
+from .helpers import encode_local_audio, encode_local_file, encode_local_image, encode_bytes_image
 from .models import Message, MessageContent
 from .session import ChatSession
 
@@ -20,5 +20,7 @@ __all__ = [
     'Message',
     'MessageContent',
     'encode_local_audio',
+    'encode_local_file',
     'encode_local_image',
+    'encode_bytes_image',
 ]

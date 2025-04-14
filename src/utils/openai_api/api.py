@@ -27,6 +27,7 @@ from .models import (
 
 if TYPE_CHECKING:
     from src.resource import BaseResource
+    from src.utils.omega_requests.types import CookieTypes, HeaderTypes, QueryTypes
 
 
 class BaseOpenAIClient(BaseCommonAPI):
@@ -95,6 +96,27 @@ class BaseOpenAIClient(BaseCommonAPI):
     @classmethod
     def _get_default_cookies(cls) -> dict[str, str]:
         return {}
+
+    @classmethod
+    async def get_any_resource_as_bytes(
+            cls,
+            url: str,
+            params: 'QueryTypes' = None,
+            *,
+            headers: 'HeaderTypes' = None,
+            cookies: 'CookieTypes' = None,
+            timeout: int = 30,
+            no_headers: bool = False,
+            no_cookies: bool = False,
+    ) -> bytes:
+        """请求任意来源资源内容"""
+        headers = cls._get_omega_requests_default_headers() if headers is None else headers
+        cookies = {} if cookies is None else cookies
+
+        return await cls._get_resource_as_bytes(
+            url=url, params=params,
+            headers=headers, cookies=cookies, timeout=timeout, no_headers=no_headers, no_cookies=no_cookies
+        )
 
     async def create_chat_completion(
             self,

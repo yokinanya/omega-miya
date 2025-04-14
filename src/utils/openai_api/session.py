@@ -13,7 +13,7 @@ from typing import TYPE_CHECKING, Any, Literal, Self
 import ujson as json
 
 from .api import BaseOpenAIClient
-from .helpers import encode_local_audio, encode_local_file, encode_local_image
+from .helpers import encode_local_audio, encode_local_file, encode_local_image, encode_bytes_image
 from .models import Message, MessageContent
 
 if TYPE_CHECKING:
@@ -105,15 +105,23 @@ class ChatSession:
             image: 'BaseResource | str',
             *,
             user_name: str | None = None,
-            detail: Literal['low', 'high', 'auto'] | None = None
+            detail: Literal['low', 'high', 'auto'] | None = None,
+            encoding_web_image: bool = True,
     ) -> None:
         """向会话 Message 序列中添加图片
 
         :param image: 图片文件或图片 url
         :param user_name: An optional name for the participant.
         :param detail: What level of detail to use when processing and understanding the image
+        :param encoding_web_image: 是否编码网络图片
         """
-        image_url = image if isinstance(image, str) else (await encode_local_image(image))
+        if isinstance(image, str):
+            if encoding_web_image:
+                image_url = await encode_bytes_image(await self.client.get_any_resource_as_bytes(url=image))
+            else:
+                image_url = image
+        else:
+            image_url = await encode_local_image(image)
         self.message.add_content(MessageContent.user(name=user_name).add_image(image_url, detail=detail))
 
     async def simple_chat(self, **kwargs) -> str:

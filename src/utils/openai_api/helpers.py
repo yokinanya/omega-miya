@@ -62,8 +62,15 @@ async def encode_local_image(image: 'BaseResource', *, convert_format: str | Non
     return f'data:image/{format_suffix};base64,{await _base64_encode(content)}'
 
 
+async def encode_bytes_image(image_content: bytes, *, convert_format: str = 'webp') -> str:
+    """将图片编码成 base64 格式的 image_url"""
+    content = await _convert_image_format(image_content, format_=convert_format)
+    return f'data:image/{convert_format};base64,{await _base64_encode(content)}'
+
+
 __all__ = [
     'encode_local_audio',
     'encode_local_file',
     'encode_local_image',
+    'encode_bytes_image',
 ]
