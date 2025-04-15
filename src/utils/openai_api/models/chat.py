@@ -25,9 +25,9 @@ class PromptTokensDetails(BaseOpenAIModel):
 
 
 class CompletionTokensDetails(BaseOpenAIModel):
-    reasoning_tokens: int
-    accepted_prediction_tokens: int
-    rejected_prediction_tokens: int
+    reasoning_tokens: int = -1
+    accepted_prediction_tokens: int = -1
+    rejected_prediction_tokens: int = -1
 
 
 class Usage(BaseOpenAIModel):
