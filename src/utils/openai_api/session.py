@@ -8,7 +8,7 @@
 @Software       : PyCharm 
 """
 
-from typing import TYPE_CHECKING, Any, Literal, Self
+from typing import TYPE_CHECKING, Any, Literal, Self, overload
 
 import ujson as json
 
@@ -149,14 +149,37 @@ class ChatSession:
 
         return await self.simple_chat(**kwargs)
 
-    async def chat_query_json(
+    @overload
+    async def chat_query_json[T: 'BaseModel'](
             self,
             text: str,
+            model_type: type[T],
+            *,
+            user_name: str | None = None,
+            **kwargs,
+    ) -> T:
+        ...
+
+    @overload
+    async def chat_query_json[T: 'BaseModel'](
+            self,
+            text: str,
+            model_type: None,
             *,
             user_name: str | None = None,
             **kwargs,
     ) -> Any:
-        """用户发起对话, 指定 JSON 响应, 并尝试解析响应返回值"""
+        ...
+
+    async def chat_query_json[T: 'BaseModel'](
+            self,
+            text: str,
+            model_type: type[T] | None = None,
+            *,
+            user_name: str | None = None,
+            **kwargs,
+    ) -> T | Any:
+        """用户发起对话, 指定 JSON 响应, 并尝试解析响应返回值, 若提供了 `model_type` 则尝试解析到该模型"""
         user_name = user_name if user_name is not None else self.default_user_name
         self.message.add_content(MessageContent.user(name=user_name).set_plain_text(text))
 
@@ -166,7 +189,8 @@ class ChatSession:
         )
 
         # 处理被标注的消息格式
-        return json.loads(reply_text.removeprefix('```json').removesuffix('```').strip())
+        json_text = reply_text.removeprefix('```json').removesuffix('```').strip()
+        return model_type.model_validate_json(json_text) if model_type is not None else json.loads(json_text)
 
     async def chat_query_schema[T: 'BaseModel'](
             self,
