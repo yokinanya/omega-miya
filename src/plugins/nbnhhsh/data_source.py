@@ -8,11 +8,30 @@
 @Software       : PyCharm
 """
 
+from typing import Iterable
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from src.compat import parse_obj_as
 from src.utils import OmegaRequests
+from src.utils.openai_api import ChatSession
+from .config import nbnhhsh_plugin_config
+from .consts import DESCRIPTION_PROMPT, IMAGE_DESC_PROMPT
+
+
+class QueryContent(BaseModel):
+    image_description: str = Field(default_factory=str)
+    attr_description: str = Field(default_factory=str)
+    user_message: str
+
+
+class ObjectDescription(BaseModel):
+    object: str
+    description: str
+
+
+class ObjectDescriptionResult(BaseModel):
+    result: list[ObjectDescription]
 
 
 class GuessResult(BaseModel):
@@ -47,6 +66,87 @@ async def query_guess(guess: str) -> list[str]:
     return [trans_word for x in guess_result for trans_word in x.guess_result]
 
 
+async def query_image_description(image_urls: Iterable[str]) -> str:
+    """获取图片描述"""
+    session = _create_chat_session(
+        service_name=nbnhhsh_plugin_config.nbnhhsh_plugin_ai_vision_service_name,
+        model_name=nbnhhsh_plugin_config.nbnhhsh_plugin_ai_vision_model_name,
+    )
+
+    for image_url in image_urls:
+        await session.add_chat_image(image=image_url, encoding_web_image=True)
+
+    return await session.chat(IMAGE_DESC_PROMPT)
+
+
+async def query_ai_description(
+        user_message: str,
+        image_description: str = '',
+        attr_description: str = '',
+) -> list[ObjectDescription]:
+    query_content = QueryContent(
+        user_message=user_message, image_description=image_description, attr_description=attr_description
+    )
+
+    session = _create_chat_session(
+        service_name=nbnhhsh_plugin_config.nbnhhsh_plugin_ai_description_service_name,
+        model_name=nbnhhsh_plugin_config.nbnhhsh_plugin_ai_description_model_name,
+        init_system_message=DESCRIPTION_PROMPT,
+    )
+
+    match nbnhhsh_plugin_config.nbnhhsh_plugin_ai_query_json_output:
+        case 'schema':
+            descriptions = await session.chat_query_schema(
+                query_content.model_dump_json(),
+                model_type=ObjectDescriptionResult,
+                temperature=nbnhhsh_plugin_config.nbnhhsh_plugin_ai_temperature,
+                max_tokens=nbnhhsh_plugin_config.nbnhhsh_plugin_ai_max_tokens,
+                timeout=nbnhhsh_plugin_config.nbnhhsh_plugin_ai_timeout,
+            )
+        case 'object':
+            descriptions = await session.chat_query_json(
+                query_content.model_dump_json(),
+                model_type=ObjectDescriptionResult,
+                temperature=nbnhhsh_plugin_config.nbnhhsh_plugin_ai_temperature,
+                max_tokens=nbnhhsh_plugin_config.nbnhhsh_plugin_ai_max_tokens,
+                timeout=nbnhhsh_plugin_config.nbnhhsh_plugin_ai_timeout,
+            )
+        case None | _:
+            description_json = await session.chat(
+                query_content.model_dump_json(),
+                temperature=nbnhhsh_plugin_config.nbnhhsh_plugin_ai_temperature,
+                max_tokens=nbnhhsh_plugin_config.nbnhhsh_plugin_ai_max_tokens,
+                timeout=nbnhhsh_plugin_config.nbnhhsh_plugin_ai_timeout,
+            )
+            description_json = description_json.removeprefix('```json').removesuffix('```').strip()
+            descriptions = ObjectDescriptionResult.model_validate_json(description_json)
+
+    return descriptions.result
+
+
+def _create_chat_session(
+        service_name: str | None = None,
+        model_name: str | None = None,
+        init_system_message: str | None = None,
+        init_assistant_message: str | None = None,
+) -> ChatSession:
+    """创建对话 Session"""
+    if (service_name is not None) and (model_name is not None):
+        return ChatSession(
+            service_name=service_name,
+            model_name=model_name,
+            init_system_message=init_system_message,
+            init_assistant_message=init_assistant_message,
+        )
+    else:
+        return ChatSession.init_default_from_config(
+            init_system_message=init_system_message,
+            init_assistant_message=init_assistant_message,
+        )
+
+
 __all__ = [
     'query_guess',
+    'query_image_description',
+    'query_ai_description',
 ]
