@@ -3,7 +3,7 @@
 @Date           : 2025/2/16 20:50
 @FileName       : config
 @Project        : omega-miya
-@Description    : 
+@Description    : RoguelikeStory 插件配置
 @GitHub         : https://github.com/Ailitonia
 @Software       : PyCharm
 """
@@ -18,8 +18,8 @@ class RoguelikeStoryPluginConfig(BaseModel):
     roguelike_story_plugin_ai_service_name: str | None = Field(default=None)
     # 使用的 AI 模型名称, 为 None 则使用默认配置
     roguelike_story_plugin_ai_model_name: str | None = Field(default=None)
-    # 生成时的 Max Tokens 参数值
-    roguelike_story_plugin_ai_temperature: float = Field(default=0.5, ge=0, le=2)
+    # 生成时的 Temperature 参数值
+    roguelike_story_plugin_ai_temperature: float = Field(default=0.6, ge=0, le=2)
     # 生成时的 Max Tokens 参数值
     roguelike_story_plugin_ai_max_tokens: int = Field(default=4096)
     # 生成时的请求超时时间
