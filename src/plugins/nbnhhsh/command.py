@@ -36,7 +36,7 @@ async def handle_guess(
     msg_images = interface.get_event_reply_msg_image_urls() + interface.get_event_msg_image_urls()
     reply_message = interface.get_event_reply_msg_plain_text()
 
-    if not reply_message and not guess_word:
+    if not guess_word and not reply_message and not msg_images:
         await interface.reject_arg_reply('ensure', '有啥搞不懂? 发来帮你看看')
 
     guess_word = '' if guess_word is None else guess_word.strip()
@@ -45,7 +45,7 @@ async def handle_guess(
 
     try:
         if nbnhhsh_plugin_config.nbnhhsh_plugin_enable_ai_description:
-            await interface.send_reply('正在解析知识概念, 请稍候')
+            await interface.send_reply('正在尝试解析知识概念, 请稍候')
             result_msg = await ai_guess(query_message=query_message, msg_images=msg_images)
         else:
             result_msg = await simple_guess(query_message=query_message)
