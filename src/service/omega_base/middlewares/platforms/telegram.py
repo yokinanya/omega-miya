@@ -199,6 +199,9 @@ class TelegramEventDepend[Event_T: TelegramEvent](BaseEventDepend[TelegramBot, E
     def get_user_nickname(self) -> str:
         raise NotImplementedError
 
+    def get_msg_mentioned_user_ids(self) -> list[str]:
+        raise NotImplementedError
+
     def get_msg_image_urls(self) -> list[str]:
         raise NotImplementedError
 
@@ -227,6 +230,13 @@ class TelegramMessageEventDepend[Event_T: TelegramMessageEvent](TelegramEventDep
 
     def get_user_nickname(self) -> str:
         return self.event.chat.username if self.event.chat.username else ''
+
+    def get_msg_mentioned_user_ids(self) -> list[str]:
+        return [
+            str(msg_seg.data.get('text')).removeprefix('@')
+            for msg_seg in self.event.get_message()
+            if msg_seg.type == 'mention'
+        ]
 
     def get_msg_image_urls(self) -> list[str]:
         return [

@@ -296,6 +296,9 @@ class QQEventDepend[Event_T: QQEvent](BaseEventDepend[QQBot, Event_T, QQMessage]
     def get_user_nickname(self) -> str:
         raise NotImplementedError
 
+    def get_msg_mentioned_user_ids(self) -> list[str]:
+        raise NotImplementedError
+
     def get_msg_image_urls(self) -> list[str]:
         raise NotImplementedError
 
@@ -337,6 +340,13 @@ class QQGuildMessageEventDepend(QQEventDepend[QQGuildMessageEvent]):
 
     def get_user_nickname(self) -> str:
         return self.event.author.username if self.event.author.username else ''
+
+    def get_msg_mentioned_user_ids(self) -> list[str]:
+        return [
+            str(msg_seg.data.get('user_id'))
+            for msg_seg in self.event.get_message()
+            if msg_seg.type == 'mention_user'
+        ]
 
     def get_msg_image_urls(self) -> list[str]:
         return [str(msg_seg.data.get('url')) for msg_seg in self.event.get_message() if msg_seg.type == 'image']
@@ -387,6 +397,13 @@ class QQC2CMessageCreateEventDepend(QQEventDepend[QQC2CMessageCreateEvent]):
     def get_user_nickname(self) -> str:
         raise NotImplementedError  # QQ 协议只有 openid, 不支持获取用户信息
 
+    def get_msg_mentioned_user_ids(self) -> list[str]:
+        return [
+            str(msg_seg.data.get('user_id'))
+            for msg_seg in self.event.get_message()
+            if msg_seg.type == 'mention_user'
+        ]
+
     def get_msg_image_urls(self) -> list[str]:
         return [str(msg_seg.data.get('url')) for msg_seg in self.event.get_message() if msg_seg.type == 'image']
 
@@ -429,6 +446,13 @@ class QQGroupAtMessageCreateEventDepend(QQEventDepend[QQGroupAtMessageCreateEven
 
     def get_user_nickname(self) -> str:
         raise NotImplementedError  # QQ 协议只有 openid, 不支持获取用户信息
+
+    def get_msg_mentioned_user_ids(self) -> list[str]:
+        return [
+            str(msg_seg.data.get('user_id'))
+            for msg_seg in self.event.get_message()
+            if msg_seg.type == 'mention_user'
+        ]
 
     def get_msg_image_urls(self) -> list[str]:
         return [str(msg_seg.data.get('url')) for msg_seg in self.event.get_message() if msg_seg.type == 'image']
