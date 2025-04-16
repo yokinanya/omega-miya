@@ -176,8 +176,26 @@ class BaseOpenAIClient(BaseCommonAPI):
         response = await self._get_json(url=url, headers=self.request_headers)
         return ModelList.model_validate(response)
 
-    async def upload_file(self, file: 'BaseResource', purpose: str, *, timeout: int = 300) -> File:
-        """Upload a file that can be used across various endpoints."""
+    async def upload_file(
+            self,
+            file: 'BaseResource',
+            purpose: str = 'user_data',
+            *,
+            timeout: int = 300,
+    ) -> File:
+        """Upload a file that can be used across various endpoints.
+
+        :param file: The File to be uploaded
+        :param purpose: The intended purpose of the uploaded file. One of:
+            `assistants`: Used in the Assistants API.
+            `batch`: Used in the Batch API.
+            `fine-tune`: Used for fine-tuning.
+            `vision`: Images used for vision fine-tuning.
+            `user_data`: Flexible file type for any purpose.
+            `evals`: Used for eval data sets.
+            `file-extract`: moonshot/kimi only support this purpose.
+        :param timeout: Timeout threshold.
+        """
         url = f'{self.base_url}/files'
         headers = {'Authorization': f'Bearer {self._api_key}'}
 

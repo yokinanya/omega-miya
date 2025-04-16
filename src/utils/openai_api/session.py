@@ -88,16 +88,23 @@ class ChatSession:
             filename: str | None = None,
             *,
             user_name: str | None = None,
+            upload_file_with_purpose: str | None = None,
     ) -> None:
         """向会话 Message 序列中添加文件, 本地文件优先"""
         if not any((file, file_id, filename)):
             raise ValueError('None of any "file", "file_id", "filename"')
 
         if file is not None:
-            file_data = await encode_local_file(file)
-            message_content = MessageContent.user(name=user_name).add_file(file_data=file_data)
+            if upload_file_with_purpose is None:
+                file_data = await encode_local_file(file)
+                message_content = MessageContent.system(name=user_name).add_file(file_data=file_data)
+            else:
+                uploaded_file = await self.client.upload_file(file=file, purpose=upload_file_with_purpose)
+                message_content = MessageContent.system(name=user_name).add_file(
+                    file_id=uploaded_file.id, filename=uploaded_file.filename
+                )
         else:
-            message_content = MessageContent.user(name=user_name).add_file(file_id=file_id, filename=filename)
+            message_content = MessageContent.system(name=user_name).add_file(file_id=file_id, filename=filename)
 
         self.message.add_content(message_content)
 
@@ -124,6 +131,14 @@ class ChatSession:
         else:
             image_url = await encode_local_image(image)
         self.message.add_content(MessageContent.user(name=user_name).add_image(image_url, detail=detail))
+
+    def add_chat_system_text(self, message: str, *, user_name: str | None = None) -> None:
+        """向会话 Message 序列中添加 System 消息"""
+        self.message.add_content(MessageContent.system(name=user_name).set_plain_text(message))
+
+    def add_chat_user_text(self, message: str, *, user_name: str | None = None) -> None:
+        """向会话 Message 序列中添加用户消息"""
+        self.message.add_content(MessageContent.user(name=user_name).set_plain_text(message))
 
     async def simple_chat(self, **kwargs) -> str:
         """使用现有 Message 序列发起对话, 返回响应对话内容"""
