@@ -27,7 +27,7 @@ from .data_source import simple_guess, ai_guess
     handlers=[get_command_str_single_arg_parser_handler('guess_word', ensure_key=True)],
     priority=10,
     block=True,
-    state=enable_processor_state(name='nbnhhsh', level=20, cooldown=45),
+    state=enable_processor_state(name='nbnhhsh', level=30, cooldown=30),
 ).got('guess_word')
 async def handle_guess(
         interface: Annotated[OmMI, Depends(OmMI.depend())],
