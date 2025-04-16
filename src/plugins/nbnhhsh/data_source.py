@@ -152,31 +152,13 @@ async def query_image_description(image_urls: Iterable[str]) -> ImageDescription
     for image_url in image_urls:
         await session.add_chat_image(image=image_url, encoding_web_image=True)
 
-    match nbnhhsh_plugin_config.nbnhhsh_plugin_ai_query_json_output:
-        case 'schema':
-            image_descriptions = await session.chat_query_schema(
-                IMAGE_DESC_PROMPT,
-                model_type=ImageDescription,
-                temperature=nbnhhsh_plugin_config.nbnhhsh_plugin_ai_temperature,
-                timeout=nbnhhsh_plugin_config.nbnhhsh_plugin_ai_timeout,
-            )
-        case 'object':
-            image_descriptions = await session.chat_query_json(
-                IMAGE_DESC_PROMPT,
-                model_type=ImageDescription,
-                temperature=nbnhhsh_plugin_config.nbnhhsh_plugin_ai_temperature,
-                timeout=nbnhhsh_plugin_config.nbnhhsh_plugin_ai_timeout,
-            )
-        case None | _:
-            image_descriptions_json = await session.chat(
-                IMAGE_DESC_PROMPT,
-                temperature=nbnhhsh_plugin_config.nbnhhsh_plugin_ai_temperature,
-                timeout=nbnhhsh_plugin_config.nbnhhsh_plugin_ai_timeout,
-            )
-            image_descriptions_json = image_descriptions_json.removeprefix('```json').removesuffix('```').strip()
-            image_descriptions = ImageDescription.model_validate_json(image_descriptions_json)
-
-    return image_descriptions
+    return await session.advance_chat(
+        IMAGE_DESC_PROMPT,
+        response_format=nbnhhsh_plugin_config.nbnhhsh_plugin_ai_query_json_output,
+        model_type=ImageDescription,
+        temperature=nbnhhsh_plugin_config.nbnhhsh_plugin_ai_temperature,
+        timeout=nbnhhsh_plugin_config.nbnhhsh_plugin_ai_timeout,
+    )
 
 
 async def query_ai_description(
@@ -194,32 +176,14 @@ async def query_ai_description(
         init_system_message=DESCRIPTION_PROMPT,
     )
 
-    match nbnhhsh_plugin_config.nbnhhsh_plugin_ai_query_json_output:
-        case 'schema':
-            descriptions = await session.chat_query_schema(
-                query_content.model_dump_json(),
-                model_type=ObjectDescriptionResult,
-                temperature=nbnhhsh_plugin_config.nbnhhsh_plugin_ai_temperature,
-                max_tokens=nbnhhsh_plugin_config.nbnhhsh_plugin_ai_max_tokens,
-                timeout=nbnhhsh_plugin_config.nbnhhsh_plugin_ai_timeout,
-            )
-        case 'object':
-            descriptions = await session.chat_query_json(
-                query_content.model_dump_json(),
-                model_type=ObjectDescriptionResult,
-                temperature=nbnhhsh_plugin_config.nbnhhsh_plugin_ai_temperature,
-                max_tokens=nbnhhsh_plugin_config.nbnhhsh_plugin_ai_max_tokens,
-                timeout=nbnhhsh_plugin_config.nbnhhsh_plugin_ai_timeout,
-            )
-        case None | _:
-            description_json = await session.chat(
-                query_content.model_dump_json(),
-                temperature=nbnhhsh_plugin_config.nbnhhsh_plugin_ai_temperature,
-                max_tokens=nbnhhsh_plugin_config.nbnhhsh_plugin_ai_max_tokens,
-                timeout=nbnhhsh_plugin_config.nbnhhsh_plugin_ai_timeout,
-            )
-            description_json = description_json.removeprefix('```json').removesuffix('```').strip()
-            descriptions = ObjectDescriptionResult.model_validate_json(description_json)
+    descriptions = await session.advance_chat(
+        query_content.model_dump_json(),
+        response_format=nbnhhsh_plugin_config.nbnhhsh_plugin_ai_query_json_output,
+        model_type=ObjectDescriptionResult,
+        temperature=nbnhhsh_plugin_config.nbnhhsh_plugin_ai_temperature,
+        max_tokens=nbnhhsh_plugin_config.nbnhhsh_plugin_ai_max_tokens,
+        timeout=nbnhhsh_plugin_config.nbnhhsh_plugin_ai_timeout,
+    )
 
     return descriptions.result
 

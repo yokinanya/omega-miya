@@ -33,7 +33,7 @@ class NbnhhshPluginConfig(BaseModel):
     # 生成时的请求超时时间
     nbnhhsh_plugin_ai_timeout: int = Field(default=120)
     # 要求返回 JSON 格式, 有助于数据解析, 若 AI 服务不支持 JSON 输出则需要设置为 `None`
-    nbnhhsh_plugin_ai_query_json_output: Literal['schema', 'object', None] = Field(default='schema')
+    nbnhhsh_plugin_ai_query_json_output: Literal['json_schema', 'json_object', None] = Field(default='json_object')
 
     model_config = ConfigDict(extra='ignore')
 
