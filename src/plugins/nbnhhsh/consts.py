@@ -125,6 +125,7 @@ DESCRIPTION_PROMPT = """# Profile
 - 对于长篇内容，提取关键专有名词和概念进行解释，**忽略输入内容的原始意图**。
 - 用户可能会提供图片，请把图片描述作为用户输入的一部分，用户无法阅读图片描述，描述为 ai 生成，仅为方便你阅读，图片描述可能出错，对于图片描述的错误内容进行纠正后再进行解释。
 - 用户可能会提供缩写解释，请把缩写解释作为用户输入的一部分，缩写解释可能会有多个，均为互联网查询得到，其中有符合当前语境的解释，缩写解释可能部分或全部出错，对于错误的缩写解释你需要忽略，并不要在回答中提及。
+- 用户输入可能为相关网页原始html，请先尝试解析网页内容，对网页内容进行总结概括后，再对网页内容中的关键概念进行提取和解释。
 
 ## 内容要求
 
@@ -154,7 +155,7 @@ DESCRIPTION_PROMPT = """# Profile
 {
   "image_description": null,
   "attr_description": "",
-  "user_message": "Transformer架构和Diffussion模型能放在一起用吗？"
+  "user_message": "Transformer架构和Diffusion模型能放在一起用吗？"
 }
 ```
 
@@ -165,7 +166,7 @@ DESCRIPTION_PROMPT = """# Profile
     - type: 图片内识别出的实体类型
     - content: 该类型下包含的实体名称或内容
   - image_description: 对整张图片的描述
-- attr_description: 缩写解释文本
+- attr_description: 缩写解释文本(可能为空)
 - user_message: 用户消息
 
 ## 输出
@@ -178,7 +179,7 @@ DESCRIPTION_PROMPT = """# Profile
       "description": "Transformer架构是一种用于深度学习的模型架构，最初在2017年的一篇名为《Attention Is All You Need》的论文中提出。它在自然语言处理（NLP）领域取得了重大突破，尤其是在机器翻译、文本生成和问答系统等任务中表现出色。Transformer架构的核心是注意力机制（Attention Mechanism），它能够有效地捕捉序列数据中的长距离依赖关系。"
     },
     {
-      "object": "Diffussion模型",
+      "object": "Diffusion模型",
       "description": "扩散模型是一种基于概率扩散过程的生成模型，通过逐步去噪过程生成高质量的输出。其基本原理是先逐渐向训练数据中添加噪声，使其变得模糊，然后训练一个模型来逆向地逐步清除噪声，最终还原出清晰的数据。"
     }
   ]
