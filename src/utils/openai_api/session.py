@@ -11,6 +11,7 @@
 from typing import TYPE_CHECKING, Any, Literal, Self, overload
 
 import ujson as json
+from pydantic import BaseModel
 
 from src.compat import parse_json_as
 from .api import BaseOpenAIClient
@@ -18,7 +19,6 @@ from .helpers import encode_local_audio, encode_local_file, encode_local_image, 
 from .models import Message, MessageContent
 
 if TYPE_CHECKING:
-    from pydantic import BaseModel
     from src.resource import BaseResource
 
 
@@ -151,6 +151,87 @@ class ChatSession:
         reply_message = result.choices[0].message
         self.message.add_content(reply_message)
         return reply_message.plain_text
+
+    @overload
+    async def advance_chat[T: 'BaseModel'](
+            self,
+            text: str,
+            *,
+            response_format: Literal['json_schema'],
+            model_type: type[T],
+            user_name: str | None = None,
+            **kwargs,
+    ) -> T:
+        ...
+
+    @overload
+    async def advance_chat[T: Any](
+            self,
+            text: str,
+            *,
+            response_format: Literal['json_object'],
+            model_type: type[T],
+            user_name: str | None = None,
+            **kwargs,
+    ) -> T:
+        ...
+
+    @overload
+    async def advance_chat(
+            self,
+            text: str,
+            *,
+            response_format: Literal['json_object'],
+            model_type: None = None,
+            user_name: str | None = None,
+            **kwargs,
+    ) -> Any:
+        ...
+
+    @overload
+    async def advance_chat[T: 'BaseModel'](
+            self,
+            text: str,
+            *,
+            response_format: str | None = None,
+            model_type: type[T],
+            user_name: str | None = None,
+            **kwargs,
+    ) -> T:
+        ...
+
+    @overload
+    async def advance_chat(
+            self,
+            text: str,
+            *,
+            response_format: str | None = None,
+            model_type: None = None,
+            user_name: str | None = None,
+            **kwargs,
+    ) -> str:
+        ...
+
+    async def advance_chat[T: Any](
+            self,
+            text: str,
+            *,
+            response_format: str | None = None,
+            model_type: type[T] | None = None,
+            user_name: str | None = None,
+            **kwargs,
+    ) -> Any:
+        """用户发起对话, 根据传参决定响应内容及解析"""
+        if response_format == 'json_schema' and model_type is not None and issubclass(model_type, BaseModel):
+            reply = await self.chat_query_schema(text=text, model_type=model_type, user_name=user_name, **kwargs)
+        elif response_format == 'json_object':
+            reply = await self.chat_query_json(text=text, model_type=model_type, user_name=user_name, **kwargs)
+        elif model_type is not None and issubclass(model_type, BaseModel):
+            reply_json = await self.chat(text=text, user_name=user_name, **kwargs)
+            reply = model_type.model_validate_json(reply_json.removeprefix('```json').removesuffix('```').strip())
+        else:
+            reply = await self.chat(text=text, user_name=user_name, **kwargs)
+        return reply
 
     async def chat(
             self,
