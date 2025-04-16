@@ -62,22 +62,14 @@ class StorySession:
             raise RuntimeError('StorySession is processing')
 
         async with self._lock:
-            if roguelike_story_plugin_config.roguelike_story_plugin_strict_schema:
-                story = await _create_chat_session(init_system_message=STORY_CREATE_PROMPT).chat_query_schema(
-                    description,
-                    model_type=Story,
-                    temperature=roguelike_story_plugin_config.roguelike_story_plugin_ai_temperature,
-                    max_tokens=roguelike_story_plugin_config.roguelike_story_plugin_ai_max_tokens,
-                    timeout=roguelike_story_plugin_config.roguelike_story_plugin_ai_timeout,
-                )
-            else:
-                story_json = await _create_chat_session(init_system_message=STORY_CREATE_PROMPT).chat_query_json(
-                    description,
-                    temperature=roguelike_story_plugin_config.roguelike_story_plugin_ai_temperature,
-                    max_tokens=roguelike_story_plugin_config.roguelike_story_plugin_ai_max_tokens,
-                    timeout=roguelike_story_plugin_config.roguelike_story_plugin_ai_timeout,
-                )
-                story = Story.model_validate(story_json)
+            story = await _create_chat_session(init_system_message=STORY_CREATE_PROMPT).advance_chat(
+                description,
+                response_format=roguelike_story_plugin_config.roguelike_story_plugin_ai_json_output,
+                model_type=Story,
+                temperature=roguelike_story_plugin_config.roguelike_story_plugin_ai_temperature,
+                max_tokens=roguelike_story_plugin_config.roguelike_story_plugin_ai_max_tokens,
+                timeout=roguelike_story_plugin_config.roguelike_story_plugin_ai_timeout,
+            )
 
         current_continue_prompt = f'{CONTINUE_PROMPT}\n\n{story.overview}'
         self._continued_session = _create_chat_session(init_system_message=current_continue_prompt)
@@ -95,22 +87,15 @@ class StorySession:
             raise RuntimeError('StorySession is processing')
 
         async with self._lock:
-            if roguelike_story_plugin_config.roguelike_story_plugin_strict_schema:
-                roll_result = await _create_chat_session(init_system_message=ROLL_PROMPT).chat_query_schema(
-                    RollCondition(current_situation='', action=action).model_dump_json(),
-                    model_type=RollResults,
-                    temperature=roguelike_story_plugin_config.roguelike_story_plugin_ai_temperature,
-                    max_tokens=roguelike_story_plugin_config.roguelike_story_plugin_ai_max_tokens,
-                    timeout=roguelike_story_plugin_config.roguelike_story_plugin_ai_timeout,
-                )
-            else:
-                roll_result_json = await _create_chat_session(init_system_message=ROLL_PROMPT).chat_query_json(
-                    RollCondition(current_situation='', action=action).model_dump_json(),
-                    temperature=roguelike_story_plugin_config.roguelike_story_plugin_ai_temperature,
-                    max_tokens=roguelike_story_plugin_config.roguelike_story_plugin_ai_max_tokens,
-                    timeout=roguelike_story_plugin_config.roguelike_story_plugin_ai_timeout,
-                )
-                roll_result = RollResults.model_validate(roll_result_json)
+            roll_result = await _create_chat_session(init_system_message=ROLL_PROMPT).advance_chat(
+                RollCondition(current_situation='', action=action).model_dump_json(),
+                response_format=roguelike_story_plugin_config.roguelike_story_plugin_ai_json_output,
+                model_type=RollResults,
+                temperature=roguelike_story_plugin_config.roguelike_story_plugin_ai_temperature,
+                max_tokens=roguelike_story_plugin_config.roguelike_story_plugin_ai_max_tokens,
+                timeout=roguelike_story_plugin_config.roguelike_story_plugin_ai_timeout,
+            )
+
         return roll_result
 
     async def roll(self, action: str) -> RollResults:
@@ -122,22 +107,15 @@ class StorySession:
             raise RuntimeError('StorySession is processing')
 
         async with self._lock:
-            if roguelike_story_plugin_config.roguelike_story_plugin_strict_schema:
-                roll_result = await self.roll_session.chat_query_schema(
-                    RollCondition(current_situation=self.current_situation, action=action).model_dump_json(),
-                    model_type=RollResults,
-                    temperature=roguelike_story_plugin_config.roguelike_story_plugin_ai_temperature,
-                    max_tokens=roguelike_story_plugin_config.roguelike_story_plugin_ai_max_tokens,
-                    timeout=roguelike_story_plugin_config.roguelike_story_plugin_ai_timeout,
-                )
-            else:
-                roll_result_json = await self.roll_session.chat_query_json(
-                    RollCondition(current_situation=self.current_situation, action=action).model_dump_json(),
-                    temperature=roguelike_story_plugin_config.roguelike_story_plugin_ai_temperature,
-                    max_tokens=roguelike_story_plugin_config.roguelike_story_plugin_ai_max_tokens,
-                    timeout=roguelike_story_plugin_config.roguelike_story_plugin_ai_timeout,
-                )
-                roll_result = RollResults.model_validate(roll_result_json)
+            roll_result = await self.roll_session.advance_chat(
+                RollCondition(current_situation=self.current_situation, action=action).model_dump_json(),
+                response_format=roguelike_story_plugin_config.roguelike_story_plugin_ai_json_output,
+                model_type=RollResults,
+                temperature=roguelike_story_plugin_config.roguelike_story_plugin_ai_temperature,
+                max_tokens=roguelike_story_plugin_config.roguelike_story_plugin_ai_max_tokens,
+                timeout=roguelike_story_plugin_config.roguelike_story_plugin_ai_timeout,
+            )
+
         return roll_result
 
     async def continue_story(self, player_action: str, roll_result: str) -> NextSituation:
@@ -149,30 +127,19 @@ class StorySession:
             raise RuntimeError('StorySession is processing')
 
         async with self._lock:
-            if roguelike_story_plugin_config.roguelike_story_plugin_strict_schema:
-                continued_result = await self.continued_session.chat_query_schema(
-                    CurrentSituation(
-                        current_situation=self.current_situation,
-                        player_action=player_action,
-                        roll_result=roll_result,
-                    ).model_dump_json(),
-                    model_type=NextSituation,
-                    temperature=roguelike_story_plugin_config.roguelike_story_plugin_ai_temperature,
-                    max_tokens=roguelike_story_plugin_config.roguelike_story_plugin_ai_max_tokens,
-                    timeout=roguelike_story_plugin_config.roguelike_story_plugin_ai_timeout,
-                )
-            else:
-                continued_result_json = await self.continued_session.chat_query_json(
-                    CurrentSituation(
-                        current_situation=self.current_situation,
-                        player_action=player_action,
-                        roll_result=roll_result,
-                    ).model_dump_json(),
-                    temperature=roguelike_story_plugin_config.roguelike_story_plugin_ai_temperature,
-                    max_tokens=roguelike_story_plugin_config.roguelike_story_plugin_ai_max_tokens,
-                    timeout=roguelike_story_plugin_config.roguelike_story_plugin_ai_timeout,
-                )
-                continued_result = NextSituation.model_validate(continued_result_json)
+            continued_result = await self.continued_session.advance_chat(
+                CurrentSituation(
+                    current_situation=self.current_situation,
+                    player_action=player_action,
+                    roll_result=roll_result,
+                ).model_dump_json(),
+                response_format=roguelike_story_plugin_config.roguelike_story_plugin_ai_json_output,
+                model_type=NextSituation,
+                temperature=roguelike_story_plugin_config.roguelike_story_plugin_ai_temperature,
+                max_tokens=roguelike_story_plugin_config.roguelike_story_plugin_ai_max_tokens,
+                timeout=roguelike_story_plugin_config.roguelike_story_plugin_ai_timeout,
+            )
+
         self.current_situation = continued_result.next_situation
         return continued_result
 

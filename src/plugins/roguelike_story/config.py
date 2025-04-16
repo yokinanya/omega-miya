@@ -8,6 +8,8 @@
 @Software       : PyCharm
 """
 
+from typing import Literal
+
 from nonebot import get_plugin_config, logger
 from pydantic import BaseModel, ConfigDict, Field, ValidationError
 
@@ -24,8 +26,8 @@ class RoguelikeStoryPluginConfig(BaseModel):
     roguelike_story_plugin_ai_max_tokens: int = Field(default=4096)
     # 生成时的请求超时时间
     roguelike_story_plugin_ai_timeout: int = Field(default=120)
-    # 要求根据模型架构严格返回 JSON 格式, 有助于数据解析, 若 AI 服务不支持 JSON schema 模式输出则需要设置为 False
-    roguelike_story_plugin_strict_schema: bool = Field(default=True)
+    # 要求返回 JSON 格式, 有助于数据解析, 若 AI 服务不支持 JSON 输出则需要设置为 `None`
+    roguelike_story_plugin_ai_json_output: Literal['json_schema', 'json_object', None] = Field(default='json_object')
 
     model_config = ConfigDict(extra='ignore')
 
