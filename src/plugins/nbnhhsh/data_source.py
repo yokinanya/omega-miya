@@ -19,10 +19,14 @@ from .config import nbnhhsh_plugin_config
 from .consts import DESCRIPTION_PROMPT, IMAGE_DESC_PROMPT
 
 
-class QueryContent(BaseModel):
-    image_description: str = Field(default_factory=str)
-    attr_description: str = Field(default_factory=str)
-    user_message: str
+class ImageItems(BaseModel):
+    type: str
+    content: list[str]
+
+
+class ImageDescription(BaseModel):
+    entity: list[ImageItems]
+    image_description: str
 
 
 class ObjectDescription(BaseModel):
@@ -32,6 +36,12 @@ class ObjectDescription(BaseModel):
 
 class ObjectDescriptionResult(BaseModel):
     result: list[ObjectDescription]
+
+
+class QueryContent(BaseModel):
+    image_description: ImageDescription | None = Field(default=None)
+    attr_description: str = Field(default_factory=str)
+    user_message: str
 
 
 class GuessResult(BaseModel):
@@ -66,7 +76,7 @@ async def query_guess(guess: str) -> list[str]:
     return [trans_word for x in guess_result for trans_word in x.guess_result]
 
 
-async def query_image_description(image_urls: Iterable[str]) -> str:
+async def query_image_description(image_urls: Iterable[str]) -> ImageDescription:
     """获取图片描述"""
     session = _create_chat_session(
         service_name=nbnhhsh_plugin_config.nbnhhsh_plugin_ai_vision_service_name,
@@ -76,12 +86,36 @@ async def query_image_description(image_urls: Iterable[str]) -> str:
     for image_url in image_urls:
         await session.add_chat_image(image=image_url, encoding_web_image=True)
 
-    return await session.chat(IMAGE_DESC_PROMPT)
+    match nbnhhsh_plugin_config.nbnhhsh_plugin_ai_query_json_output:
+        case 'schema':
+            image_descriptions = await session.chat_query_schema(
+                IMAGE_DESC_PROMPT,
+                model_type=ImageDescription,
+                temperature=nbnhhsh_plugin_config.nbnhhsh_plugin_ai_temperature,
+                timeout=nbnhhsh_plugin_config.nbnhhsh_plugin_ai_timeout,
+            )
+        case 'object':
+            image_descriptions = await session.chat_query_json(
+                IMAGE_DESC_PROMPT,
+                model_type=ImageDescription,
+                temperature=nbnhhsh_plugin_config.nbnhhsh_plugin_ai_temperature,
+                timeout=nbnhhsh_plugin_config.nbnhhsh_plugin_ai_timeout,
+            )
+        case None | _:
+            image_descriptions_json = await session.chat(
+                IMAGE_DESC_PROMPT,
+                temperature=nbnhhsh_plugin_config.nbnhhsh_plugin_ai_temperature,
+                timeout=nbnhhsh_plugin_config.nbnhhsh_plugin_ai_timeout,
+            )
+            image_descriptions_json = image_descriptions_json.removeprefix('```json').removesuffix('```').strip()
+            image_descriptions = ImageDescription.model_validate_json(image_descriptions_json)
+
+    return image_descriptions
 
 
 async def query_ai_description(
         user_message: str,
-        image_description: str = '',
+        image_description: ImageDescription | None = None,
         attr_description: str = '',
 ) -> list[ObjectDescription]:
     query_content = QueryContent(

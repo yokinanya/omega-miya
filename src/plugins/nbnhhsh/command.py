@@ -82,23 +82,25 @@ async def ai_guess(query_message: str, msg_images: Iterable[str]) -> str:
         if msg_images:
             images_desc = await query_image_description(image_urls=msg_images)
         else:
-            images_desc = ''
+            images_desc = None
     except Exception as e:
         logger.warning(f'nbnhhsh | 尝试解析图片({msg_images})失败, {e}')
-        images_desc = ''
+        images_desc = None
 
     desc_result = await query_ai_description(
         user_message=query_message, image_description=images_desc, attr_description=attr_desc
     )
+
+    message = attr_desc or (images_desc.image_description if images_desc else '')
 
     if desc_result:
         desc_text = '\n\n'.join(f'{x.object}: {x.description}' for x in desc_result)
     elif attr_desc:
         desc_text = attr_desc
     else:
-        desc_text = '没有识别到相关的知识或概念'
+        desc_text = '没有识别到相关需要解释的实体或概念'
 
-    return desc_text
+    return f'{message.strip()}\n\n{desc_text.strip()}'.strip()
 
 
 __all__ = []
