@@ -109,16 +109,23 @@ async def handle_roll_attr(
         attr: Annotated[str, ArgStr('attr')],
 ) -> None:
     attr = attr.strip()
+    attr_node = f'{ATTR_PREFIX}{attr}'
 
+    # 检查用户是否存在相应属性值, 若不存在对应属性值时尝试随机获取
+    if not (await interface.entity.check_auth_setting(module=MODULE_NAME, plugin=PLUGIN_NAME, node=attr_node)):
+        logger.info(f'Roll | 查询 {interface.entity} 属性 {attr!r} 不存在, 尝试随机获取属性')
+        async with interface.restart_new_session('user') as sub_interface:
+            await handle_roll_set_attr(interface=sub_interface, attr=attr)
+
+    # 尝试获取用户属性值
     try:
-        attr_node = f'{ATTR_PREFIX}{attr}'
         user_attr = await interface.entity.query_auth_setting(module=MODULE_NAME, plugin=PLUGIN_NAME, node=attr_node)
         if user_attr.value is None or not user_attr.value.isdigit():
             raise ValueError('attr value must be isdigit')
         attr_value = int(user_attr.value)
     except Exception as e:
         logger.warning(f'Roll | 查询 {interface.entity} 属性 {attr!r} 失败, {e}')
-        await interface.finish_reply(f'你还没有{attr!r}属性/技能, 或属性值异常, 请使用"/rrs {attr}"获取属性/技能后再试')
+        await interface.finish_reply(f'你的{attr!r}属性/技能值异常, 请稍后重试或联系管理员处理')
 
     roll_result = await RandomDice.simple_roll(1, 100)
     if roll_result.result_int is None or roll_result.error_message is not None:
