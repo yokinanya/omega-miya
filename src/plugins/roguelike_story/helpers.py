@@ -11,9 +11,7 @@
 from random import randint
 from typing import TYPE_CHECKING
 
-from sqlalchemy.exc import NoResultFound
-
-from .consts import ATTR_PREFIX, MODULE_NAME, PLUGIN_NAME, INTRO_TEXT
+from .consts import INTRO_TEXT
 
 if TYPE_CHECKING:
     from src.service import OmegaMatcherInterface as OmMI
@@ -51,8 +49,14 @@ async def handle_story_continue(story_session: 'StorySession', interface: 'OmMI'
     await interface.send_reply('肉鸽娘正在编写剧本中_<, 请稍候')
     roll_result = await story_session.roll(action=description)
 
+    # 尝试获取用户属性值, 若不存在对应属性值时尝试随机获取
+    attr_value = await interface.entity.query_character_attribute(
+        attr_name=roll_result.characteristics,
+        default_factory=lambda: randint(1, 100),
+    )
+    await interface.entity.commit_session()
+
     # 判定用户属性, 决定骰子事件后续发展
-    attr_value = await check_user_characteristics(interface, roll_result.characteristics)
     checking_value = randint(1, 100)
     result_msg = get_roll_result_text(roll_result=roll_result, attr_value=attr_value, checking_value=checking_value)
 
@@ -76,7 +80,15 @@ async def handle_fast_roll_action(story_session: 'StorySession', interface: 'OmM
     await interface.send_reply('骰子姬正在编写剧本中_<, 请稍候')
 
     roll_result = await story_session.fast_roll(action=description)
-    attr_value = await check_user_characteristics(interface, roll_result.characteristics)
+
+    # 尝试获取用户属性值, 若不存在对应属性值时尝试随机获取
+    attr_value = await interface.entity.query_character_attribute(
+        attr_name=roll_result.characteristics,
+        default_factory=lambda: randint(1, 100),
+    )
+    await interface.entity.commit_session()
+
+    # 判定用户属性, 决定骰子事件后续发展
     checking_value = randint(1, 100)
     result_msg = get_roll_result_text(roll_result=roll_result, attr_value=attr_value, checking_value=checking_value)
 
@@ -101,27 +113,8 @@ def get_roll_result_text(roll_result: 'RollResults', attr_value: int, checking_v
     return result_msg
 
 
-async def check_user_characteristics(interface: 'OmMI', characteristics: str) -> int:
-    """判定用户属性, 若用户无该属性则随机生成"""
-    attr_node = f'{ATTR_PREFIX}{characteristics}'
-    try:
-        user_attr = await interface.entity.query_auth_setting(MODULE_NAME, PLUGIN_NAME, attr_node)
-        if user_attr.value is None or not user_attr.value.isdigit():
-            raise ValueError('attr value must be isdigit')
-        attr_value = int(user_attr.value)
-    except (NoResultFound, ValueError):
-        attr_value = randint(1, 100)
-        await interface.entity.set_auth_setting(
-            module=MODULE_NAME, plugin=PLUGIN_NAME, node=attr_node, available=1, value=str(attr_value)
-        )
-        await interface.entity.commit_session()
-
-    return attr_value
-
-
 __all__ = [
     'handle_story_init',
     'handle_story_continue',
     'handle_fast_roll_action',
-    'check_user_characteristics',
 ]
