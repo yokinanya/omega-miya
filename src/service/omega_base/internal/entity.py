@@ -9,7 +9,7 @@
 """
 
 from datetime import date, datetime, timedelta
-from typing import TYPE_CHECKING, Literal, Self
+from typing import TYPE_CHECKING, Callable, Literal, Self
 
 from sqlalchemy.exc import NoResultFound
 
@@ -23,14 +23,20 @@ from src.database.internal.subscription import SubscriptionDAL
 from src.database.internal.subscription_source import SubscriptionSource, SubscriptionSourceDAL
 from .consts import (
     GLOBAL_COOLDOWN_EVENT,
-    RATE_LIMITING_COOLDOWN_EVENT,
     SKIP_COOLDOWN_PERMISSION_NODE,
+    CHARACTER_ATTRIBUTE_SETTER_COOLDOWN_EVENT_PREFIX,
+    CHARACTER_PROFILE_SETTER_COOLDOWN_EVENT_PREFIX,
     PermissionGlobal,
     PermissionLevel,
+    CharacterAttribute,
+    CharacterProfile,
 )
 
 if TYPE_CHECKING:
     from sqlalchemy.ext.asyncio import AsyncSession
+
+type DefaultIntValueFactory = Callable[[], int]
+type DefaultStrValueFactory = Callable[[], str]
 
 
 class InternalEntity:
@@ -95,8 +101,9 @@ class InternalEntity:
     async def query_entity_self(self) -> Entity:
         """查询 Entity 自身"""
         bot = await self.query_bot_self()
-        return await EntityDAL(session=self.db_session).query_unique(bot_index_id=bot.id, entity_type=self.entity_type,
-                                                                     entity_id=self.entity_id, parent_id=self.parent_id)
+        return await EntityDAL(session=self.db_session).query_unique(
+            bot_index_id=bot.id, entity_type=self.entity_type, entity_id=self.entity_id, parent_id=self.parent_id
+        )
 
     async def add_ignore_exists(
             self,
@@ -111,11 +118,21 @@ class InternalEntity:
         entity_info = self.entity_info if entity_info is None else entity_info
 
         try:
-            await entity_dal.query_unique(bot_index_id=bot.id, entity_id=self.entity_id,
-                                          entity_type=self.entity_type, parent_id=self.parent_id)
+            await entity_dal.query_unique(
+                bot_index_id=bot.id,
+                entity_id=self.entity_id,
+                entity_type=self.entity_type,
+                parent_id=self.parent_id,
+            )
         except NoResultFound:
-            await entity_dal.add(bot_index_id=bot.id, entity_id=self.entity_id, entity_type=self.entity_type,
-                                 parent_id=self.parent_id, entity_name=entity_name, entity_info=entity_info)
+            await entity_dal.add(
+                bot_index_id=bot.id,
+                entity_id=self.entity_id,
+                entity_type=self.entity_type,
+                parent_id=self.parent_id,
+                entity_name=entity_name,
+                entity_info=entity_info,
+            )
 
     async def add_upgrade(
             self,
@@ -130,12 +147,22 @@ class InternalEntity:
         entity_info = self.entity_info if entity_info is None else entity_info
 
         try:
-            entity = await entity_dal.query_unique(bot_index_id=bot.id, entity_id=self.entity_id,
-                                                   entity_type=self.entity_type, parent_id=self.parent_id)
+            entity = await entity_dal.query_unique(
+                bot_index_id=bot.id,
+                entity_id=self.entity_id,
+                entity_type=self.entity_type,
+                parent_id=self.parent_id,
+            )
             await entity_dal.update(id_=entity.id, entity_name=entity_name, entity_info=entity_info)
         except NoResultFound:
-            await entity_dal.add(bot_index_id=bot.id, entity_id=self.entity_id, entity_type=self.entity_type,
-                                 parent_id=self.parent_id, entity_name=entity_name, entity_info=entity_info)
+            await entity_dal.add(
+                bot_index_id=bot.id,
+                entity_id=self.entity_id,
+                entity_type=self.entity_type,
+                parent_id=self.parent_id,
+                entity_name=entity_name,
+                entity_info=entity_info,
+            )
 
     async def delete(self) -> None:
         """删除 Entity"""
@@ -156,11 +183,25 @@ class InternalEntity:
         friendship_dal = FriendshipDAL(session=self.db_session)
         try:
             _friendship = await friendship_dal.query_unique(entity_index_id=entity.id)
-            await friendship_dal.update(id_=_friendship.id, status=status, mood=mood, friendship=friendship,
-                                        energy=energy, currency=currency, response_threshold=response_threshold)
+            await friendship_dal.update(
+                id_=_friendship.id,
+                status=status,
+                mood=mood,
+                friendship=friendship,
+                energy=energy,
+                currency=currency,
+                response_threshold=response_threshold,
+            )
         except NoResultFound:
-            await friendship_dal.add(entity_index_id=entity.id, status=status, mood=mood, friendship=friendship,
-                                     energy=energy, currency=currency, response_threshold=response_threshold)
+            await friendship_dal.add(
+                entity_index_id=entity.id,
+                status=status,
+                mood=mood,
+                friendship=friendship,
+                energy=energy,
+                currency=currency,
+                response_threshold=response_threshold,
+            )
 
     async def change_friendship(
             self,
@@ -185,11 +226,25 @@ class InternalEntity:
             currency += _friendship.currency
             response_threshold += _friendship.response_threshold
 
-            await friendship_dal.update(id_=_friendship.id, status=status, mood=mood, friendship=friendship,
-                                        energy=energy, currency=currency, response_threshold=response_threshold)
+            await friendship_dal.update(
+                id_=_friendship.id,
+                status=status,
+                mood=mood,
+                friendship=friendship,
+                energy=energy,
+                currency=currency,
+                response_threshold=response_threshold,
+            )
         except NoResultFound:
-            await friendship_dal.add(entity_index_id=entity.id, status='normal', mood=mood, friendship=friendship,
-                                     energy=energy, currency=currency, response_threshold=response_threshold)
+            await friendship_dal.add(
+                entity_index_id=entity.id,
+                status='normal',
+                mood=mood,
+                friendship=friendship,
+                energy=energy,
+                currency=currency,
+                response_threshold=response_threshold,
+            )
 
     async def query_friendship(self) -> Friendship:
         """获取好感度, 没有则直接初始化"""
@@ -309,24 +364,28 @@ class InternalEntity:
     async def query_plugin_all_auth_setting(self, module: str, plugin: str) -> list[AuthSetting]:
         """查询 Entity 具有某个插件的全部的权限配置"""
         entity = await self.query_entity_self()
-        return await AuthSettingDAL(session=self.db_session).query_entity_all(entity_index_id=entity.id,
-                                                                              module=module, plugin=plugin)
+        return await AuthSettingDAL(session=self.db_session).query_entity_all(
+            entity_index_id=entity.id, module=module, plugin=plugin
+        )
 
     async def query_auth_setting(self, module: str, plugin: str, node: str) -> AuthSetting:
         """查询 Entity 具体某个权限配置"""
         entity = await self.query_entity_self()
-        return await AuthSettingDAL(session=self.db_session).query_unique(entity_index_id=entity.id, module=module,
-                                                                          plugin=plugin, node=node)
+        return await AuthSettingDAL(session=self.db_session).query_unique(
+            entity_index_id=entity.id, module=module, plugin=plugin, node=node
+        )
 
     async def query_global_permission(self) -> AuthSetting:
         """查询 Entity 全局功能开关"""
-        return await self.query_auth_setting(module=PermissionGlobal.module, plugin=PermissionGlobal.plugin,
-                                             node=PermissionGlobal.node)
+        return await self.query_auth_setting(
+            module=PermissionGlobal.module, plugin=PermissionGlobal.plugin, node=PermissionGlobal.node
+        )
 
     async def query_permission_level(self) -> AuthSetting:
         """查询 Entity 权限等级"""
-        return await self.query_auth_setting(module=PermissionLevel.module, plugin=PermissionLevel.plugin,
-                                             node=PermissionLevel.node)
+        return await self.query_auth_setting(
+            module=PermissionLevel.module, plugin=PermissionLevel.plugin, node=PermissionLevel.node
+        )
 
     async def check_auth_setting(
             self,
@@ -358,18 +417,33 @@ class InternalEntity:
 
     async def check_global_permission(self) -> bool:
         """检查 Entity 是否打开全局功能开关"""
-        return await self.check_auth_setting(module=PermissionGlobal.module, plugin=PermissionGlobal.plugin,
-                                             node=PermissionGlobal.node, available=1, strict_match_available=True)
+        return await self.check_auth_setting(
+            module=PermissionGlobal.module,
+            plugin=PermissionGlobal.plugin,
+            node=PermissionGlobal.node,
+            available=1,
+            strict_match_available=True,
+        )
 
     async def check_permission_level(self, level: int) -> bool:
         """检查 Entity 权限等级是否达到要求"""
-        return await self.check_auth_setting(module=PermissionLevel.module, plugin=PermissionLevel.plugin,
-                                             node=PermissionLevel.node, available=level, strict_match_available=False)
+        return await self.check_auth_setting(
+            module=PermissionLevel.module,
+            plugin=PermissionLevel.plugin,
+            node=PermissionLevel.node,
+            available=level,
+            strict_match_available=False,
+        )
 
     async def check_permission_skip_cooldown(self, module: str, plugin: str) -> bool:
         """检查 Entity 是否有插件跳过冷却的权限"""
-        return await self.check_auth_setting(module=module, plugin=plugin, node=SKIP_COOLDOWN_PERMISSION_NODE,
-                                             available=1, strict_match_available=True)
+        return await self.check_auth_setting(
+            module=module,
+            plugin=plugin,
+            node=SKIP_COOLDOWN_PERMISSION_NODE,
+            available=1,
+            strict_match_available=True,
+        )
 
     async def verify_auth_setting(
             self,
@@ -417,37 +491,62 @@ class InternalEntity:
         auth_setting_dal = AuthSettingDAL(session=self.db_session)
 
         try:
-            auth_setting = await auth_setting_dal.query_unique(entity_index_id=entity.id, module=module,
-                                                               plugin=plugin, node=node)
+            auth_setting = await auth_setting_dal.query_unique(
+                entity_index_id=entity.id, module=module, plugin=plugin, node=node
+            )
             await auth_setting_dal.update(id_=auth_setting.id, available=available, value=value)
         except NoResultFound:
-            await auth_setting_dal.add(entity_index_id=entity.id, module=module, plugin=plugin, node=node,
-                                       available=available, value=value)
+            await auth_setting_dal.add(
+                entity_index_id=entity.id, module=module, plugin=plugin, node=node, available=available, value=value
+            )
+
+    async def delete_auth_setting(
+            self,
+            module: str,
+            plugin: str,
+            node: str,
+    ) -> None:
+        """删除 Entity 权限节点"""
+        entity = await self.query_entity_self()
+        auth_setting_dal = AuthSettingDAL(session=self.db_session)
+
+        try:
+            auth_setting = await auth_setting_dal.query_unique(
+                entity_index_id=entity.id, module=module, plugin=plugin, node=node
+            )
+            await auth_setting_dal.delete(id_=auth_setting.id)
+        except NoResultFound:
+            pass
 
     async def enable_global_permission(self) -> None:
         """打开 Entity 全局功能开关"""
-        return await self.set_auth_setting(module=PermissionGlobal.module, plugin=PermissionGlobal.plugin,
-                                           node=PermissionGlobal.node, available=1)
+        return await self.set_auth_setting(
+            module=PermissionGlobal.module, plugin=PermissionGlobal.plugin, node=PermissionGlobal.node, available=1
+        )
 
     async def disable_global_permission(self) -> None:
         """关闭 Entity 全局功能开关"""
-        return await self.set_auth_setting(module=PermissionGlobal.module, plugin=PermissionGlobal.plugin,
-                                           node=PermissionGlobal.node, available=0)
+        return await self.set_auth_setting(
+            module=PermissionGlobal.module, plugin=PermissionGlobal.plugin, node=PermissionGlobal.node, available=0
+        )
 
     async def set_permission_level(self, level: int) -> None:
         """设置 Entity 权限等级"""
-        return await self.set_auth_setting(module=PermissionLevel.module, plugin=PermissionLevel.plugin,
-                                           node=PermissionLevel.node, available=level)
+        return await self.set_auth_setting(
+            module=PermissionLevel.module, plugin=PermissionLevel.plugin, node=PermissionLevel.node, available=level
+        )
 
     async def enable_plugin_skip_cooldown_permission(self, module: str, plugin: str) -> None:
         """启用 Entity 某插件跳过冷却权限"""
-        return await self.set_auth_setting(module=module, plugin=plugin, node=SKIP_COOLDOWN_PERMISSION_NODE,
-                                           available=1)
+        return await self.set_auth_setting(
+            module=module, plugin=plugin, node=SKIP_COOLDOWN_PERMISSION_NODE, available=1
+        )
 
     async def disable_plugin_skip_cooldown_permission(self, module: str, plugin: str) -> None:
         """关闭 Entity 某插件跳过冷却权限"""
-        return await self.set_auth_setting(module=module, plugin=plugin, node=SKIP_COOLDOWN_PERMISSION_NODE,
-                                           available=0)
+        return await self.set_auth_setting(
+            module=module, plugin=plugin, node=SKIP_COOLDOWN_PERMISSION_NODE, available=0
+        )
 
     async def query_cooldown(self, cooldown_event: str) -> CoolDown:
         """查询冷却"""
@@ -480,8 +579,9 @@ class InternalEntity:
             cooldown = await cooldown_dal.query_unique(entity_index_id=entity.id, event=cooldown_event)
             await cooldown_dal.update(id_=cooldown.id, stop_at=stop_at, description=description)
         except NoResultFound:
-            await cooldown_dal.add(entity_index_id=entity.id, event=cooldown_event, stop_at=stop_at,
-                                   description=description)
+            await cooldown_dal.add(
+                entity_index_id=entity.id, event=cooldown_event, stop_at=stop_at, description=description
+            )
 
     async def check_cooldown_expired(self, cooldown_event: str) -> tuple[bool, datetime]:
         """查询冷却是否到期
@@ -500,10 +600,11 @@ class InternalEntity:
     async def set_global_cooldown(self, expired_time: datetime | timedelta) -> None:
         """设置全局冷却
 
-        :param expired_time: datetime: 冷却过期事件; timedelta: 以现在时间为准新增的冷却时间
+        :param expired_time: datetime: 冷却过期时间; timedelta: 以现在时间为准新增的冷却时间
         """
-        return await self.set_cooldown(cooldown_event=GLOBAL_COOLDOWN_EVENT, expired_time=expired_time,
-                                       description='全局冷却')
+        return await self.set_cooldown(
+            cooldown_event=GLOBAL_COOLDOWN_EVENT, expired_time=expired_time, description='全局冷却'
+        )
 
     async def check_global_cooldown_expired(self) -> tuple[bool, datetime]:
         """查询全局冷却是否到期
@@ -512,20 +613,185 @@ class InternalEntity:
         """
         return await self.check_cooldown_expired(cooldown_event=GLOBAL_COOLDOWN_EVENT)
 
-    async def _set_rate_limiting_cooldown(self, expired_time: datetime | timedelta) -> None:
-        """(Deactivated)设置流控冷却
+    async def set_character_attribute(self, attr_name: str, attr_value: int) -> None:
+        """设置 Entity 对象的角色属性, 属性应当为 int 类型"""
+        return await self.set_auth_setting(
+            module=CharacterAttribute.module,
+            plugin=CharacterAttribute.plugin,
+            node=attr_name,
+            available=1,
+            value=str(attr_value),
+        )
 
+    async def set_character_profile(self, profile_name: str, profile_value: str) -> None:
+        """设置 Entity 对象的角色档案, 档案内容应当为 str 类型"""
+        return await self.set_auth_setting(
+            module=CharacterProfile.module,
+            plugin=CharacterProfile.plugin,
+            node=profile_name,
+            available=1,
+            value=profile_value,
+        )
+
+    async def disable_character_attribute(self, attr_name: str) -> None:
+        """禁用 Entity 对象的角色属性"""
+        return await self.set_auth_setting(
+            module=CharacterAttribute.module,
+            plugin=CharacterAttribute.plugin,
+            node=attr_name,
+            available=0,
+        )
+
+    async def disable_character_profile(self, profile_name: str) -> None:
+        """禁用 Entity 对象的角色档案"""
+        return await self.set_auth_setting(
+            module=CharacterProfile.module,
+            plugin=CharacterProfile.plugin,
+            node=profile_name,
+            available=0,
+        )
+
+    async def delete_character_attribute(self, attribute_name: str) -> None:
+        """删除 Entity 对象的角色属性"""
+        return await self.delete_auth_setting(
+            module=CharacterAttribute.module,
+            plugin=CharacterAttribute.plugin,
+            node=attribute_name,
+        )
+
+    async def delete_character_profile(self, profile_name: str) -> None:
+        """删除 Entity 对象的角色档案"""
+        return await self.delete_auth_setting(
+            module=CharacterProfile.module,
+            plugin=CharacterProfile.plugin,
+            node=profile_name,
+        )
+
+    async def query_all_character_attribute(self) -> list[AuthSetting]:
+        """获取 Entity 对象所有的角色属性"""
+        return await self.query_plugin_all_auth_setting(
+            module=CharacterAttribute.module,
+            plugin=CharacterAttribute.plugin,
+        )
+
+    async def query_all_character_profile(self) -> list[AuthSetting]:
+        """获取 Entity 对象所有的角色档案"""
+        return await self.query_plugin_all_auth_setting(
+            module=CharacterProfile.module,
+            plugin=CharacterProfile.plugin,
+        )
+
+    async def query_character_attribute(
+            self,
+            attr_name: str,
+            *,
+            default_factory: DefaultIntValueFactory | None = None,
+    ) -> int:
+        """查询 Entity 对象的角色属性, 提供 `default_factory` 时若无角色属性则动态生成"""
+        try:
+            attribute = await self.query_auth_setting(
+                module=CharacterAttribute.module,
+                plugin=CharacterAttribute.plugin,
+                node=attr_name,
+            )
+
+            if attribute.available != 1:
+                raise ValueError('CharacterAttribute is not available')
+
+            if attribute.value is None or not attribute.value.isdigit():
+                raise ValueError('CharacterAttribute value must be isdigit')
+
+            attribute_value = int(attribute.value)
+        except (NoResultFound, ValueError) as e:
+            if default_factory is None:
+                raise e
+
+            attribute_value = default_factory()
+            await self.set_character_attribute(attr_name=attr_name, attr_value=attribute_value)
+
+        return attribute_value
+
+    async def query_character_profile(
+            self,
+            profile_name: str,
+            *,
+            default_factory: DefaultStrValueFactory | None = None,
+    ) -> str:
+        """查询 Entity 对象的角色档案, 提供 `default_factory` 时若无角色档案则动态生成"""
+        try:
+            profile = await self.query_auth_setting(
+                module=CharacterProfile.module,
+                plugin=CharacterProfile.plugin,
+                node=profile_name,
+            )
+
+            if profile.available != 1:
+                raise ValueError('CharacterProfile is not available')
+
+            if profile.value is None:
+                raise ValueError('CharacterProfile can not be None')
+
+            profile_value = profile.value
+        except (NoResultFound, ValueError) as e:
+            if default_factory is None:
+                raise e
+
+            profile_value = default_factory()
+            await self.set_character_profile(profile_name=profile_name, profile_value=profile_value)
+
+        return profile_value
+
+    async def set_character_attribute_setter_cooldown(
+            self,
+            attr_name: str,
+            expired_time: datetime | timedelta,
+    ) -> None:
+        """设置更新 Entity 对象角色属性时的冷却
+
+        :param attr_name: 角色属性名称
         :param expired_time: datetime: 冷却过期事件; timedelta: 以现在时间为准新增的冷却时间
         """
-        return await self.set_cooldown(cooldown_event=RATE_LIMITING_COOLDOWN_EVENT, expired_time=expired_time,
-                                       description='流控冷却')
+        return await self.set_cooldown(
+            cooldown_event=f'{CHARACTER_ATTRIBUTE_SETTER_COOLDOWN_EVENT_PREFIX}_{attr_name}',
+            expired_time=expired_time,
+            description=f'角色{attr_name!r}属性更新冷却',
+        )
 
-    async def _check_rate_limiting_cooldown_expired(self) -> tuple[bool, datetime]:
-        """(Deactivated)查询流控专用冷却是否到期
+    async def set_character_profile_setter_cooldown(
+            self,
+            profile_name: str,
+            expired_time: datetime | timedelta,
+    ) -> None:
+        """设置更新 Entity 对象角色档案时的冷却
 
+        :param profile_name: 角色档案名称
+        :param expired_time: datetime: 冷却过期事件; timedelta: 以现在时间为准新增的冷却时间
+        """
+        return await self.set_cooldown(
+            cooldown_event=f'{CHARACTER_PROFILE_SETTER_COOLDOWN_EVENT_PREFIX}_{profile_name}',
+            expired_time=expired_time,
+            description=f'角色{profile_name!r}档案更新冷却',
+        )
+
+    async def check_character_attribute_setter_cooldown_expired(self, attr_name: str) -> tuple[bool, datetime]:
+        """查询更新 Entity 对象角色属性时的冷却是否到期
+
+        :param attr_name: 角色属性名称
         :return: 冷却是否已到期, (若仍在冷却中的)到期时间
         """
-        return await self.check_cooldown_expired(cooldown_event=RATE_LIMITING_COOLDOWN_EVENT)
+        return await self.check_cooldown_expired(
+            cooldown_event=f'{CHARACTER_ATTRIBUTE_SETTER_COOLDOWN_EVENT_PREFIX}_{attr_name}'
+        )
+
+    async def check_character_profile_setter_cooldown_expired(self, profile_name: str) -> tuple[bool, datetime]:
+        """查询更新 Entity 对象角色档案时的冷却是否到期
+
+        :param profile_name: 角色档案名称
+        :return: 冷却是否已到期, (若仍在冷却中的)到期时间
+        """
+        return await self.check_cooldown_expired(
+            cooldown_event=f'{CHARACTER_PROFILE_SETTER_COOLDOWN_EVENT_PREFIX}_{profile_name}'
+        )
 
     async def add_subscription(self, subscription_source: SubscriptionSource, sub_info: str | None = None) -> None:
         """添加订阅"""
@@ -533,12 +799,14 @@ class InternalEntity:
         subscription_dal = SubscriptionDAL(session=self.db_session)
 
         try:
-            subscription = await subscription_dal.query_unique(sub_source_index_id=subscription_source.id,
-                                                               entity_index_id=entity.id)
+            subscription = await subscription_dal.query_unique(
+                sub_source_index_id=subscription_source.id, entity_index_id=entity.id
+            )
             await subscription_dal.update(id_=subscription.id, sub_info=sub_info)
         except NoResultFound:
-            await subscription_dal.add(sub_source_index_id=subscription_source.id, entity_index_id=entity.id,
-                                       sub_info=sub_info)
+            await subscription_dal.add(
+                sub_source_index_id=subscription_source.id, entity_index_id=entity.id, sub_info=sub_info
+            )
 
     async def delete_subscription(self, subscription_source: SubscriptionSource) -> None:
         """删除订阅"""
@@ -546,8 +814,9 @@ class InternalEntity:
         subscription_dal = SubscriptionDAL(session=self.db_session)
 
         try:
-            subscription = await subscription_dal.query_unique(sub_source_index_id=subscription_source.id,
-                                                               entity_index_id=entity.id)
+            subscription = await subscription_dal.query_unique(
+                sub_source_index_id=subscription_source.id, entity_index_id=entity.id
+            )
             await subscription_dal.delete(id_=subscription.id)
         except NoResultFound:
             pass

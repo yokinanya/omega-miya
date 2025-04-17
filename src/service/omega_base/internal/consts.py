@@ -14,37 +14,54 @@ from pydantic.dataclasses import dataclass
 
 
 @dataclass
-class BaseInternalAuthNode:
+class BaseInternalNode:
     module: Literal['OmegaInternal'] = 'OmegaInternal'
+
+
+class BaseInternalPermissionAuthNode(BaseInternalNode):
     plugin: Literal['OmegaInternal'] = 'OmegaInternal'
 
 
-class PermissionGlobal(BaseInternalAuthNode):
+class PermissionGlobal(BaseInternalPermissionAuthNode):
     """全局功能开关权限"""
     node: Literal['OmegaPermissionGlobalEnable'] = 'OmegaPermissionGlobalEnable'
 
 
-class PermissionLevel(BaseInternalAuthNode):
+class PermissionLevel(BaseInternalPermissionAuthNode):
     """权限等级"""
     node: Literal['OmegaPermissionLevel'] = 'OmegaPermissionLevel'
+
+
+class CharacterAttribute(BaseInternalNode):
+    """对象角色属性"""
+    plugin: Literal['OmegaInternalCharacterAttribute'] = 'OmegaInternalCharacterAttribute'
+
+
+class CharacterProfile(BaseInternalNode):
+    """对象角色档案"""
+    plugin: Literal['OmegaInternalCharacterProfile'] = 'OmegaInternalCharacterProfile'
 
 
 SKIP_COOLDOWN_PERMISSION_NODE: Literal['skip_cooldown'] = 'skip_cooldown'
 """允许跳过冷却权限节点"""
 
-
 GLOBAL_COOLDOWN_EVENT: Literal['OmegaGlobalCooldown'] = 'OmegaGlobalCooldown'
 """全局冷却 event 名称"""
 
+CHARACTER_ATTRIBUTE_SETTER_COOLDOWN_EVENT_PREFIX: Literal['OmegaICAttrSetter'] = 'OmegaICAttrSetter'
+"""对象角色属性设置冷却 event 名称"""
 
-RATE_LIMITING_COOLDOWN_EVENT: Literal['OmegaRateLimitingCooldown'] = 'OmegaRateLimitingCooldown'
-"""流控限制冷却 event 名称"""
+CHARACTER_PROFILE_SETTER_COOLDOWN_EVENT_PREFIX: Literal['OmegaICProfileSetter'] = 'OmegaICProfileSetter'
+"""对象角色档案设置冷却 event 名称"""
 
 
 __all__ = [
     'PermissionGlobal',
     'PermissionLevel',
+    'CharacterAttribute',
+    'CharacterProfile',
     'SKIP_COOLDOWN_PERMISSION_NODE',
     'GLOBAL_COOLDOWN_EVENT',
-    'RATE_LIMITING_COOLDOWN_EVENT'
+    'CHARACTER_ATTRIBUTE_SETTER_COOLDOWN_EVENT_PREFIX',
+    'CHARACTER_PROFILE_SETTER_COOLDOWN_EVENT_PREFIX',
 ]
