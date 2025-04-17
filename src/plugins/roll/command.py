@@ -116,6 +116,7 @@ async def handle_roll_attr(
         logger.info(f'Roll | 查询 {interface.entity} 属性 {attr!r} 不存在, 尝试随机获取属性')
         async with interface.restart_new_session('user') as sub_interface:
             await handle_roll_set_attr(interface=sub_interface, attr=attr)
+        interface.entity.db_session.expire_all()
 
     # 尝试获取用户属性值
     try:
