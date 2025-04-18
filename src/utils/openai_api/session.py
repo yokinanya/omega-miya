@@ -15,7 +15,13 @@ from pydantic import BaseModel
 
 from src.compat import parse_json_as
 from .api import BaseOpenAIClient
-from .helpers import encode_local_audio, encode_local_file, encode_local_image, encode_bytes_image
+from .helpers import (
+    encode_local_audio,
+    encode_local_file,
+    encode_local_image,
+    encode_bytes_image,
+    fix_broken_generated_json,
+)
 from .models import Message, MessageContent
 
 if TYPE_CHECKING:
@@ -228,7 +234,7 @@ class ChatSession:
             reply = await self.chat_query_json(text=text, model_type=model_type, user_name=user_name, **kwargs)
         elif model_type is not None and issubclass(model_type, BaseModel):
             reply_json = await self.chat(text=text, user_name=user_name, **kwargs)
-            reply = model_type.model_validate_json(reply_json.removeprefix('```json').removesuffix('```').strip())
+            reply = model_type.model_validate_json(self.fix_md_json(reply_json))
         else:
             reply = await self.chat(text=text, user_name=user_name, **kwargs)
         return reply
@@ -286,7 +292,7 @@ class ChatSession:
         )
 
         # 处理被标注的消息格式
-        json_text = reply_text.removeprefix('```json').removesuffix('```').strip()
+        json_text = self.fix_md_json(reply_text)
         return parse_json_as(model_type, json_text) if model_type is not None else json.loads(json_text)
 
     async def chat_query_schema[T: 'BaseModel'](
@@ -314,7 +320,12 @@ class ChatSession:
         )
 
         # 处理被标注的消息格式
-        return model_type.model_validate_json(reply_text.removeprefix('```json').removesuffix('```').strip())
+        return model_type.model_validate_json(self.fix_md_json(reply_text))
+
+    @staticmethod
+    def fix_md_json(text: str) -> str:
+        """修复生成的 Markdown 文本 JSON 内容"""
+        return fix_broken_generated_json(text.strip().removeprefix('```json').removesuffix('```').strip())
 
 
 __all__ = [

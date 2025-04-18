@@ -12,6 +12,7 @@ import base64
 from io import BytesIO
 from typing import TYPE_CHECKING
 
+import ujson as json
 from PIL import Image
 from nonebot.utils import run_sync
 
@@ -68,9 +69,96 @@ async def encode_bytes_image(image_content: bytes, *, convert_format: str = 'web
     return f'data:image/{convert_format};base64,{await _base64_encode(content)}'
 
 
+def _fix_broken_generated_json(json_str: str) -> str:
+    """(Deactivated)Fixes a malformed JSON string by:
+        - Removing the last comma and any trailing content.
+        - Appending a closing bracket `]` and brace `}` to properly terminate the JSON.
+
+    Reference from HippoRAG2:
+    https://github.com/OSU-NLP-Group/HippoRAG/blob/b67f86a92fe886b3aa537cc4a92b935171890228/src/hipporag/utils/llm_utils.py#L126-L143
+
+    :param json_str: The malformed JSON string to be fixed.
+    :return: The corrected JSON string.
+    """
+    last_comma_index = json_str.rfind(',')
+    if last_comma_index != -1:
+        json_str = json_str[:last_comma_index]
+
+    processed_string = json_str + ']\n}'
+    return processed_string
+
+
+def fix_broken_generated_json(json_str: str) -> str:
+    """Fixes a malformed JSON string by:
+        - Removing the last comma and any trailing content.
+        - Iterating over the JSON string once to determine and fix unclosed braces or brackets.
+        - Ensuring braces and brackets inside string literals are not considered.
+
+    If the original json_str string can be successfully loaded by json.loads(), will directly return it without any modification.
+
+    Reference from HippoRAG2:
+    https://github.com/OSU-NLP-Group/HippoRAG/blob/b67f86a92fe886b3aa537cc4a92b935171890228/src/hipporag/utils/llm_utils.py#L146C1-L215C20
+
+    :param json_str: The malformed JSON string to be fixed.
+    :return: The corrected JSON string.
+    """
+
+    def find_unclosed(inner_json_str: str):
+        """Identifies the unclosed braces and brackets in the JSON string.
+
+        :param inner_json_str: The JSON string to analyze.
+        :return: A list of unclosed elements in the order they were opened.
+        """
+        unclosed = []
+        inside_string = False
+        escape_next = False
+
+        for char in inner_json_str:
+            if inside_string:
+                if escape_next:
+                    escape_next = False
+                elif char == '\\':
+                    escape_next = True
+                elif char == '"':
+                    inside_string = False
+            else:
+                if char == '"':
+                    inside_string = True
+                elif char in '{[':
+                    unclosed.append(char)
+                elif char in '}]':
+                    if unclosed and ((char == '}' and unclosed[-1] == '{') or (char == ']' and unclosed[-1] == '[')):
+                        unclosed.pop()
+
+        return unclosed
+
+    try:
+        # Try to load the JSON to see if it is valid
+        json.loads(json_str)
+        return json_str  # Return as-is if valid
+    except json.JSONDecodeError:
+        pass
+
+    # Step 1: Remove trailing content after the last comma.
+    last_comma_index = json_str.rfind(',')
+    if last_comma_index != -1:
+        json_str = json_str[:last_comma_index]
+
+    # Step 2: Identify unclosed braces and brackets.
+    unclosed_elements = find_unclosed(json_str)
+
+    # Step 3: Append the necessary closing elements in reverse order of opening.
+    closing_map = {'{': '}', '[': ']'}
+    for open_char in reversed(unclosed_elements):
+        json_str += closing_map[open_char]
+
+    return json_str
+
+
 __all__ = [
     'encode_local_audio',
     'encode_local_file',
     'encode_local_image',
     'encode_bytes_image',
+    'fix_broken_generated_json',
 ]
