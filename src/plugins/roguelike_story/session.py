@@ -14,7 +14,7 @@ from typing import TYPE_CHECKING
 
 from src.utils.openai_api import ChatSession
 from .config import roguelike_story_plugin_config
-from .consts import STORY_CREATE_PROMPT, CONTINUE_PROMPT, ROLL_PROMPT
+from .consts import STORY_CREATE_PROMPT, CONTINUE_PROMPT, SAFE_ROLL_PROMPT, UNLIMITED_ROLL_PROMPT
 from .models import Story, CurrentSituation, NextSituation, RollCondition, RollResults
 
 if TYPE_CHECKING:
@@ -74,7 +74,10 @@ class StorySession:
         current_continue_prompt = f'{CONTINUE_PROMPT}\n\n{story.overview}'
         self._continued_session = _create_chat_session(init_system_message=current_continue_prompt)
 
-        current_roll_prompt = f'{ROLL_PROMPT}\n\n{story.overview}'
+        if roguelike_story_plugin_config.roguelike_story_plugin_ai_safe_roll:
+            current_roll_prompt = f'{SAFE_ROLL_PROMPT}\n\n{story.overview}'
+        else:
+            current_roll_prompt = f'{UNLIMITED_ROLL_PROMPT}\n\n{story.overview}'
         self._roll_session = _create_chat_session(init_system_message=current_roll_prompt)
 
         self.current_situation = story.prologue
@@ -86,8 +89,13 @@ class StorySession:
         if self.is_processing:
             raise RuntimeError('StorySession is processing')
 
+        if roguelike_story_plugin_config.roguelike_story_plugin_ai_safe_roll:
+            roll_prompt = SAFE_ROLL_PROMPT
+        else:
+            roll_prompt = UNLIMITED_ROLL_PROMPT
+
         async with self._lock:
-            roll_result = await _create_chat_session(init_system_message=ROLL_PROMPT).advance_chat(
+            roll_result = await _create_chat_session(init_system_message=roll_prompt).advance_chat(
                 RollCondition(current_situation='', action=action).model_dump_json(),
                 response_format=roguelike_story_plugin_config.roguelike_story_plugin_ai_json_output,
                 model_type=RollResults,

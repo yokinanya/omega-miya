@@ -28,6 +28,8 @@ class RoguelikeStoryPluginConfig(BaseModel):
     roguelike_story_plugin_ai_timeout: int = Field(default=120)
     # 要求返回 JSON 格式, 有助于数据解析, 若 AI 服务不支持 JSON 输出则需要设置为 `None`
     roguelike_story_plugin_ai_json_output: Literal['json_schema', 'json_object', None] = Field(default='json_object')
+    # 生成掷骰事件时是否使用 SFW 内容安全提示词
+    roguelike_story_plugin_ai_safe_roll: bool = Field(default=True)
 
     model_config = ConfigDict(extra='ignore')
 
