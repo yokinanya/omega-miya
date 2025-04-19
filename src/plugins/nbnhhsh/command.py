@@ -37,7 +37,7 @@ async def handle_guess(
     reply_message = interface.get_event_reply_msg_plain_text()
 
     if not guess_word and not reply_message and not msg_images:
-        await interface.reject_arg_reply('ensure', '有啥搞不懂? 发来帮你看看')
+        await interface.reject_arg_reply('guess_word', '有啥搞不懂? 发来帮你看看')
 
     guess_word = '' if guess_word is None else guess_word.strip()
     reply_message = '' if reply_message is None else reply_message.strip()

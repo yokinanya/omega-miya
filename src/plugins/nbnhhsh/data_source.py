@@ -21,7 +21,7 @@ from src.compat import parse_obj_as
 from src.utils import OmegaRequests
 from src.utils.openai_api import ChatSession
 from .config import nbnhhsh_plugin_config
-from .consts import DESCRIPTION_PROMPT, IMAGE_DESC_PROMPT
+from .consts import DESCRIPTION_PROMPT, IMAGE_DESC_PROMPT, WEB_DESC_PROMPT
 
 if TYPE_CHECKING:
     from lxml.html import HtmlElement
@@ -34,7 +34,12 @@ class ImageItems(BaseModel):
 
 class ImageDescription(BaseModel):
     entity: list[ImageItems]
-    image_description: str
+    image_overview: str
+
+
+class WebDescription(BaseModel):
+    keywords: list[str]
+    web_overview: str
 
 
 class ObjectDescription(BaseModel):
@@ -48,11 +53,12 @@ class ObjectDescriptionResult(BaseModel):
 
 class QueryContent(BaseModel):
     image_description: ImageDescription | None = Field(default=None)
+    web_description: WebDescription | None = Field(default=None)
     attr_description: str = Field(default_factory=str)
     user_message: str
 
 
-class GuessResult(BaseModel):
+class AttrGuessResult(BaseModel):
     name: str
     trans: list[str] | None = None
     inputting: list[str] | None = None
@@ -69,18 +75,18 @@ class GuessResult(BaseModel):
         return result
 
 
-async def _query_guess(guess: str) -> list[GuessResult]:
+async def _query_attr_guess(guess: str) -> list[AttrGuessResult]:
     """从 magiconch API 处获取缩写查询结果"""
     # 该 api 当前不支持查询的缩写中有空格 这里去除待查询文本中的空格
     guess = guess.replace(' ', '').strip()
     url = 'https://lab.magiconch.com/api/nbnhhsh/guess'
     payload = {'text': guess}
     response = await OmegaRequests().post(url=url, json=payload)
-    return parse_obj_as(list[GuessResult], OmegaRequests.parse_content_as_json(response=response))
+    return parse_obj_as(list[AttrGuessResult], OmegaRequests.parse_content_as_json(response=response))
 
 
-async def query_guess(guess: str) -> list[str]:
-    guess_result = await _query_guess(guess=guess)
+async def query_attr_guess(guess: str) -> list[str]:
+    guess_result = await _query_attr_guess(guess=guess)
     return [trans_word for x in guess_result for trans_word in x.guess_result]
 
 
@@ -126,7 +132,7 @@ def filter_html(content: str) -> str:
         for attr in element.attrib:
             del element.attrib[attr]
 
-    # 展平 div 和 span 标签
+    # 展平 div, span, section 等标签
     flatten_nested_tags(tree, ['div', 'span', 'section'])
     # 将清理后的 HTML 转回字符串
     cleaned_html = html.tostring(tree, encoding='unicode', pretty_print=True)
@@ -137,9 +143,28 @@ def filter_html(content: str) -> str:
 
 
 async def query_web_page_html(url: str) -> str:
-    """获取网页 html"""
+    """获取和初步清理网页 html"""
     page_content = OmegaRequests.parse_content_as_text(await OmegaRequests().get(url=url))
     return await filter_html(content=page_content)
+
+
+async def query_web_page_description(url: str) -> WebDescription:
+    """获取网页内容描述"""
+    page_content = await query_web_page_html(url=url)
+
+    session = _create_chat_session(
+        service_name=nbnhhsh_plugin_config.nbnhhsh_plugin_ai_description_service_name,
+        model_name=nbnhhsh_plugin_config.nbnhhsh_plugin_ai_description_model_name,
+        init_system_message=WEB_DESC_PROMPT,
+    )
+
+    return await session.advance_chat(
+        page_content,
+        response_format=nbnhhsh_plugin_config.nbnhhsh_plugin_ai_query_json_output,
+        model_type=WebDescription,
+        temperature=nbnhhsh_plugin_config.nbnhhsh_plugin_ai_temperature,
+        timeout=nbnhhsh_plugin_config.nbnhhsh_plugin_ai_timeout,
+    )
 
 
 async def query_image_description(image_urls: Iterable[str]) -> ImageDescription:
@@ -164,10 +189,14 @@ async def query_image_description(image_urls: Iterable[str]) -> ImageDescription
 async def query_ai_description(
         user_message: str,
         image_description: ImageDescription | None = None,
+        web_description: WebDescription | None = None,
         attr_description: str = '',
 ) -> list[ObjectDescription]:
     query_content = QueryContent(
-        user_message=user_message, image_description=image_description, attr_description=attr_description
+        user_message=user_message,
+        image_description=image_description,
+        web_description=web_description,
+        attr_description=attr_description,
     )
 
     session = _create_chat_session(
@@ -211,7 +240,7 @@ def _create_chat_session(
 
 async def simple_guess(query_message: str) -> str:
     """查询缩写"""
-    guess_result = await query_guess(guess=query_message)
+    guess_result = await query_attr_guess(guess=query_message)
     if guess_result:
         trans = '\n'.join(guess_result)
         trans = f'为你找到了{query_message!r}的以下解释:\n\n{trans}'
@@ -222,7 +251,9 @@ async def simple_guess(query_message: str) -> str:
 
 async def ai_guess(query_message: str, msg_images: Iterable[str]) -> str:
     """使用 AI 进行解释"""
-    need_query_attr = True
+
+    # 只有文本内容为纯字母的时候才尝试查询缩写
+    need_query_attr = query_message.isalpha() and query_message.isascii()
 
     try:
         if msg_images:
@@ -236,13 +267,16 @@ async def ai_guess(query_message: str, msg_images: Iterable[str]) -> str:
 
     try:
         if is_valid_url(url=query_message):
-            query_message = await query_web_page_html(url=query_message)
+            web_desc = await query_web_page_description(url=query_message)
             need_query_attr = False
+        else:
+            web_desc = None
     except Exception as e:
         logger.warning(f'nbnhhsh | 尝试解析链接({query_message})失败, {e}')
+        web_desc = None
 
     try:
-        if need_query_attr and (attr_desc_result := await query_guess(guess=query_message)):
+        if need_query_attr and (attr_desc_result := await query_attr_guess(guess=query_message)):
             attr_desc = f'查询缩写{query_message!r}可能的含义:\n\n{"\n".join(attr_desc_result)}'
         else:
             attr_desc = ''
@@ -251,10 +285,17 @@ async def ai_guess(query_message: str, msg_images: Iterable[str]) -> str:
         attr_desc = ''
 
     desc_result = await query_ai_description(
-        user_message=query_message, image_description=images_desc, attr_description=attr_desc
+        user_message=query_message,
+        image_description=images_desc,
+        web_description=web_desc,
+        attr_description=attr_desc,
     )
 
-    message = attr_desc or (images_desc.image_description if images_desc else '')
+    message = (
+            attr_desc
+            or (images_desc.image_overview if images_desc else '')
+            or (web_desc.web_overview if web_desc else '')
+    )
 
     if desc_result:
         desc_text = '\n\n'.join(f'{x.object}: {x.description}' for x in desc_result)
