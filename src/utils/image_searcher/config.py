@@ -9,25 +9,21 @@
 """
 
 from nonebot import get_plugin_config, logger
-from pydantic import BaseModel, ConfigDict, ValidationError
+from pydantic import BaseModel, ConfigDict, Field, ValidationError
 
 
 class ImageSearcherConfig(BaseModel):
     """ImageSearcher 配置"""
     saucenao_api_key: str | None = None
 
-    image_searcher_enable_ascii2d: bool = False
-    image_searcher_enable_saucenao: bool = True
-    image_searcher_enable_iqdb: bool = True
-    image_searcher_enable_yandex: bool = False
-    image_searcher_enable_trace_moe: bool = True
+    image_searcher_enable_searcher: list[str] = Field(default=['saucenao', 'iqdb', 'tracemoe'])
 
     model_config = ConfigDict(extra='ignore')
 
 
 try:
     image_searcher_config = get_plugin_config(ImageSearcherConfig)
-    if image_searcher_config.image_searcher_enable_saucenao and not image_searcher_config.saucenao_api_key:
+    if 'saucenao' in image_searcher_config.image_searcher_enable_searcher and not image_searcher_config.saucenao_api_key:
         logger.opt(colors=True).warning(
             '<lc>ImageSearcher</lc> | <lr>未配置 Saucenao API KEY</lr>, <ly>部分识图功能可能无法正常使用</ly>'
         )

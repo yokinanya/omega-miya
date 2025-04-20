@@ -17,6 +17,7 @@ from src.compat import parse_obj_as
 from ..model import BaseImageSearcherAPI, ImageSearchingResult
 
 if TYPE_CHECKING:
+    from src.resource import BaseResource
     from src.utils.omega_common_api.types import CookieTypes, HeaderTypes
 
 
@@ -83,7 +84,50 @@ class Iqdb(BaseImageSearcherAPI):
                 continue
         return result
 
-    async def search(self) -> list[ImageSearchingResult]:
+    @classmethod
+    async def _search_local_image(cls, image: 'BaseResource') -> list[ImageSearchingResult]:
+        with image.open('rb') as f:
+            form_data = [
+                ('MAX_FILE_SIZE', (None, '', None)),
+                ('service[]', (None, '1', None)),
+                ('service[]', (None, '2', None)),
+                ('service[]', (None, '3', None)),
+                ('service[]', (None, '4', None)),
+                ('service[]', (None, '5', None)),
+                ('service[]', (None, '6', None)),
+                ('service[]', (None, '11', None)),
+                ('service[]', (None, '13', None)),
+                ('file', (image.path.name, f, 'application/octet-stream')),
+                # ('url', (None, '', None)),
+                # ('forcegray', (None, 'on', None)),
+            ]
+            iqdb_response = await cls._request_post(url=cls._get_root_url(), files=form_data, timeout=20)
+
+        iqdb_search_content = cls._parse_content_as_text(iqdb_response)
+        return parse_obj_as(list[ImageSearchingResult], cls._parser(content=iqdb_search_content))
+
+    @classmethod
+    async def _search_bytes_image(cls, image: bytes) -> list[ImageSearchingResult]:
+        form_data = [
+            ('MAX_FILE_SIZE', (None, '', None)),
+            ('service[]', (None, '1', None)),
+            ('service[]', (None, '2', None)),
+            ('service[]', (None, '3', None)),
+            ('service[]', (None, '4', None)),
+            ('service[]', (None, '5', None)),
+            ('service[]', (None, '6', None)),
+            ('service[]', (None, '11', None)),
+            ('service[]', (None, '13', None)),
+            ('file', ('blob', image, 'application/octet-stream')),
+            # ('url', (None, '', None)),
+            # ('forcegray', (None, 'on', None)),
+        ]
+        iqdb_response = await cls._request_post(url=cls._get_root_url(), files=form_data, timeout=20)
+        iqdb_search_content = cls._parse_content_as_text(iqdb_response)
+        return parse_obj_as(list[ImageSearchingResult], cls._parser(content=iqdb_search_content))
+
+    @classmethod
+    async def _search_url_image(cls, image: str) -> list[ImageSearchingResult]:
         form_data = [
             ('MAX_FILE_SIZE', (None, '', None)),
             ('service[]', (None, '1', None)),
@@ -95,13 +139,12 @@ class Iqdb(BaseImageSearcherAPI):
             ('service[]', (None, '11', None)),
             ('service[]', (None, '13', None)),
             ('file', ('', b'', 'application/octet-stream')),
-            ('url', (None, self.image_url, None)),
+            ('url', (None, image, None)),
+            # ('forcegray', (None, 'on', None)),
         ]
-
-        iqdb_response = await self._request_post(url=self._get_root_url(), files=form_data)
-        iqdb_search_content = self._parse_content_as_text(iqdb_response)
-
-        return parse_obj_as(list[ImageSearchingResult], self._parser(content=iqdb_search_content))
+        iqdb_response = await cls._request_post(url=cls._get_root_url(), files=form_data, timeout=20)
+        iqdb_search_content = cls._parse_content_as_text(iqdb_response)
+        return parse_obj_as(list[ImageSearchingResult], cls._parser(content=iqdb_search_content))
 
 
 __all__ = [

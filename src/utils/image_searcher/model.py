@@ -14,10 +14,13 @@ from typing import TYPE_CHECKING
 from pydantic import BaseModel, ConfigDict
 
 from src.compat import AnyUrlStr as AnyUrl
+from src.resource import BaseResource
 from src.utils import BaseCommonAPI
 
 if TYPE_CHECKING:
     from src.utils.omega_common_api.types import QueryTypes
+
+type SearchableImage = BaseResource | bytes | str
 
 
 class ImageSearchingResult(BaseModel):
@@ -33,20 +36,42 @@ class ImageSearchingResult(BaseModel):
 class BaseImageSearcher(abc.ABC):
     """识图引擎基类"""
 
-    def __init__(self, image_url: str):
+    def __init__(self, image: SearchableImage):
         """仅支持传入图片 url
 
-        :param image_url: 待识别的图片 url
+        :param image: 待识别的图片
         """
-        self.image_url = image_url
+        self.image = image
 
     def __repr__(self) -> str:
-        return f'{self.__class__.__name__}(image_url={self.image_url})'
+        return f'{self.__class__.__name__}(image={self.image})'
 
+    @classmethod
     @abc.abstractmethod
-    async def search(self) -> list[ImageSearchingResult]:
-        """获取搜索结果"""
+    async def _search_local_image(cls, image: BaseResource) -> list[ImageSearchingResult]:
+        """识别本地图片"""
         raise NotImplementedError
+
+    @classmethod
+    @abc.abstractmethod
+    async def _search_bytes_image(cls, image: bytes) -> list[ImageSearchingResult]:
+        """识别 bytes 图片"""
+        raise NotImplementedError
+
+    @classmethod
+    @abc.abstractmethod
+    async def _search_url_image(cls, image: str) -> list[ImageSearchingResult]:
+        """识别 url 图片"""
+        raise NotImplementedError
+
+    async def search(self) -> list[ImageSearchingResult]:
+        """根据提供的图片类型获取搜索结果"""
+        if isinstance(self.image, BaseResource):
+            return await self._search_local_image(image=self.image)
+        elif isinstance(self.image, bytes):
+            return await self._search_bytes_image(image=self.image)
+        else:
+            return await self._search_url_image(image=self.image)  # type: ignore
 
 
 class BaseImageSearcherAPI(BaseImageSearcher, BaseCommonAPI, abc.ABC):
@@ -55,6 +80,11 @@ class BaseImageSearcherAPI(BaseImageSearcher, BaseCommonAPI, abc.ABC):
     @classmethod
     def _load_cloudflare_clearance(cls) -> bool:
         return False
+
+    @classmethod
+    def get_searcher_name(cls) -> str:
+        """获取识图引擎名称"""
+        return cls.__name__.lower()
 
     @classmethod
     async def get_resource_as_bytes(cls, url: str, *, params: 'QueryTypes' = None, timeout: int = 30) -> bytes:
@@ -71,4 +101,5 @@ __all__ = [
     'BaseImageSearcher',
     'BaseImageSearcherAPI',
     'ImageSearchingResult',
+    'SearchableImage',
 ]
