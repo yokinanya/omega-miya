@@ -10,6 +10,7 @@
 
 import hashlib
 import pathlib
+import re
 from asyncio.exceptions import TimeoutError as AsyncTimeoutError
 from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
@@ -130,6 +131,16 @@ class OmegaRequests:
         name_prefix = '_'.join(prefix) if prefix else 'file'
         new_name = f'{name_prefix}_{name_hash}{name_suffix}'
         return new_name
+
+    @classmethod
+    def get_url_in_text(cls, text: str) -> list[str]:
+        """匹配并提取字符串中的合法 URL"""
+        pattern = re.compile(r'https?://(?:[a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(?:/[^/\s]*)*')
+        parsed_urls = [urlparse(str(x)) for x in re.findall(pattern, text)]
+        return [
+            x.geturl() for x in parsed_urls
+            if all((x.scheme in ['http', 'https'], x.netloc))
+        ]
 
     @classmethod
     def get_default_headers(cls) -> dict[str, str]:
