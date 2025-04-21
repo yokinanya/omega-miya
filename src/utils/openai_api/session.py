@@ -54,13 +54,46 @@ class ChatSession:
             )
 
     @classmethod
-    def init_default_from_config(
+    def create(
+            cls,
+            service_name: str | None = None,
+            model_name: str | None = None,
+            *,
+            default_user_name: str | None = None,
+            init_system_message: str | None = None,
+            init_assistant_message: str | None = None,
+            use_developer_message: bool = False,
+            max_messages: int = 20,
+    ) -> Self:
+        """使用指定服务与模型名称创建对话 Session, 若不提供则从配置文件中使用默认项初始化"""
+        if (service_name is not None) and (model_name is not None):
+            return cls(
+                service_name=service_name,
+                model_name=model_name,
+                default_user_name=default_user_name,
+                init_system_message=init_system_message,
+                init_assistant_message=init_assistant_message,
+                use_developer_message=use_developer_message,
+                max_messages=max_messages,
+            )
+        else:
+            return cls.create_from_config_default(
+                default_user_name=default_user_name,
+                init_system_message=init_system_message,
+                init_assistant_message=init_assistant_message,
+                use_developer_message=use_developer_message,
+                max_messages=max_messages,
+            )
+
+    @classmethod
+    def create_from_config_default(
             cls,
             *,
             default_user_name: str | None = None,
             init_system_message: str | None = None,
             init_assistant_message: str | None = None,
             use_developer_message: bool = False,
+            max_messages: int = 20,
     ) -> Self:
         """从配置文件中初始化, 使用第一个可用配置项"""
         if not (available_services := BaseOpenAIClient.get_available_services()):
@@ -71,6 +104,7 @@ class ChatSession:
             init_system_message=init_system_message,
             init_assistant_message=init_assistant_message,
             use_developer_message=use_developer_message,
+            max_messages=max_messages,
         )
 
     def reset_chat(self) -> None:

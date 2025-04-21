@@ -62,7 +62,12 @@ class StorySession:
             raise RuntimeError('StorySession is processing')
 
         async with self._lock:
-            story = await _create_chat_session(init_system_message=STORY_CREATE_PROMPT).advance_chat(
+            # 生成故事框架
+            story = await ChatSession.create(
+                service_name=roguelike_story_plugin_config.roguelike_story_plugin_ai_service_name,
+                model_name=roguelike_story_plugin_config.roguelike_story_plugin_ai_model_name,
+                init_system_message=STORY_CREATE_PROMPT,
+            ).advance_chat(
                 description,
                 response_format=roguelike_story_plugin_config.roguelike_story_plugin_ai_json_output,
                 model_type=Story,
@@ -71,14 +76,24 @@ class StorySession:
                 timeout=roguelike_story_plugin_config.roguelike_story_plugin_ai_timeout,
             )
 
+        # 初始化续写 Session
         current_continue_prompt = f'{CONTINUE_PROMPT}\n\n{story.overview}'
-        self._continued_session = _create_chat_session(init_system_message=current_continue_prompt)
+        self._continued_session = ChatSession.create(
+            service_name=roguelike_story_plugin_config.roguelike_story_plugin_ai_service_name,
+            model_name=roguelike_story_plugin_config.roguelike_story_plugin_ai_model_name,
+            init_system_message=current_continue_prompt,
+        )
 
+        # 初始化掷骰 Session
         if roguelike_story_plugin_config.roguelike_story_plugin_ai_safe_roll:
             current_roll_prompt = f'{SAFE_ROLL_PROMPT}\n\n{story.overview}'
         else:
             current_roll_prompt = f'{UNLIMITED_ROLL_PROMPT}\n\n{story.overview}'
-        self._roll_session = _create_chat_session(init_system_message=current_roll_prompt)
+        self._roll_session = ChatSession.create(
+            service_name=roguelike_story_plugin_config.roguelike_story_plugin_ai_service_name,
+            model_name=roguelike_story_plugin_config.roguelike_story_plugin_ai_model_name,
+            init_system_message=current_roll_prompt,
+        )
 
         self.current_situation = story.prologue
         self._is_inited = True
@@ -95,7 +110,11 @@ class StorySession:
             roll_prompt = UNLIMITED_ROLL_PROMPT
 
         async with self._lock:
-            roll_result = await _create_chat_session(init_system_message=roll_prompt).advance_chat(
+            roll_result = await ChatSession.create(
+                service_name=roguelike_story_plugin_config.roguelike_story_plugin_ai_service_name,
+                model_name=roguelike_story_plugin_config.roguelike_story_plugin_ai_model_name,
+                init_system_message=roll_prompt,
+            ).advance_chat(
                 RollCondition(current_situation='', action=action).model_dump_json(),
                 response_format=roguelike_story_plugin_config.roguelike_story_plugin_ai_json_output,
                 model_type=RollResults,
@@ -155,28 +174,6 @@ class StorySession:
         del self._continued_session
         del self._roll_session
         del self._lock
-
-
-def _create_chat_session(
-        init_system_message: str | None = None,
-        init_assistant_message: str | None = None,
-) -> ChatSession:
-    """创建对话 Session"""
-    if (
-            (service_name := roguelike_story_plugin_config.roguelike_story_plugin_ai_service_name) is not None
-            and (model_name := roguelike_story_plugin_config.roguelike_story_plugin_ai_model_name) is not None
-    ):
-        return ChatSession(
-            service_name=service_name,
-            model_name=model_name,
-            init_system_message=init_system_message,
-            init_assistant_message=init_assistant_message,
-        )
-    else:
-        return ChatSession.init_default_from_config(
-            init_system_message=init_system_message,
-            init_assistant_message=init_assistant_message,
-        )
 
 
 def get_story_session(interface: 'OmMI') -> StorySession:

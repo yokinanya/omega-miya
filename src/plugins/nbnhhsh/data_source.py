@@ -152,7 +152,7 @@ async def query_web_page_description(url: str) -> WebDescription:
     """获取网页内容描述"""
     page_content = await query_web_page_html(url=url)
 
-    session = _create_chat_session(
+    session = ChatSession.create(
         service_name=nbnhhsh_plugin_config.nbnhhsh_plugin_ai_description_service_name,
         model_name=nbnhhsh_plugin_config.nbnhhsh_plugin_ai_description_model_name,
         init_system_message=WEB_DESC_PROMPT,
@@ -169,7 +169,7 @@ async def query_web_page_description(url: str) -> WebDescription:
 
 async def query_image_description(image_urls: Iterable[str]) -> ImageDescription:
     """获取图片描述"""
-    session = _create_chat_session(
+    session = ChatSession.create(
         service_name=nbnhhsh_plugin_config.nbnhhsh_plugin_ai_vision_service_name,
         model_name=nbnhhsh_plugin_config.nbnhhsh_plugin_ai_vision_model_name,
     )
@@ -199,7 +199,7 @@ async def query_ai_description(
         attr_description=attr_description,
     )
 
-    session = _create_chat_session(
+    session = ChatSession.create(
         service_name=nbnhhsh_plugin_config.nbnhhsh_plugin_ai_description_service_name,
         model_name=nbnhhsh_plugin_config.nbnhhsh_plugin_ai_description_model_name,
         init_system_message=DESCRIPTION_PROMPT,
@@ -215,27 +215,6 @@ async def query_ai_description(
     )
 
     return descriptions.result
-
-
-def _create_chat_session(
-        service_name: str | None = None,
-        model_name: str | None = None,
-        init_system_message: str | None = None,
-        init_assistant_message: str | None = None,
-) -> ChatSession:
-    """创建对话 Session"""
-    if (service_name is not None) and (model_name is not None):
-        return ChatSession(
-            service_name=service_name,
-            model_name=model_name,
-            init_system_message=init_system_message,
-            init_assistant_message=init_assistant_message,
-        )
-    else:
-        return ChatSession.init_default_from_config(
-            init_system_message=init_system_message,
-            init_assistant_message=init_assistant_message,
-        )
 
 
 async def simple_guess(query_message: str) -> str:
