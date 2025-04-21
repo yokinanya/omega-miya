@@ -8,10 +8,9 @@
 @Software       : PyCharm
 """
 
-import re
-from typing import TYPE_CHECKING, Iterable
+from typing import Iterable
 
-from lxml import html
+from lxml import etree
 from nonebot.log import logger
 from nonebot.utils import run_sync
 from pydantic import BaseModel, Field
@@ -21,9 +20,6 @@ from src.utils import OmegaRequests
 from src.utils.openai_api import ChatSession
 from .config import nbnhhsh_plugin_config
 from .consts import DESCRIPTION_PROMPT, IMAGE_DESC_PROMPT, WEB_DESC_PROMPT
-
-if TYPE_CHECKING:
-    from lxml.html import HtmlElement
 
 
 class ImageItems(BaseModel):
@@ -89,28 +85,10 @@ async def query_attr_guess(guess: str) -> list[str]:
     return [trans_word for x in guess_result for trans_word in x.guess_result]
 
 
-def flatten_nested_tags(tree: 'HtmlElement', tags_to_flatten: Iterable[str]) -> None:
-    """展平嵌套的标签"""
-    for tag in tags_to_flatten:
-        for element in tree.xpath(f'//{tag}'):
-            # 获取父节点
-            parent = element.getparent()
-            # 获取当前标签的索引
-            index = parent.index(element)
-            # 将当前标签的所有子节点插入到父节点中
-            for child in reversed(element.getchildren()):
-                parent.insert(index, child)
-            # 如果当前标签有文本内容，保留文本
-            if element.text:
-                parent.insert(index, html.Element('text', text=element.text))
-            # 删除当前标签
-            parent.remove(element)
-
-
 @run_sync
-def filter_html(content: str) -> str:
-    """过滤 html 和移除非主体标签"""
-    tree = html.fromstring(content)
+def get_html_pure_text(html_content: str) -> str:
+    """提取 html 中文本内容"""
+    tree = etree.HTML(html_content)
 
     # 定义要删除的标签
     tags_to_remove = ['script', 'style', 'meta', 'link', 'noscript']
@@ -120,25 +98,19 @@ def filter_html(content: str) -> str:
         for element in tree.xpath(f'//{tag}'):
             element.getparent().remove(element)
 
-    # 遍历所有元素，移除 style 属性
-    for element in tree.xpath('//*'):
-        for attr in element.attrib:
-            del element.attrib[attr]
+    # 移除换行符
+    text_list = [
+        str(x).replace('\n', '').replace('\r', '').strip()
+        for x in tree.xpath('//text()')
+    ]
 
-    # 展平 div, span, section 等标签
-    flatten_nested_tags(tree, ['div', 'span', 'section'])
-    # 将清理后的 HTML 转回字符串
-    cleaned_html = html.tostring(tree, encoding='unicode', pretty_print=True)
-    # 清理多余的空格和换行符
-    cleaned_html = re.sub(r'\s+', ' ', cleaned_html)
-
-    return cleaned_html
+    return ' '.join(text.strip() for text in text_list if text.strip())
 
 
 async def query_web_page_html(url: str) -> str:
     """获取和初步清理网页 html"""
     page_content = OmegaRequests.parse_content_as_text(await OmegaRequests().get(url=url))
-    return await filter_html(content=page_content)
+    return await get_html_pure_text(html_content=page_content)
 
 
 async def query_web_page_description(url: str) -> WebDescription:
