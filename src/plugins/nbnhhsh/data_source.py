@@ -10,7 +10,6 @@
 
 import re
 from typing import TYPE_CHECKING, Iterable
-from urllib.parse import urlparse
 
 from lxml import html
 from nonebot.log import logger
@@ -88,12 +87,6 @@ async def _query_attr_guess(guess: str) -> list[AttrGuessResult]:
 async def query_attr_guess(guess: str) -> list[str]:
     guess_result = await _query_attr_guess(guess=guess)
     return [trans_word for x in guess_result for trans_word in x.guess_result]
-
-
-def is_valid_url(url: str) -> bool:
-    """检查一个字符串是否是可访问的 URL"""
-    result = urlparse(url)
-    return all((result.scheme in ['http', 'https'], result.netloc))
 
 
 def flatten_nested_tags(tree: 'HtmlElement', tags_to_flatten: Iterable[str]) -> None:
@@ -245,8 +238,8 @@ async def ai_guess(query_message: str, msg_images: Iterable[str]) -> str:
         images_desc = None
 
     try:
-        if is_valid_url(url=query_message):
-            web_desc = await query_web_page_description(url=query_message)
+        if urls := OmegaRequests.get_url_in_text(text=query_message):
+            web_desc = await query_web_page_description(url=urls[0])
             need_query_attr = False
         else:
             web_desc = None
