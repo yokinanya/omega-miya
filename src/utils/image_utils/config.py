@@ -22,7 +22,7 @@ class ImageUtilsConfig:
     default_font_folder: StaticResource = StaticResource('fonts')
     default_font_file: StaticResource = default_font_folder(default_font_name)
     default_preview_font: StaticResource = default_font_folder('SourceHanSerif-Regular.ttc')
-    default_emoji_font: StaticResource = default_font_folder('AppleColorEmoji.ttf')
+    default_emoji_font: StaticResource = default_font_folder('NotoEmoji-Regular.ttf')
 
     # 默认的生成缓存文件路径
     tmp_folder: TemporaryResource = TemporaryResource('image_utils')

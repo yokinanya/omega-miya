@@ -11,28 +11,31 @@
 from datetime import datetime
 from io import BytesIO
 from math import ceil
+from typing import TYPE_CHECKING
 
 from PIL import Image, ImageDraw, ImageFont, UnidentifiedImageError
 from nonebot.utils import run_sync
 
-from src.resource import BaseResource, TemporaryResource
-from .model import PreviewImageModel
 from ..config import image_utils_config
-from ..image_util import ImageUtils
+from ..image_util import ImageEffectProcessor, ImageTextProcessor
+
+if TYPE_CHECKING:
+    from src.resource import BaseResource, TemporaryResource
+    from .model import PreviewImageModel
 
 
 async def generate_thumbs_preview_image(
-        preview: PreviewImageModel,
+        preview: 'PreviewImageModel',
         preview_size: tuple[int, int],
         *,
-        font_path: BaseResource = image_utils_config.default_preview_font,
+        font_path: 'BaseResource' = image_utils_config.default_preview_font,
         header_color: tuple[int, int, int] = (255, 255, 255),
         hold_ratio: bool = False,
         edge_scale: float = 1/32,
         num_of_line: int = 6,
         limit: int = 1000,
-        output_folder: TemporaryResource = image_utils_config.tmp_preview_output_folder
-) -> TemporaryResource:
+        output_folder: 'TemporaryResource' = image_utils_config.tmp_preview_output_folder
+) -> 'TemporaryResource':
     """生成多个带说明的缩略图的预览图
 
     :param preview: 经过预处理的生成预览的数据
@@ -60,9 +63,11 @@ async def generate_thumbs_preview_image(
         _preview_w = _thumb_w * num_of_line
 
         # 标题自动换行
-        _title = ImageUtils.split_multiline_text(text=preview_name, width=int(_preview_w * 0.85), font=_font_title)
+        _title = ImageTextProcessor.split_multiline_text(
+            text=preview_name, width=int(_preview_w * 0.85), font=_font_title
+        )
         # 计算标题尺寸
-        _title_w, _title_h = ImageUtils.get_text_size(text=_title, font=_font_title)
+        _title_w, _title_h = ImageTextProcessor.get_text_size(text=_title, font=_font_title)
 
         # 根据缩略图计算标准间距
         _spacing_w = int(_thumb_w * 0.4)
@@ -108,14 +113,14 @@ async def generate_thumbs_preview_image(
 
             # 调整图片大小
             if hold_ratio:
-                _thumb_img = ImageUtils(image=_thumb_img).resize_with_filling(preview_size).image
+                _thumb_img = ImageEffectProcessor(image=_thumb_img).resize_with_filling(preview_size).image
 
             if _thumb_img.size != preview_size:
                 _thumb_img = _thumb_img.resize(preview_size)
 
             # 调整边缘
             if edge_scale > 0:
-                _thumb_img = ImageUtils(image=_thumb_img).add_edge(edge_scale=edge_scale).image
+                _thumb_img = ImageEffectProcessor(image=_thumb_img).add_edge(edge_scale=edge_scale).image
 
             # 确认缩略图单行位置
             seq = _index % num_of_line

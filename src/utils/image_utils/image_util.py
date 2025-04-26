@@ -11,79 +11,46 @@
 import base64
 import random
 from io import BytesIO
-from typing import Literal, Self
+from typing import TYPE_CHECKING, Literal, Optional, Self
 
 from PIL import Image, ImageDraw, ImageEnhance, ImageFilter, ImageFont
+from fontTools.ttLib import TTFont
 from nonebot.utils import run_sync
 
-from src.resource import BaseResource, TemporaryResource
-from src.utils import OmegaRequests
+from src.utils import BaseCommonAPI, OmegaRequests
 from .config import image_utils_config
 
+if TYPE_CHECKING:
+    from src.resource import BaseResource, TemporaryResource
 
-class ImageUtils:
-    """图片处理工具集"""
 
-    def __init__(self, image: Image.Image):
-        self._image: Image.Image = image
+class ImageLoader:
+    """图片加载工具"""
 
-    @classmethod
-    def init_from_bytes(cls, image: bytes) -> Self:
+    @staticmethod
+    def init_from_bytes(image: bytes) -> 'Image.Image':
         """从 Bytes 中初始化"""
         with BytesIO(image) as bf:
-            _image: Image.Image = Image.open(bf)
+            _image = Image.open(bf)
             _image.load()
-            new_obj = cls(image=_image)
-        return new_obj
+        return _image
 
-    @classmethod
-    def init_from_file(cls, file: BaseResource) -> Self:
+    @staticmethod
+    def init_from_file(file: 'BaseResource') -> 'Image.Image':
         """从文件初始化"""
         with file.open('rb') as f:
-            image: Image.Image = Image.open(f)
+            image = Image.open(f)
             image.load()
-            new_obj = cls(image=image)
-        return new_obj
+        return image
 
-    @classmethod
-    async def async_init_from_url(cls, image_url: str) -> Self:
-        """从 URL 初始化"""
-        requests = OmegaRequests(timeout=30)
-        response = await requests.get(url=image_url)
-        return await cls.async_init_from_bytes(image=requests.parse_content_as_bytes(response=response))
-
-    @classmethod
-    @run_sync
-    def async_init_from_bytes(cls, image: bytes) -> Self:
-        return cls.init_from_bytes(image=image)
-
-    @classmethod
-    @run_sync
-    def async_init_from_file(cls, file: BaseResource) -> Self:
-        return cls.init_from_file(file=file)
-
-    @classmethod
-    @run_sync
-    def async_init_from_text(
-            cls,
-            text: str,
-            *,
-            image_width: int = 512,
-            font_name: str | None = None,
-            alpha: bool = False,
-    ) -> Self:
-        """异步从文本初始化, 文本转图片并自动裁切"""
-        return cls.init_from_text(text, image_width=image_width, font_name=font_name, alpha=alpha)
-
-    @classmethod
+    @staticmethod
     def init_from_text(
-            cls,
             text: str,
             *,
             image_width: int = 512,
             font_name: str | None = None,
             alpha: bool = False,
-    ) -> Self:
+    ) -> 'Image.Image':
         """从文本初始化, 文本转图片并自动裁切
 
         :param text: 待转换文本
@@ -100,8 +67,8 @@ class ImageUtils:
         font_size = image_width // 25
         font = ImageFont.truetype(font_file.resolve_path, font_size)
         # 按长度切分文本
-        text = cls.split_multiline_text(text=text, width=int(image_width * 0.75), font=font)
-        _, text_height = cls.get_text_size(text, font=font)
+        text = ImageTextProcessor.split_multiline_text(text=text, width=int(image_width * 0.75), font=font)
+        _, text_height = ImageTextProcessor.get_text_size(text, font=font)
         # 初始化背景图层
         image_height = int(text_height + image_width * 0.25)
         if alpha:
@@ -115,8 +82,269 @@ class ImageUtils:
             font=font,
             fill=(0, 0, 0)
         )
-        new_obj = cls(image=background)
-        return new_obj
+        return background
+
+    @classmethod
+    @run_sync
+    def async_init_from_bytes(cls, image: bytes) -> 'Image.Image':
+        return cls.init_from_bytes(image=image)
+
+    @classmethod
+    @run_sync
+    def async_init_from_file(cls, file: 'BaseResource') -> 'Image.Image':
+        return cls.init_from_file(file=file)
+
+    @classmethod
+    @run_sync
+    def async_init_from_text(
+            cls,
+            text: str,
+            *,
+            image_width: int = 512,
+            font_name: str | None = None,
+            alpha: bool = False,
+    ) -> 'Image.Image':
+        """异步从文本初始化, 文本转图片并自动裁切"""
+        return cls.init_from_text(text, image_width=image_width, font_name=font_name, alpha=alpha)
+
+    @classmethod
+    async def async_init_from_url(
+            cls,
+            image_url: str,
+            *,
+            backend: BaseCommonAPI | OmegaRequests | None = None
+    ) -> 'Image.Image':
+        """从 URL 初始化"""
+        if isinstance(backend, BaseCommonAPI):
+            image_content = await backend._get_resource_as_bytes(url=image_url)
+        elif isinstance(backend, OmegaRequests):
+            image_content = backend.parse_content_as_bytes(response=await backend.get(url=image_url))
+        else:
+            requests = OmegaRequests(timeout=30)
+            image_content = requests.parse_content_as_bytes(response=await requests.get(url=image_url))
+        return await cls.async_init_from_bytes(image=image_content)
+
+
+class ImageTextProcessor:
+    """图片文字处理工具工具
+
+    python-pillow/Pillow Issue #4808 Backup font for missing characters when drawing text
+    https://github.com/python-pillow/Pillow/issues/4808#issuecomment-2067558946
+    Provided a pure Python implementation solution: https://github.com/TrueMyst/PillowFontFallback
+    """
+
+    type FontMap = dict[str, TTFont]
+
+    @staticmethod
+    def load_fonts(*font_names: str) -> FontMap:
+        """Loads font files specified by paths into memory and returns a dictionary of font objects."""
+        fonts = {}
+        for name in font_names:
+            font_path = image_utils_config.default_font_folder(name).resolve_path
+            font = TTFont(font_path, fontNumber=0)
+            fonts[font_path] = font
+        return fonts
+
+    @staticmethod
+    def has_glyph(font: TTFont, glyph: str) -> bool:
+        """Checks if the given font contains a glyph for the specified character."""
+        for table in font['cmap'].tables:  # type: ignore
+            if table.cmap.get(ord(glyph)):
+                return True
+        return False
+
+    @classmethod
+    def merge_chunks(cls, text: str, fonts: FontMap) -> list[list[str]]:
+        """Merges consecutive characters with the same font into clusters, optimizing font lookup."""
+        chunks: list[list[str]] = []
+
+        for char in text:
+            for font_path, font in fonts.items():
+                if cls.has_glyph(font, char):
+                    chunks.append([char, font_path])
+                    break
+
+        cluster = chunks[:1]
+
+        for char, font_path in chunks[1:]:
+            if cluster[-1][1] == font_path:
+                cluster[-1][0] += char
+            else:
+                cluster.append([char, font_path])
+        return cluster
+
+    @classmethod
+    def _draw_text_v2(
+            cls,
+            draw: 'ImageDraw.ImageDraw',
+            xy: tuple[int, int],
+            text: str,
+            color: tuple[int, int, int],
+            fonts: FontMap,
+            size: int,
+            anchor: Optional[str] = None,
+            align: Literal['left', 'center', 'right'] = 'left',
+    ) -> None:
+        """Draws text on an image at given coordinates, using specified size, color, and fonts."""
+
+        y_offset = 0
+        sentence = cls.merge_chunks(text, fonts)
+
+        for words in sentence:
+            xy_ = (xy[0] + y_offset, xy[1])
+
+            font = ImageFont.truetype(words[1], size)
+            draw.text(
+                xy=xy_,
+                text=words[0],
+                fill=color,
+                font=font,
+                anchor=anchor,
+                align=align,
+                embedded_color=True,
+            )
+
+            box = font.getbbox(words[0])
+            y_offset += box[2] - box[0]
+
+    @classmethod
+    def _draw_multiline_text_v2(
+            cls,
+            draw: 'ImageDraw.ImageDraw',
+            xy: tuple[int, int],
+            text: str,
+            color: tuple[int, int, int],
+            fonts: FontMap,
+            size: int,
+            anchor: Optional[str] = None,
+            align: Literal["left", "center", "right"] = "left",
+    ) -> None:
+        """Draws multiple lines of text on an image, handling newline characters and adjusting spacing between lines."""
+        spacing = xy[1]
+        lines = text.split("\n")
+
+        for line in lines:
+            if not line:
+                continue
+
+            mod_cord = (xy[0], spacing)
+            cls._draw_text_v2(
+                draw,
+                xy=mod_cord,
+                text=line,
+                color=color,
+                fonts=fonts,
+                size=size,
+                anchor=anchor,
+                align=align,
+            )
+            spacing += size + 5
+
+    @classmethod
+    def _draw_text_v3(
+            cls,
+            draw: ImageDraw.ImageDraw,
+            xy: tuple[int, int],
+            text: str,
+            color: tuple[int, int, int],
+            fonts: FontMap,
+            size: int,
+            anchor: Optional[str] = None,
+            align: Literal["left", "center", "right"] = "left",
+    ) -> None:
+        """Draws text on an image at given coordinates, using specified size, color, and fonts.
+
+        Better support for anchor
+        Provided by @bradenhilton in: https://github.com/TrueMyst/PillowFontFallback/issues/1
+        """
+
+        sentence = cls.merge_chunks(text, fonts)
+
+        chunk_data = []
+        for text_chunk, font_path in sentence:
+            font = ImageFont.truetype(font_path, size)
+            chunk_data.append({
+                'text': text_chunk,
+                'font': font,
+                'bbox': font.getbbox(text_chunk, anchor=anchor)
+            })
+
+        x_offset = sum(chunk['bbox'][0] for chunk in chunk_data)
+        max_top = max(chunk['bbox'][1] for chunk in chunk_data)
+
+        for chunk in chunk_data:
+            draw.text(
+                xy=((xy[0] + x_offset), (xy[1] + max_top)),
+                text=chunk['text'],
+                fill=color,
+                font=chunk['font'],
+                anchor=None,
+                align=align,
+                embedded_color=True,
+            )
+            x_offset += chunk['bbox'][2] - chunk['bbox'][0]
+
+    @classmethod
+    def _draw_multiline_text_v3(
+            cls,
+            draw: 'ImageDraw.ImageDraw',
+            xy: tuple[int, int],
+            text: str,
+            color: tuple[int, int, int],
+            fonts: FontMap,
+            size: int,
+            anchor: Optional[str] = None,
+            align: Literal["left", "center", "right"] = "left",
+    ) -> None:
+        """Draws multiple lines of text on an image, handling newline characters and adjusting spacing between lines."""
+        spacing = xy[1]
+        lines = text.split('\n')
+
+        for line in lines:
+            if not line:
+                continue
+
+            mod_cord = (xy[0], spacing)
+            cls._draw_text_v3(
+                draw,
+                xy=mod_cord,
+                text=line,
+                color=color,
+                fonts=fonts,
+                size=size,
+                anchor=anchor,
+                align=align,
+            )
+            spacing += size + 5
+
+    @classmethod
+    def draw_multiline_text(
+            cls,
+            draw: 'ImageDraw.ImageDraw',
+            xy: tuple[int, int],
+            text: str,
+            size: int,
+            *,
+            color: tuple[int, int, int] = (0, 0, 0),
+            anchor: Optional[str] = None,
+            align: Literal["left", "center", "right"] = "center",
+    ) -> None:
+        """Draws multiple lines of text on an image, handling newline characters and adjusting spacing between lines."""
+        fonts = cls.load_fonts(
+            image_utils_config.default_font_file.path.name,
+            image_utils_config.default_emoji_font.path.name,
+            image_utils_config.default_font_folder('msyh.ttc').path.name,
+        )
+        cls._draw_multiline_text_v3(
+            draw,
+            xy=xy,
+            text=text,
+            size=size,
+            color=color,
+            anchor=anchor,
+            align=align,
+            fonts=fonts,
+        )
 
     @staticmethod
     def get_text_size(
@@ -167,11 +395,13 @@ class ImageUtils:
         :param stroke_width: 文字描边, 像素
         """
         if font is None:
-            font = ImageFont.truetype(image_utils_config.default_font_file.resolve_path,
-                                      image_utils_config.default_font_size)
+            font = ImageFont.truetype(
+                image_utils_config.default_font_file.resolve_path, image_utils_config.default_font_size
+            )
         elif isinstance(font, str):
-            font = ImageFont.truetype(image_utils_config.default_font_folder(font).resolve_path,
-                                      image_utils_config.default_font_size)
+            font = ImageFont.truetype(
+                image_utils_config.default_font_folder(font).resolve_path, image_utils_config.default_font_size
+            )
 
         spl_num = 0
         spl_list = []
@@ -184,15 +414,32 @@ class ImageUtils:
 
         return '\n'.join(spl_list)
 
-    @property
-    def image(self) -> Image.Image:
-        """获取 Image 对象副本"""
-        return self._image
 
-    def set_image(self, image: Image.Image) -> Self:
-        """手动更新 Image"""
-        self._image = image
+class ImageEffectProcessor:
+    """图片处理工具集"""
+
+    def __init__(self, image: Image.Image):
+        self.image: Image.Image = image
+
+    def convert(self, mode: str) -> Self:
+        self.image = self.image.convert(mode=mode)
         return self
+
+    async def save(
+            self,
+            file: 'TemporaryResource | str',
+            *,
+            format_: str = 'JPEG',
+    ) -> 'TemporaryResource':
+        """输出指定格式图片到文件"""
+        if isinstance(file, str):
+            save_file = image_utils_config.tmp_output_folder(file)
+        else:
+            save_file = file
+
+        async with save_file.async_open('wb') as af:
+            await af.write(self.get_bytes(format_=format_))
+        return save_file
 
     @run_sync
     def async_get_base64(self, *, format_: str = 'JPEG', use_data_uri_scheme: bool = False) -> str:
@@ -220,33 +467,13 @@ class ImageUtils:
     def get_bytes(self, *, format_: str = 'JPEG') -> bytes:
         """获取 Image 内容, 以 Bytes 输出"""
         with BytesIO() as _bf:
-            self._image.save(_bf, format=format_)
-            _content = _bf.getvalue()
-        return _content
+            self.image.save(_bf, format=format_)
+            content = _bf.getvalue()
+        return content
 
     def get_bytes_add_blank(self, bytes_num: int = 16, *, format_: str = 'JPEG') -> bytes:
         """获取 Image 内容, 以 Bytes 输出并在末尾添加空白比特"""
         return self.get_bytes(format_=format_) + b' '*bytes_num
-
-    async def save(
-            self,
-            file: str | TemporaryResource,
-            *,
-            format_: str = 'JPEG',
-    ) -> TemporaryResource:
-        """输出指定格式图片到文件"""
-        if isinstance(file, TemporaryResource):
-            save_file = file
-        else:
-            save_file = image_utils_config.tmp_output_folder(file)
-
-        async with save_file.async_open('wb') as af:
-            await af.write(self.get_bytes(format_=format_))
-        return save_file
-
-    def convert(self, mode: str) -> Self:
-        self._image = self._image.convert(mode=mode)
-        return self
 
     def mark(
             self,
@@ -256,11 +483,10 @@ class ImageUtils:
             fill: tuple[int, int, int] = (128, 128, 128),
     ) -> Self:
         """在图片上添加标注文本"""
-        image = self.image
-        if image.mode == 'L':
-            image = image.convert(mode='RGB')
+        if self.image.mode == 'L':
+            self.convert(mode='RGB')
 
-        width, height = image.size
+        width, height = self.image.size
         edge_w = width // 32 if width // 32 <= 10 else 10
         edge_h = height // 32 if height // 32 <= 10 else 10
 
@@ -275,39 +501,35 @@ class ImageUtils:
 
         match position:
             case 'c':
-                ImageDraw.Draw(image).text(
+                ImageDraw.Draw(self.image).text(
                     xy=(width // 2, height // 2), align='center', anchor='mm', **text_kwargs
                 )
             case 'la':
-                ImageDraw.Draw(image).text(
+                ImageDraw.Draw(self.image).text(
                     xy=(0, 0), align='left', anchor='la', **text_kwargs
                 )
             case 'ra':
-                ImageDraw.Draw(image).text(
+                ImageDraw.Draw(self.image).text(
                     xy=(width - edge_w, 0), align='right', anchor='ra', **text_kwargs
                 )
             case 'lb':
-                ImageDraw.Draw(image).text(
+                ImageDraw.Draw(self.image).text(
                     xy=(0, height - edge_h), align='left', anchor='lb', **text_kwargs
                 )
             case 'rb' | _:
-                ImageDraw.Draw(image).text(
+                ImageDraw.Draw(self.image).text(
                     xy=(width - edge_w, height - edge_h), align='right', anchor='rb', **text_kwargs
                 )
 
-        self._image = image
         return self
 
     def gaussian_blur(self, radius: int | None = None) -> Self:
         """高斯模糊"""
-        _image = self.image
         if radius is None:
-            blur_radius = _image.width // 16
+            blur_radius = self.image.width // 16
         else:
             blur_radius = radius
-        blur_image = _image.filter(ImageFilter.GaussianBlur(radius=blur_radius))
-
-        self._image = blur_image
+        self.image = self.image.filter(ImageFilter.GaussianBlur(radius=blur_radius))
         return self
 
     def gaussian_noise(
@@ -324,9 +546,8 @@ class ImageUtils:
         :param mask_factor: 噪声蒙版透明度修正, 默认值0.25
         :return:
         """
-        _image = self.image
         # 处理图片
-        width, height = _image.size
+        width, height = self.image.size
         # 为sigma添加随机扰动
         if enable_random:
             _sigma = sigma * (1 + 0.1 * random.random())
@@ -337,9 +558,8 @@ class ImageUtils:
         # 生成底噪蒙版
         noise_mask = ImageEnhance.Brightness(noise_image.convert('L')).enhance(factor=mask_factor)
         # 叠加噪声图层
-        _image.paste(noise_image, (0, 0), mask=noise_mask)
+        self.image.paste(noise_image, (0, 0), mask=noise_mask)
 
-        self._image = _image
         return self
 
     def add_edge(
@@ -348,24 +568,23 @@ class ImageUtils:
             edge_color: tuple[int, int, int] | tuple[int, int, int, int] = (255, 255, 255, 0),
     ) -> Self:
         """在保持原图大小的条件下, 使用透明图层为原图添加边框"""
-        image = self.image
-        if image.mode != 'RGBA':
-            image = image.convert(mode='RGBA')
+        if self.image.mode != 'RGBA':
+            self.convert(mode='RGBA')
 
         # 计算调整比例
-        width, height = image.size
+        width, height = self.image.size
 
         edge_scale = 0 if edge_scale < 0 else 1 if edge_scale > 1 else edge_scale
         scaled_size = int(width * (1 - edge_scale)), int(height * (1 - edge_scale))
 
         scale = min(scaled_size[0] / width, scaled_size[1] / height)
-        image = image.resize((int(width * scale), int(height * scale)), Image.Resampling.LANCZOS)
+        image = self.image.resize((int(width * scale), int(height * scale)), Image.Resampling.LANCZOS)
 
         box = (int(width * (1 - scale) / 2)), int(height * (1 - scale) / 2)
         background = Image.new(mode='RGBA', size=(width, height), color=edge_color)
         background.paste(image, box=box, mask=image)
 
-        self._image = background
+        self.image = background
         return self
 
     def resize_with_filling(
@@ -374,21 +593,20 @@ class ImageUtils:
             background_color: tuple[int, int, int] | tuple[int, int, int, int] = (255, 255, 255, 0),
     ) -> Self:
         """在不损失原图长宽比的条件下, 使用透明图层将原图转换成指定大小"""
-        image = self.image
-        if image.mode != 'RGBA':
-            image = image.convert(mode='RGBA')
+        if self.image.mode != 'RGBA':
+            self.convert(mode='RGBA')
 
         # 计算调整比例
-        width, height = image.size
+        width, height = self.image.size
         rs_width, rs_height = size
         scale = min(rs_width / width, rs_height / height)
 
-        image = image.resize((int(width * scale), int(height * scale)), Image.Resampling.LANCZOS)
+        image = self.image.resize((int(width * scale), int(height * scale)), Image.Resampling.LANCZOS)
         box = (int(abs(width * scale - rs_width) / 2), int(abs(height * scale - rs_height) / 2))
         background = Image.new(mode='RGBA', size=size, color=background_color)
         background.paste(image, box=box, mask=image)
 
-        self._image = background
+        self.image = background
         return self
 
     def resize_fill_canvas(
@@ -397,24 +615,25 @@ class ImageUtils:
             background_color: tuple[int, int, int] | tuple[int, int, int, int] = (255, 255, 255, 0),
     ) -> Self:
         """在不损失原图长宽比的条件下, 填充并平铺指定大小画布"""
-        image = self.image
-        if image.mode != 'RGBA':
-            image = image.convert(mode='RGBA')
+        if self.image.mode != 'RGBA':
+            self.convert(mode='RGBA')
 
         # 计算调整比例
-        width, height = image.size
+        width, height = self.image.size
         rs_width, rs_height = size
         scale = max(rs_width / width, rs_height / height)
-        image = image.resize((int(width * scale), int(height * scale)), Image.Resampling.LANCZOS)
+        image = self.image.resize((int(width * scale), int(height * scale)), Image.Resampling.LANCZOS)
 
         box = (- int(abs(width * scale - rs_width) / 2), - int(abs(height * scale - rs_height) / 2))
         background = Image.new(mode='RGBA', size=size, color=background_color)
         background.paste(image, box=box, mask=image)
 
-        self._image = background
+        self.image = background
         return self
 
 
 __all__ = [
-    'ImageUtils'
+    'ImageEffectProcessor',
+    'ImageLoader',
+    'ImageTextProcessor',
 ]
