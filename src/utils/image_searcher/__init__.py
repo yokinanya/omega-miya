@@ -8,44 +8,43 @@
 @Software       : PyCharm 
 """
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Iterable
 
 from src.utils import semaphore_gather
 from .config import image_searcher_config
-from .model import BaseImageSearcher
-from .seachers import (
-    Ascii2d,
-    Iqdb,
-    Saucenao,
-    TraceMoe,
-    Yandex,
-)
+from .model import SearchableImage
+from .seachers import AVAILABLE_SEARCHERS
 
 if TYPE_CHECKING:
     from .model import BaseImageSearcherAPI, ImageSearchingResult
 
+_ENABLED_SEARCHERS: list[type['BaseImageSearcherAPI']] = [
+    x for x in AVAILABLE_SEARCHERS
+    if x.get_searcher_name() in image_searcher_config.image_searcher_enable_searchers
+]
 
-class ComplexImageSearcher(BaseImageSearcher):
+
+class ComplexImageSearcher:
     """综合图片搜索"""
 
-    _searcher: list[type['BaseImageSearcherAPI']] = []
-
-    if image_searcher_config.image_searcher_enable_saucenao:
-        _searcher.append(Saucenao)
-
-    if image_searcher_config.image_searcher_enable_ascii2d:
-        _searcher.append(Ascii2d)
-
-    if image_searcher_config.image_searcher_enable_iqdb:
-        _searcher.append(Iqdb)
-
-    if image_searcher_config.image_searcher_enable_yandex:
-        _searcher.append(Yandex)
+    def __init__(
+            self,
+            image: SearchableImage,
+            *,
+            include_searcher: Iterable[str] | None = None,
+            exclude_searcher: Iterable[str] | None = None,
+    ) -> None:
+        self.image = image
+        self.searcher = [
+            x for x in _ENABLED_SEARCHERS
+            if ((include_searcher is None) or (x.get_searcher_name() in include_searcher))
+               and ((exclude_searcher is None) or (x.get_searcher_name() not in exclude_searcher))
+        ]
 
     async def search(self) -> list['ImageSearchingResult']:
         searching_tasks = [
-            searcher(image_url=self.image_url).search()
-            for searcher in self._searcher
+            searcher(image=self.image).search()
+            for searcher in self.searcher
         ]
         all_results = await semaphore_gather(tasks=searching_tasks, semaphore_num=4, filter_exception=True)
 
@@ -54,9 +53,4 @@ class ComplexImageSearcher(BaseImageSearcher):
 
 __all__ = [
     'ComplexImageSearcher',
-    'Ascii2d',
-    'Iqdb',
-    'Saucenao',
-    'TraceMoe',
-    'Yandex',
 ]

@@ -8,7 +8,7 @@
 @Software       : PyCharm 
 """
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class ImageUtilsBaseModel(BaseModel):
@@ -26,8 +26,11 @@ class PreviewImageThumbs(ImageUtilsBaseModel):
 class PreviewImageModel(ImageUtilsBaseModel):
     """生成预览图的数据 Model"""
     preview_name: str
-    count: int
-    previews: list[PreviewImageThumbs]
+    previews: list[PreviewImageThumbs] = Field(default_factory=list)
+
+    @property
+    def count(self) -> int:
+        return len(self.previews)
 
 
 __all__ = [

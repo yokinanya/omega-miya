@@ -16,7 +16,7 @@ import numpy
 from PIL import Image, ImageDraw, ImageEnhance, ImageFont
 
 from src.utils import OmegaRequests
-from src.utils.image_utils import ImageUtils
+from src.utils.image_utils import ImageTextProcessor, ImageEffectProcessor
 from src.utils.tencent_cloud_api import TencentTMT
 from .consts import FONT_RESOURCE, STATIC_RESOURCE, TMP_PATH
 from .model import BaseStickerRender
@@ -79,14 +79,22 @@ class TraitorRender(BaseStickerRender):
         text_main_img = Image.new(mode='RGBA', size=image.size, color=(0, 0, 0, 0))
         font_main_size = int(image.width / 15.6)
         font_main = ImageFont.truetype(fonts[0].resolve_path, font_main_size)
+
         # 按长度切分文本
-        test_main_fin = ImageUtils.split_multiline_text(text=text, width=int(image.width * 0.53), font=font_main)
-        ImageDraw.Draw(text_main_img).multiline_text(xy=(0, 0), text=test_main_fin, font=font_main, spacing=12,
-                                                     fill=(0, 0, 0))
+        test_main_fin = ImageTextProcessor.split_multiline_text(
+            text=text, width=int(image.width * 0.53), font=font_main
+        )
+        ImageDraw.Draw(text_main_img).multiline_text(
+            xy=(0, 0), text=test_main_fin, font=font_main, spacing=12, fill=(0, 0, 0)
+        )
 
         # 处理文字部分旋转
-        text_num_img = text_num_img.rotate(angle=-9, expand=True, resample=Image.Resampling.BICUBIC, center=(0, 0))
-        text_main_img = text_main_img.rotate(angle=-9.25, expand=True, resample=Image.Resampling.BICUBIC, center=(0, 0))
+        text_num_img = text_num_img.rotate(
+            angle=-9, expand=True, resample=Image.Resampling.BICUBIC, center=(0, 0)
+        )
+        text_main_img = text_main_img.rotate(
+            angle=-9.25, expand=True, resample=Image.Resampling.BICUBIC, center=(0, 0)
+        )
 
         # 向模板图片中置入文字图层
         background.paste(im=image, box=(0, 0))
@@ -141,9 +149,10 @@ class JichouRender(BaseStickerRender):
 
         font_main_size = int(image.width / 12)
         font = ImageFont.truetype(fonts[0].resolve_path, font_main_size)
+
         # 按长度切分文本
-        text_main_fin = ImageUtils.split_multiline_text(text=text, width=(image.width * 7 // 8), font=font)
-        _, text_h = ImageUtils.get_text_size(text=text_main_fin, font=font)
+        text_main_fin = ImageTextProcessor.split_multiline_text(text=text, width=(image.width * 7 // 8), font=font)
+        _, text_h = ImageTextProcessor.get_text_size(text=text_main_fin, font=font)
 
         # 处理图片
         background_h = int(image.height * 1.08 + text_h)
@@ -212,11 +221,11 @@ class PhLogoRender(BaseStickerRender):
         font = ImageFont.truetype(fonts[0].resolve_path, 320)
 
         # 分别确定两边文字的大小
-        w_text_width, text_height = ImageUtils.get_text_size(white_text, font)
-        y_text_width, _ = ImageUtils.get_text_size(yellow_text, font)
+        w_text_width, text_height = ImageTextProcessor.get_text_size(white_text, font)
+        y_text_width, _ = ImageTextProcessor.get_text_size(yellow_text, font)
 
         # 生成图片定长 两部分文字之间间隔及两侧留空为固定值三个空格大小
-        split_width, _ = ImageUtils.get_text_size(' ', font)
+        split_width, _ = ImageTextProcessor.get_text_size(' ', font)
         image_width = int(w_text_width + y_text_width + split_width * 5.5)
         image_height = int(text_height * 2.25)
 
@@ -306,13 +315,13 @@ class LuxunSayRender(BaseStickerRender):
         sign_text = '—— 鲁迅'
 
         # 分割文本
-        text_ = ImageUtils.split_multiline_text(
+        text_ = ImageTextProcessor.split_multiline_text(
             text=text, width=text_width_limit, font=font, stroke_width=text_stroke_width
         )
 
         # 文本大小
-        _, main_text_height = ImageUtils.get_text_size(text_, font, stroke_width=text_stroke_width)
-        _, sign_text_height = ImageUtils.get_text_size(sign_text, font, stroke_width=text_stroke_width)
+        _, main_text_height = ImageTextProcessor.get_text_size(text_, font, stroke_width=text_stroke_width)
+        _, sign_text_height = ImageTextProcessor.get_text_size(sign_text, font, stroke_width=text_stroke_width)
 
         # 创建背景图层
         # 定位主体文字到图片下侧往上 1/4 处, 落款与主体文字间隔半行, 底部间隔一行, 超出部分为所有文字高度减去图片 1/4 高度
@@ -399,7 +408,7 @@ class JiangzhuangRender(BaseStickerRender):
         text_width_limit = int(image.width * 0.65)
 
         # 分割文本
-        text_ = ImageUtils.split_multiline_text(text=text, width=text_width_limit, font=font)
+        text_ = ImageTextProcessor.split_multiline_text(text=text, width=text_width_limit, font=font)
 
         # 粘贴主体文本
         ImageDraw.Draw(image).multiline_text(
@@ -459,7 +468,7 @@ class XibaoHorizontalRender(BaseStickerRender):
         text_width_limit = int(image.width * 0.75)
 
         # 分割文本
-        text_ = ImageUtils.split_multiline_text(
+        text_ = ImageTextProcessor.split_multiline_text(
             text=text, width=text_width_limit, font=font, stroke_width=text_stroke_width
         )
 
@@ -523,7 +532,7 @@ class XibaoVerticalRender(BaseStickerRender):
         text_width_limit = int(image.width * 0.75)
 
         # 分割文本
-        text_ = ImageUtils.split_multiline_text(
+        text_ = ImageTextProcessor.split_multiline_text(
             text=text, width=text_width_limit, font=font, stroke_width=text_stroke_width
         )
 
@@ -587,12 +596,12 @@ class DefaultRender(BaseStickerRender):
         text_stroke_width = int(font_size / 20)
         font = ImageFont.truetype(fonts[0].resolve_path, font_size)
 
-        text_w, text_h = ImageUtils.get_text_size(text, font=font, stroke_width=text_stroke_width)
+        text_w, text_h = ImageTextProcessor.get_text_size(text, font=font, stroke_width=text_stroke_width)
         # 自适应处理文字大小
         while text_w >= int(external_image.width * 0.95):
             font_size -= 1
             font = ImageFont.truetype(fonts[0].resolve_path, font_size)
-            text_w, text_h = ImageUtils.get_text_size(text, font=font, stroke_width=text_stroke_width)
+            text_w, text_h = ImageTextProcessor.get_text_size(text, font=font, stroke_width=text_stroke_width)
         # 计算居中文字位置
         text_coordinate = (external_image.width // 2, 9 * (external_image.height - text_h) // 10)
         ImageDraw.Draw(external_image).multiline_text(
@@ -652,12 +661,12 @@ class LittleAngelRender(BaseStickerRender):
         font_size_up = int(external_image.width / 7)
         font_up = ImageFont.truetype(fonts[0].resolve_path, font_size_up)
         text_up = f'请问你们看到{text}了吗?'
-        text_up_w, text_up_h = ImageUtils.get_text_size(text_up, font_up)
+        text_up_w, text_up_h = ImageTextProcessor.get_text_size(text_up, font_up)
         # 自适应处理文字大小
         while text_up_w >= int(external_image.width * 1.14):
             font_size_up -= 1
             font_up = ImageFont.truetype(fonts[0].resolve_path, font_size_up)
-            text_up_w, text_up_h = ImageUtils.get_text_size(text_up, font_up)
+            text_up_w, text_up_h = ImageTextProcessor.get_text_size(text_up, font_up)
 
         # 处理图片
         background = Image.new(
@@ -745,12 +754,12 @@ class WhiteBackgroundRender(BaseStickerRender):
         text = ' ' if text is None else text
         font_size = external_image.width // 10
         font = ImageFont.truetype(fonts[0].resolve_path, font_size)
-        text_w, text_h = ImageUtils.get_text_size(text, font=font)
+        text_w, text_h = ImageTextProcessor.get_text_size(text, font=font)
         # 自适应处理文字大小
         while text_w >= int(external_image.width * 8 / 9):
             font_size -= 1
             font = ImageFont.truetype(fonts[0].resolve_path, font_size)
-            text_w, text_h = ImageUtils.get_text_size(text, font=font)
+            text_w, text_h = ImageTextProcessor.get_text_size(text, font=font)
 
         # 处理图片
         background = Image.new(
@@ -817,12 +826,12 @@ class BlackBackgroundRender(BaseStickerRender):
         text = ' ' if text is None else text
         font_size = external_image.width // 8
         font = ImageFont.truetype(fonts[0].resolve_path, font_size)
-        text_w, text_h = ImageUtils.get_text_size(text, font=font)
+        text_w, text_h = ImageTextProcessor.get_text_size(text, font=font)
         # 自适应处理文字大小
         while text_w >= int(external_image.width * 1.1):
             font_size -= 1
             font = ImageFont.truetype(fonts[0].resolve_path, font_size)
-            text_w, text_h = ImageUtils.get_text_size(text, font=font)
+            text_w, text_h = ImageTextProcessor.get_text_size(text, font=font)
 
         # 处理图片
         background = Image.new(
@@ -947,7 +956,10 @@ class GunjoRender(BaseStickerRender):
         upper_font = ImageFont.truetype(fonts[0].resolve_path, upper_font_size)
         upper_text_coordinate = (int(made_image.width * 12 / 13), int(made_image.height / 11))
 
-        _, upper_text_height = ImageUtils.get_text_size('群\n青', upper_font, stroke_width=upper_font_size // 20)
+        _, upper_text_height = ImageTextProcessor.get_text_size(
+            '群\n青', upper_font, stroke_width=upper_font_size // 20
+        )
+
         ImageDraw.Draw(background).multiline_text(
             xy=upper_text_coordinate, text='群\n青', anchor='ra', align='center', font=upper_font,
             fill=(255, 255, 255), stroke_width=upper_font_size // 20, stroke_fill=background_color
@@ -1069,11 +1081,11 @@ class GrassJaRender(BaseStickerRender):
         font_jp = ImageFont.truetype(fonts[0].resolve_path, int(image.width / 24))
 
         text_zh, text_jp = text.split(maxsplit=1)
-        text_zh = ImageUtils.split_multiline_text(text=text_zh, width=int(image.width * 0.9), font=font_zh)
-        text_jp = ImageUtils.split_multiline_text(text=text_jp, width=int(image.width * 0.9), font=font_jp)
+        text_zh = ImageTextProcessor.split_multiline_text(text=text_zh, width=int(image.width * 0.9), font=font_zh)
+        text_jp = ImageTextProcessor.split_multiline_text(text=text_jp, width=int(image.width * 0.9), font=font_jp)
 
-        _, text_zh_h = ImageUtils.get_text_size(text_zh, font=font_zh)
-        _, text_jp_h = ImageUtils.get_text_size(text_jp, font=font_jp)
+        _, text_zh_h = ImageTextProcessor.get_text_size(text_zh, font=font_zh)
+        _, text_jp_h = ImageTextProcessor.get_text_size(text_jp, font=font_jp)
 
         # 处理图片
         background = Image.new(
@@ -1342,7 +1354,7 @@ class TwistRender(BaseStickerRender):
         if external_image.format != 'RGBA':
             external_image = external_image.convert('RGBA')
 
-        image = ImageUtils(image=external_image).resize_with_filling(size=(128, 128)).image
+        image = ImageEffectProcessor(image=external_image).resize_with_filling(size=(128, 128)).image
 
         angle = 0
         paste_coordinate: list[tuple[int, int]] = [

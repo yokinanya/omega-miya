@@ -12,12 +12,15 @@ from typing import TYPE_CHECKING
 
 from lxml import etree
 from nonebot.log import logger
+from nonebot.utils import run_sync
 
 from src.compat import parse_obj_as
+from src.resource import BaseResource
+from ..config import image_searcher_config
 from ..model import BaseImageSearcherAPI, ImageSearchingResult
 
 if TYPE_CHECKING:
-    from src.utils.omega_common_api.types import CookieTypes, HeaderTypes
+    from src.utils.omega_common_api.types import CookieTypes, HeaderTypes, Response
 
 
 class Ascii2d(BaseImageSearcherAPI):
@@ -25,25 +28,29 @@ class Ascii2d(BaseImageSearcherAPI):
 
     @classmethod
     def _get_root_url(cls, *args, **kwargs) -> str:
-        return 'https://ascii2d.net'
+        # the website `https://ascii2d.net` has enabled Cloudflare verification.
+        # It can only be used through a mirror site.
+        # Currently, there is a usable instance `https://ascii2d.obfs.dev`.
+        return (
+            'https://ascii2d.net'
+            if image_searcher_config.image_searcher_ascii2d_alternative_url is None
+            else image_searcher_config.image_searcher_ascii2d_alternative_url.removesuffix('/')
+        )
 
     @classmethod
     async def _async_get_root_url(cls, *args, **kwargs) -> str:
         return cls._get_root_url(*args, **kwargs)
 
     @classmethod
-    def _load_cloudflare_clearance(cls) -> bool:
-        return True
-
-    @classmethod
     def _get_default_headers(cls) -> 'HeaderTypes':
-        return {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:75.0) Gecko/20100101 Firefox/75.0'}
+        return {'User-Agent': 'PostmanRuntime/7.29.0'}
 
     @classmethod
     def _get_default_cookies(cls) -> 'CookieTypes':
         return None
 
     @staticmethod
+    @run_sync
     def _parse_search_token(content: str) -> dict[str, str]:
         """解析页面获取搜索图片 hash"""
         html = etree.HTML(content)
@@ -53,6 +60,7 @@ class Ascii2d(BaseImageSearcherAPI):
         return {csrf_param: csrf_token}
 
     @staticmethod
+    @run_sync
     def _parse_search_hash(content: str) -> str:
         """解析页面获取搜索图片 hash"""
         html = etree.HTML(content)
@@ -63,8 +71,9 @@ class Ascii2d(BaseImageSearcherAPI):
         ).pop(0).text
         return image_hash
 
-    @staticmethod
-    def _parser(content: str) -> list[dict]:
+    @classmethod
+    @run_sync
+    def _parser(cls, content: str) -> list[dict]:
         """解析结果页面"""
         html = etree.HTML(content)
         # 搜索模式
@@ -98,7 +107,11 @@ class Ascii2d(BaseImageSearcherAPI):
 
                 result.append({
                     'similarity': None,
-                    'thumbnail': f'https://ascii2d.net{preview_img_url}',
+                    'thumbnail': (
+                        preview_img_url
+                        if preview_img_url is None or preview_img_url.startswith('http')
+                        else f'{cls._get_root_url().removesuffix("/")}/{preview_img_url.removeprefix("/")}'
+                    ),
                     'source': f'ascii2d-{search_mode}-{source_type}-{source_ref}',
                     'source_urls': [source_url]
                 })
@@ -107,28 +120,52 @@ class Ascii2d(BaseImageSearcherAPI):
                 continue
         return result
 
-    async def search(self) -> list[ImageSearchingResult]:
-        searching_page = await self._get_resource_as_text(url=self._get_root_url())
-        searching_token = self._parse_search_token(content=searching_page)
+    @classmethod
+    async def _handle_color_search_result(cls, color_search_response: 'Response') -> list[ImageSearchingResult]:
+        """解析颜色搜索并处理后续特征搜索"""
+        color_search_content = cls._parse_content_as_text(color_search_response)
+
+        image_hash = await cls._parse_search_hash(color_search_content)
+        bovw_search_content = await cls._get_resource_as_text(url=f'{cls._get_root_url()}/search/bovw/{image_hash}')
+
+        parsed_result = []
+        parsed_result.extend(await cls._parser(content=color_search_content))
+        parsed_result.extend(await cls._parser(content=bovw_search_content))
+
+        return parse_obj_as(list[ImageSearchingResult], parsed_result)
+
+    @classmethod
+    async def _search_local_image(cls, image: BaseResource) -> list[ImageSearchingResult]:
+        with image.open('rb') as f:
+            files = {
+                'file': (image.path.name, f, 'application/octet-stream'),
+            }
+            color_response = await cls._request_post(url=f'{cls._get_root_url()}/search/file',
+                                                     files=files)  # type: ignore
+        return await cls._handle_color_search_result(color_search_response=color_response)
+
+    @classmethod
+    async def _search_bytes_image(cls, image: bytes) -> list[ImageSearchingResult]:
+        files = {
+            'file': ('blob', image, 'application/octet-stream'),
+        }
+        color_response = await cls._request_post(url=f'{cls._get_root_url()}/search/file', files=files)  # type: ignore
+        return await cls._handle_color_search_result(color_search_response=color_response)
+
+    @classmethod
+    async def _search_url_image(cls, image: str) -> list[ImageSearchingResult]:
+        searching_page = await cls._get_resource_as_text(url=cls._get_root_url())
+        searching_token = await cls._parse_search_token(content=searching_page)
 
         form_data = {
             'utf8': '✓',  # type: ignore
             **searching_token,  # type: ignore
-            'uri': self.image_url,  # type: ignore
+            'uri': image,  # type: ignore
             'search': b''
         }
 
-        color_response = await self._request_post(url=f'{self._get_root_url()}/search/uri', data=form_data)
-        color_search_content = self._parse_content_as_text(color_response)
-
-        image_hash = self._parse_search_hash(color_search_content)
-        bovw_search_content = await self._get_resource_as_text(url=f'{self._get_root_url()}/search/bovw/{image_hash}')
-
-        parsed_result = []
-        parsed_result.extend(self._parser(content=color_search_content))
-        parsed_result.extend(self._parser(content=bovw_search_content))
-
-        return parse_obj_as(list[ImageSearchingResult], parsed_result)
+        color_response = await cls._request_post(url=f'{cls._get_root_url()}/search/uri', data=form_data)
+        return await cls._handle_color_search_result(color_search_response=color_response)
 
 
 __all__ = [

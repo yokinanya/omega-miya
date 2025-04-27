@@ -28,6 +28,17 @@ from .utils import (
     simple_white,
 )
 
+_AVAILABLE_MODE: list[str] = [
+    '白底',
+    '黑底',
+    '噪点',
+    '彩色噪点',
+    '灰度混合',
+    '彩色混合',
+    '差分',
+]
+_AVAILABLE_MODE_TEXT: str = ', '.join(f'{x!r}' for x in _AVAILABLE_MODE)
+
 
 @on_command(
     'mirage-tank',
@@ -45,11 +56,11 @@ async def handle_mirage_tank(
     if not state.get('mode') and step_arg.strip():
         state.update({'mode': step_arg.strip()})
         mode = state.get('mode')
-    elif state.get('mode') in ['白底', '黑底', '噪点', '彩色噪点', '灰度混合', '彩色混合', '差分']:
+    elif state.get('mode') in _AVAILABLE_MODE:
         mode = state.get('mode')
     else:
         await interface.reject_arg_reply(
-            'step_arg', '请输入想要制作幻影坦克的模式:\n\n"白底", "黑底", "噪点", "彩色噪点", "灰度混合", "彩色混合", "差分"'
+            'step_arg', f'请输入想要制作幻影坦克的模式:\n\n{_AVAILABLE_MODE_TEXT}'
         )
     process_mode = str(mode).strip()
 
@@ -137,7 +148,7 @@ async def handle_mirage_tank(
 
         case _:
             await interface.finish_reply(
-                f'{process_mode!r}不是可用的模式, 仅有以下模式可选:\n\n"白底", "黑底", "灰度混合", "彩色混合", "差分"'
+                f'{process_mode!r}不是可用的模式, 仅有以下模式可选:\n\n{_AVAILABLE_MODE_TEXT}'
             )
 
     try:

@@ -15,7 +15,7 @@ from typing import TYPE_CHECKING, Literal
 from nonebot.utils import run_sync
 
 from src.utils import semaphore_gather
-from src.utils.image_utils import ImageUtils
+from src.utils.image_utils import ImageLoader, ImageEffectProcessor
 from src.utils.image_utils.template import PreviewImageModel, PreviewImageThumbs, generate_thumbs_preview_image
 from .typing import ArtworkProxyAddonsMixin
 from ..models import ArtworkPool
@@ -32,9 +32,9 @@ class ImageOpsMixin(ArtworkProxyAddonsMixin, abc.ABC):
 
     @staticmethod
     @run_sync
-    def _handle_blur(image: 'TemporaryResource', origin_mark: str) -> ImageUtils:
+    def _handle_blur(image: 'TemporaryResource', origin_mark: str) -> ImageEffectProcessor:
         """模糊处理图片"""
-        _image = ImageUtils.init_from_file(file=image)
+        _image = ImageEffectProcessor(ImageLoader.init_from_file(file=image))
         _image.gaussian_blur()
         _image.mark(text=origin_mark)
         _image.convert(mode='RGB')
@@ -42,18 +42,18 @@ class ImageOpsMixin(ArtworkProxyAddonsMixin, abc.ABC):
 
     @staticmethod
     @run_sync
-    def _handle_mark(image: 'TemporaryResource', origin_mark: str) -> ImageUtils:
+    def _handle_mark(image: 'TemporaryResource', origin_mark: str) -> ImageEffectProcessor:
         """标记水印"""
-        _image = ImageUtils.init_from_file(file=image)
+        _image = ImageEffectProcessor(ImageLoader.init_from_file(file=image))
         _image.mark(text=origin_mark)
         _image.convert(mode='RGB')
         return _image
 
     @staticmethod
     @run_sync
-    def _handle_noise(image: 'TemporaryResource', origin_mark: str) -> ImageUtils:
+    def _handle_noise(image: 'TemporaryResource', origin_mark: str) -> ImageEffectProcessor:
         """噪点处理图片"""
-        _image = ImageUtils.init_from_file(file=image)
+        _image = ImageEffectProcessor(ImageLoader.init_from_file(file=image))
         _image.gaussian_noise(sigma=16)
         _image.mark(text=origin_mark)
         _image.convert(mode='RGB')
@@ -170,8 +170,7 @@ class ImageOpsMixin(ArtworkProxyAddonsMixin, abc.ABC):
         ]
         requests_data = await semaphore_gather(tasks=tasks, semaphore_num=8, filter_exception=True)
         previews = list(requests_data)
-        count = len(previews)
-        return PreviewImageModel(preview_name=preview_name, count=count, previews=previews)
+        return PreviewImageModel(preview_name=preview_name, previews=previews)
 
     @classmethod
     async def _get_artworks_preview_data(
@@ -190,8 +189,7 @@ class ImageOpsMixin(ArtworkProxyAddonsMixin, abc.ABC):
         ]
         requests_data = await semaphore_gather(tasks=tasks, semaphore_num=8, filter_exception=True)
         previews = list(requests_data)
-        count = len(previews)
-        return PreviewImageModel(preview_name=preview_name, count=count, previews=previews)
+        return PreviewImageModel(preview_name=preview_name, previews=previews)
 
     @classmethod
     async def generate_any_images_preview(
