@@ -14,7 +14,6 @@ from pydantic import BaseModel, ConfigDict
 
 from src.compat import AnyHttpUrlStr as AnyHttpUrl
 from src.resource import TemporaryResource
-from src.utils.image_utils.template import PreviewImageModel, PreviewImageThumbs
 
 
 class BaseComic18Model(BaseModel):
@@ -91,14 +90,6 @@ class Comic18PreviewRequestModel(BaseComic18Model):
     request_url: AnyHttpUrl
 
 
-class Comic18PreviewBody(PreviewImageThumbs):
-    """Pixiv 作品预览图中的缩略图数据"""
-
-
-class Comic18PreviewModel(PreviewImageModel):
-    """Pixiv 作品预览图 Model"""
-
-
 __all__ = [
     'AlbumChapter',
     'AlbumData',
@@ -107,6 +98,4 @@ __all__ = [
     'AlbumsResult',
     'AlbumPackResult',
     'Comic18PreviewRequestModel',
-    'Comic18PreviewBody',
-    'Comic18PreviewModel',
 ]

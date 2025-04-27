@@ -13,7 +13,7 @@ https://github.com/tonquer/JMComic-qt/blob/8b59628a0c0357b31911b98176c10c2bf4452
 """
 
 from hashlib import md5
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Self
 
 from PIL import Image
 from lxml import etree
@@ -21,11 +21,12 @@ from nonebot.log import logger
 from nonebot.utils import run_sync
 from pydantic import ValidationError
 
-from src.utils.image_utils import ImageUtils
+from src.utils.image_utils import ImageEffectProcessor, ImageLoader
 from .model import AlbumData, AlbumPage, AlbumsResult
 
 if TYPE_CHECKING:
     from lxml.etree import _Element
+    from src.resource import BaseResource
 
 
 class Comic18Parser:
@@ -231,7 +232,7 @@ class Comic18Parser:
         })
 
 
-class Comic18ImgOps(ImageUtils):
+class Comic18ImgOps(ImageEffectProcessor):
     """Comic18 图片处理工具"""
 
     @staticmethod
@@ -251,6 +252,10 @@ class Comic18ImgOps(ImageUtils):
             split_num = (ord(split_seed[-1]) % 8) * 2 + 2
 
         return split_num
+
+    @classmethod
+    async def async_init_from_file(cls, file: 'BaseResource') -> Self:
+        return cls(await ImageLoader.async_init_from_file(file=file))
 
     @run_sync
     def reverse_segmental_image(self, album_id: int, page_id: str) -> 'Comic18ImgOps':
@@ -277,11 +282,11 @@ class Comic18ImgOps(ImageUtils):
             # 移动区块指针
             down_pointer = up_pointer
 
-        self._image = output_image
+        self.image = output_image
         return self
 
 
 __all__ = [
     'Comic18Parser',
-    'Comic18ImgOps'
+    'Comic18ImgOps',
 ]

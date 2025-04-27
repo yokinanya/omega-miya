@@ -15,15 +15,13 @@ from typing import TYPE_CHECKING, Literal
 
 from src.exception import WebSourceException
 from src.utils import BaseCommonAPI, semaphore_gather
-from src.utils.image_utils.template import generate_thumbs_preview_image
+from src.utils.image_utils.template import PreviewImageModel, PreviewImageThumbs, generate_thumbs_preview_image
 from src.utils.zip_utils import ZipUtils
 from .config import nhentai_config, nhentai_resource_config
 from .helper import NhentaiParser
 from .model import (
     NhentaiDownloadResult,
     NhentaiGalleryModel,
-    NhentaiPreviewBody,
-    NhentaiPreviewModel,
     NhentaiPreviewRequestModel,
     NhentaiSearchingResult,
 )
@@ -79,25 +77,23 @@ class BaseNhentai(BaseCommonAPI):
         )
 
     @classmethod
-    async def _request_preview_body(cls, request: NhentaiPreviewRequestModel) -> NhentaiPreviewBody:
+    async def _request_preview_body(cls, request: NhentaiPreviewRequestModel) -> PreviewImageThumbs:
         """获取生成预览图中每个缩略图的数据"""
         _request_data = await cls._get_resource_as_bytes(url=request.request_url)
-        return NhentaiPreviewBody(desc_text=request.desc_text, preview_thumb=_request_data)
+        return PreviewImageThumbs(desc_text=request.desc_text, preview_thumb=_request_data)
 
     @classmethod
     async def _request_preview_model(
             cls,
             preview_name: str,
             requests: Sequence[NhentaiPreviewRequestModel]
-    ) -> NhentaiPreviewModel:
+    ) -> PreviewImageModel:
         """获取生成预览图所需要的数据模型"""
         _tasks = [cls._request_preview_body(request) for request in requests]
         _requests_data = await semaphore_gather(tasks=_tasks, semaphore_num=30, filter_exception=True)
         _requests_data = list(_requests_data)
-        count = len(_requests_data)
-        return NhentaiPreviewModel.model_validate({
+        return PreviewImageModel.model_validate({
             'preview_name': preview_name,
-            'count': count,
             'previews': _requests_data
         })
 
@@ -106,7 +102,7 @@ class BaseNhentai(BaseCommonAPI):
             cls,
             searching_name: str,
             model: NhentaiSearchingResult
-    ) -> NhentaiPreviewModel:
+    ) -> PreviewImageModel:
         """从搜索结果中获取生成预览图所需要的数据模型"""
         request_list = [
             NhentaiPreviewRequestModel(
@@ -126,7 +122,7 @@ class BaseNhentai(BaseCommonAPI):
             model: NhentaiGalleryModel,
             *,
             use_thumbnail: bool = True
-    ) -> NhentaiPreviewModel:
+    ) -> PreviewImageModel:
         """从作品信息中获取生成预览图所需要的数据模型"""
 
         def _page_type(type_: str) -> str:
@@ -156,7 +152,7 @@ class BaseNhentai(BaseCommonAPI):
     @classmethod
     async def generate_nhentai_preview_image(
             cls,
-            preview: NhentaiPreviewModel,
+            preview: 'PreviewImageModel',
             *,
             preview_size: tuple[int, int] = nhentai_resource_config.default_preview_size,
             hold_ratio: bool = False,

@@ -17,7 +17,7 @@ from pydantic import BaseModel, ConfigDict
 
 from src.database import SystemSettingDAL, begin_db_session
 from src.utils.crypto import AESEncryptor
-from src.utils.image_utils import ImageUtils
+from src.utils.image_utils import ImageLoader, ImageEffectProcessor
 from .consts import (
     DB_ENTITY_SETTING_MODULE_NAME,
     DB_ENTITY_SETTING_PLUGIN_NAME,
@@ -158,8 +158,8 @@ def decrypt_password(ciphertext: str) -> str:
 
 
 @run_sync
-def _generate_mail_snapshot(mail_content: str) -> ImageUtils:
-    return ImageUtils.init_from_text(text=mail_content)
+def _generate_mail_snapshot(mail_content: str) -> ImageEffectProcessor:
+    return ImageEffectProcessor(ImageLoader.init_from_text(text=mail_content))
 
 
 async def generate_mail_snapshot(mail_content: str) -> 'TemporaryResource':

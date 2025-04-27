@@ -15,7 +15,6 @@ from pydantic import BaseModel, ConfigDict, model_validator
 
 from src.compat import AnyHttpUrlStr as AnyHttpUrl
 from src.resource import TemporaryResource
-from src.utils.image_utils.template import PreviewImageModel, PreviewImageThumbs
 
 
 class BaseNhentaiModel(BaseModel):
@@ -94,14 +93,6 @@ class NhentaiPreviewRequestModel(BaseNhentaiModel):
     request_url: AnyHttpUrl
 
 
-class NhentaiPreviewBody(PreviewImageThumbs):
-    """Pixiv 作品预览图中的缩略图数据"""
-
-
-class NhentaiPreviewModel(PreviewImageModel):
-    """Pixiv 作品预览图 Model"""
-
-
 @dataclass
 class NhentaiDownloadResult:
     """Nhentai 下载结果信息"""
@@ -113,7 +104,5 @@ __all__ = [
     'NhentaiDownloadResult',
     'NhentaiGalleryModel',
     'NhentaiPreviewRequestModel',
-    'NhentaiPreviewBody',
-    'NhentaiPreviewModel',
     'NhentaiSearchingResult'
 ]
