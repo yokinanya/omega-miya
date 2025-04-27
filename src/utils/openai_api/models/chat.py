@@ -17,7 +17,15 @@ from .message import MessageContent
 class Choice(BaseOpenAIModel):
     index: int
     message: MessageContent
-    finish_reason: Literal['stop', 'length', 'content_filter', 'tool_calls', 'function_call']
+    finish_reason: Literal[
+        'stop',
+        'eos',
+        'length',
+        'content_filter',
+        'tool_calls',
+        'function_call',
+        'insufficient_system_resource',
+    ]
 
 
 class PromptTokensDetails(BaseOpenAIModel):
