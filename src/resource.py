@@ -10,18 +10,20 @@
 
 import abc
 import os
-import pathlib
 import sys
 from collections.abc import Generator
 from contextlib import asynccontextmanager, contextmanager
 from copy import deepcopy
 from datetime import datetime
 from functools import wraps
+from pathlib import Path
 from typing import (
     IO,
     TYPE_CHECKING,
     Any,
     AsyncContextManager,
+    Callable,
+    Concatenate,
     ContextManager,
     Literal,
     NoReturn,
@@ -65,11 +67,13 @@ class ResourceNotFileError(LocalSourceException):
         return f'{self.__class__.__name__}(path={self.path.as_posix()!r}, message={self.message})'
 
 
-_LOG_FOLDER = pathlib.Path(os.path.abspath(sys.path[0])).joinpath('log')
+__ROOT_PATH = os.path.abspath(sys.path[0])
+"""项目根目录"""
+_LOG_FOLDER = Path(__ROOT_PATH).joinpath('log')
 """日志文件路径"""
-_STATIC_RESOURCE_FOLDER = pathlib.Path(os.path.abspath(sys.path[0])).joinpath('static')
+_STATIC_RESOURCE_FOLDER = Path(__ROOT_PATH).joinpath('static')
 """静态资源文件路径"""
-_TEMPORARY_RESOURCE_FOLDER = pathlib.Path(os.path.abspath(sys.path[0])).joinpath('.tmp')
+_TEMPORARY_RESOURCE_FOLDER = Path(__ROOT_PATH).joinpath('.tmp')
 """临时文件文件路径"""
 
 # 初始化日志文件路径文件夹
@@ -81,11 +85,41 @@ if not _TEMPORARY_RESOURCE_FOLDER.exists():
     _TEMPORARY_RESOURCE_FOLDER.mkdir()
 
 
+def check_directory[**P, R, T: 'BaseResource'](func: Callable[Concatenate[T, P], R]):
+    """装饰一个方法, 需要实例 path 为文件夹时才能运行"""
+
+    @wraps(func)
+    def _wrapper(self: T, *args, **kwargs):
+        if self.path.exists() and self.path.is_dir():
+            return func(self, *args, **kwargs)
+        else:
+            raise ResourceNotFolderError(self.path)
+
+    return _wrapper
+
+
+def check_file[**P, R, T: 'BaseResource'](func: Callable[Concatenate[T, P], R]):
+    """装饰一个方法, 需要实例 path 为文件时才能运行"""
+
+    @wraps(func)
+    def _wrapper(self: T, *args, **kwargs):
+        if self.path.exists() and self.path.is_file():
+            return func(self, *args, **kwargs)
+        elif not self.path.exists():
+            if not self.path.parent.exists():
+                Path.mkdir(self.path.parent, parents=True)
+            return func(self, *args, **kwargs)
+        else:
+            raise ResourceNotFileError(self.path)
+
+    return _wrapper
+
+
 class BaseResource(abc.ABC):
     """资源文件基类"""
 
     __slots__ = ('path',)
-    path: pathlib.Path
+    path: Path
 
     @abc.abstractmethod
     def __init__(self, *args: str):
@@ -126,32 +160,6 @@ class BaseResource(abc.ABC):
         """路径目标不是文件夹或不存在时抛出 ResourceNotFolderError 异常"""
         if not self.is_dir:
             raise ResourceNotFolderError(self.path)
-
-    @staticmethod
-    def check_directory(func):
-        """装饰一个方法, 需要实例 path 为文件夹时才能运行"""
-        @wraps(func)
-        def _wrapper(self: Self, *args, **kwargs):
-            if self.path.exists() and self.path.is_dir():
-                return func(self, *args, **kwargs)
-            else:
-                raise ResourceNotFolderError(self.path)
-        return _wrapper
-
-    @staticmethod
-    def check_file(func):
-        """装饰一个方法, 需要实例 path 为文件时才能运行"""
-        @wraps(func)
-        def _wrapper(self: Self, *args, **kwargs):
-            if self.path.exists() and self.path.is_file():
-                return func(self, *args, **kwargs)
-            elif not self.path.exists():
-                if not self.path.parent.exists():
-                    pathlib.Path.mkdir(self.path.parent, parents=True)
-                return func(self, *args, **kwargs)
-            else:
-                raise ResourceNotFileError(self.path)
-        return _wrapper
 
     @property
     def resolve_path(self) -> str:
@@ -252,52 +260,46 @@ class BaseResource(abc.ABC):
 class AnyResource(BaseResource):
     """任意位置资源文件"""
 
-    def __init__(self, path: str | pathlib.PurePath, /, *args: str):
-        self.path: pathlib.Path = pathlib.Path(path)
-        if args:
-            self.path = self.path.joinpath(*args)
+    def __init__(self, path: str | Path, /, *args: str):
+        self.path = Path(path).joinpath(*args)
 
 
 class LogFileResource(BaseResource):
     """日志文件"""
 
     def __init__(self):
-        self.path: pathlib.Path = deepcopy(_LOG_FOLDER)
-        self.timestamp_str = datetime.now().strftime('%Y%m%d-%H%M%S')
+        self.timestamp = datetime.now()
+        self.path = _LOG_FOLDER.joinpath(self.timestamp.strftime('%Y-%m'))
 
     @property
-    def debug(self) -> pathlib.Path:
-        return self(f'{self.timestamp_str}-DEBUG.log').path
+    def debug(self) -> Path:
+        return self(f'{self.timestamp.strftime('%Y%m%d-%H%M%S')}-DEBUG.log').path
 
     @property
-    def info(self) -> pathlib.Path:
-        return self(f'{self.timestamp_str}-INFO.log').path
+    def info(self) -> Path:
+        return self(f'{self.timestamp.strftime('%Y%m%d-%H%M%S')}-INFO.log').path
 
     @property
-    def warring(self) -> pathlib.Path:
-        return self(f'{self.timestamp_str}-WARRING.log').path
+    def warring(self) -> Path:
+        return self(f'{self.timestamp.strftime('%Y%m%d-%H%M%S')}-WARRING.log').path
 
     @property
-    def error(self) -> pathlib.Path:
-        return self(f'{self.timestamp_str}-ERROR.log').path
+    def error(self) -> Path:
+        return self(f'{datetime.now().strftime('%Y%m%d-%H%M%S')}-ERROR.log').path
 
 
 class StaticResource(BaseResource):
     """静态资源文件"""
 
     def __init__(self, *args: str):
-        self.path: pathlib.Path = deepcopy(_STATIC_RESOURCE_FOLDER)
-        if args:
-            self.path = self.path.joinpath(*args)
+        self.path = _STATIC_RESOURCE_FOLDER.joinpath(*args)
 
 
 class TemporaryResource(BaseResource):
     """临时资源文件"""
 
     def __init__(self, *args: str):
-        self.path: pathlib.Path = deepcopy(_TEMPORARY_RESOURCE_FOLDER)
-        if args:
-            self.path = self.path.joinpath(*args)
+        self.path = _TEMPORARY_RESOURCE_FOLDER.joinpath(*args)
 
 
 __all__ = [
