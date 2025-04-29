@@ -85,36 +85,6 @@ if not _TEMPORARY_RESOURCE_FOLDER.exists():
     _TEMPORARY_RESOURCE_FOLDER.mkdir()
 
 
-def check_directory[**P, R, T: 'BaseResource'](func: Callable[Concatenate[T, P], R]):
-    """装饰一个方法, 需要实例 path 为文件夹时才能运行"""
-
-    @wraps(func)
-    def _wrapper(self: T, *args, **kwargs):
-        if self.path.exists() and self.path.is_dir():
-            return func(self, *args, **kwargs)
-        else:
-            raise ResourceNotFolderError(self.path)
-
-    return _wrapper
-
-
-def check_file[**P, R, T: 'BaseResource'](func: Callable[Concatenate[T, P], R]):
-    """装饰一个方法, 需要实例 path 为文件时才能运行"""
-
-    @wraps(func)
-    def _wrapper(self: T, *args, **kwargs):
-        if self.path.exists() and self.path.is_file():
-            return func(self, *args, **kwargs)
-        elif not self.path.exists():
-            if not self.path.parent.exists():
-                Path.mkdir(self.path.parent, parents=True)
-            return func(self, *args, **kwargs)
-        else:
-            raise ResourceNotFileError(self.path)
-
-    return _wrapper
-
-
 class BaseResource(abc.ABC):
     """资源文件基类"""
 
@@ -160,6 +130,40 @@ class BaseResource(abc.ABC):
         """路径目标不是文件夹或不存在时抛出 ResourceNotFolderError 异常"""
         if not self.is_dir:
             raise ResourceNotFolderError(self.path)
+
+    @staticmethod
+    def check_directory[**P, R, ST: 'BaseResource'](
+            func: Callable[Concatenate[ST, P], R],
+    ) -> Callable[Concatenate[ST, P], R]:
+        """装饰一个方法, 需要实例 path 为文件夹时才能运行"""
+
+        @wraps(func)
+        def _wrapper(self: ST, *args: P.args, **kwargs: P.kwargs) -> R:
+            if self.path.exists() and self.path.is_dir():
+                return func(self, *args, **kwargs)
+            else:
+                raise ResourceNotFolderError(self.path)
+
+        return _wrapper
+
+    @staticmethod
+    def check_file[**P, R, ST: 'BaseResource'](
+            func: Callable[Concatenate[ST, P], R],
+    ) -> Callable[Concatenate[ST, P], R]:
+        """装饰一个方法, 需要实例 path 为文件时才能运行"""
+
+        @wraps(func)
+        def _wrapper(self: ST, *args: P.args, **kwargs: P.kwargs) -> R:
+            if self.path.exists() and self.path.is_file():
+                return func(self, *args, **kwargs)
+            elif not self.path.exists():
+                if not self.path.parent.exists():
+                    Path.mkdir(self.path.parent, parents=True)
+                return func(self, *args, **kwargs)
+            else:
+                raise ResourceNotFileError(self.path)
+
+        return _wrapper
 
     @property
     def resolve_path(self) -> str:
