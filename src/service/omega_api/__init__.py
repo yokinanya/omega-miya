@@ -10,11 +10,11 @@
 
 from .api import OmegaAPI
 from .helpers import return_standard_api_result
-from .model import BaseOmegaAPIModel
+from .model import StandardOmegaAPIReturn
 
 
 __all__ = [
-    'BaseOmegaAPIModel',
     'OmegaAPI',
+    'StandardOmegaAPIReturn',
     'return_standard_api_result',
 ]

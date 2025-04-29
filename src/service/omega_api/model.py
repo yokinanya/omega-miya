@@ -8,21 +8,14 @@
 @Software       : PyCharm 
 """
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 
-class BaseOmegaAPIModel(BaseModel):
-    """Omega API 数据基类"""
-
-    model_config = ConfigDict(extra='ignore', coerce_numbers_to_str=True, frozen=True)
-
-
-class StandardOmegaAPIReturn[T: BaseOmegaAPIModel](BaseModel):
+class StandardOmegaAPIReturn[T: BaseModel](BaseModel):
     """Omega API 返回值基类"""
     error: bool
     body: T | None
-    message: str
-    exception: str | None = None
+    message: str = Field(default_factory=str)
 
     model_config = ConfigDict(extra='ignore', coerce_numbers_to_str=True, from_attributes=True, frozen=True)
 
@@ -32,6 +25,5 @@ class StandardOmegaAPIReturn[T: BaseOmegaAPIModel](BaseModel):
 
 
 __all = [
-    'BaseOmegaAPIModel',
     'StandardOmegaAPIReturn',
 ]
