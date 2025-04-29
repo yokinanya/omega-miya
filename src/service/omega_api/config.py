@@ -19,7 +19,7 @@ def generate_api_key() -> SecretStr:
     return SecretStr(token_hex())
 
 
-class OmegaApiConfig(BaseModel):
+class OmegaAPIConfig(BaseModel):
     """Omega API 配置"""
     omega_api_key: Annotated[SecretStr, Field(default_factory=generate_api_key)]
 
@@ -27,7 +27,7 @@ class OmegaApiConfig(BaseModel):
 
 
 try:
-    api_config = get_plugin_config(OmegaApiConfig)
+    api_config = get_plugin_config(OmegaAPIConfig)
     logger.opt(colors=True).success(
         f'<lc>Omega API</lc> | API Key 已配置: <ly>{api_config.omega_api_key.get_secret_value()}</ly>'
     )

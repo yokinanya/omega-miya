@@ -11,13 +11,13 @@
 from pydantic import BaseModel, ConfigDict
 
 
-class BaseApiModel(BaseModel):
+class BaseOmegaAPIModel(BaseModel):
     """Omega API 数据基类"""
 
     model_config = ConfigDict(extra='ignore', coerce_numbers_to_str=True, frozen=True)
 
 
-class StandardApiReturn[T: BaseApiModel](BaseModel):
+class StandardOmegaAPIReturn[T: BaseOmegaAPIModel](BaseModel):
     """Omega API 返回值基类"""
     error: bool
     body: T | None
@@ -32,6 +32,6 @@ class StandardApiReturn[T: BaseApiModel](BaseModel):
 
 
 __all = [
-    'BaseApiModel',
-    'StandardApiReturn',
+    'BaseOmegaAPIModel',
+    'StandardOmegaAPIReturn',
 ]

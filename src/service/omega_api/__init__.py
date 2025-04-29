@@ -8,13 +8,13 @@
 @Software       : PyCharm 
 """
 
-from .api import OmegaApi
+from .api import OmegaAPI
 from .helpers import return_standard_api_result
-from .model import BaseApiModel
+from .model import BaseOmegaAPIModel
 
 
 __all__ = [
-    'BaseApiModel',
-    'OmegaApi',
+    'BaseOmegaAPIModel',
+    'OmegaAPI',
     'return_standard_api_result',
 ]
