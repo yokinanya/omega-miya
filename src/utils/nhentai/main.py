@@ -124,16 +124,6 @@ class BaseNhentai(BaseCommonAPI):
             use_thumbnail: bool = True
     ) -> PreviewImageModel:
         """从作品信息中获取生成预览图所需要的数据模型"""
-
-        def _page_type(type_: str) -> str:
-            match type_:
-                case 'j':
-                    return 'jpg'
-                case 'p':
-                    return 'png'
-                case _:
-                    return 'unknown'
-
         if use_thumbnail:
             request_list = [
                 NhentaiPreviewRequestModel(desc_text=f'Page: {index + 1}', request_url=url)
@@ -143,7 +133,7 @@ class BaseNhentai(BaseCommonAPI):
             request_list = [
                 NhentaiPreviewRequestModel.model_validate({
                     'desc_text': f'Page: {index + 1}',
-                    'request_url': f'https://i.nhentai.net/galleries/{model.media_id}/{index + 1}.{_page_type(data.t)}'
+                    'request_url': f'{NhentaiGallery.get_page_resource_url()}/{model.media_id}/{index + 1}.{data.ft}'
                 })
                 for index, data in enumerate(model.images.pages)
             ]
@@ -230,8 +220,8 @@ class NhentaiGallery(Nhentai):
         return f'<{self.__class__.__name__}(gallery_id={self.gallery_id})>'
 
     @classmethod
-    def _get_page_resource_url(cls) -> str:
-        return 'https://i.nhentai.net/galleries/'
+    def get_page_resource_url(cls) -> str:
+        return f'https://{nhentai_config.galleries_resource_url_subdomain}.nhentai.net/galleries'
 
     async def query_gallery(self) -> NhentaiGalleryModel:
         if not isinstance(self.gallery_model, NhentaiGalleryModel):
@@ -263,15 +253,7 @@ class NhentaiGallery(Nhentai):
         # 生成下载任务序列
         download_tasks = []
         for index, page in enumerate(gallery_model.images.pages):
-            match page.t:
-                case 'j':
-                    page_type = 'jpg'
-                case 'p':
-                    page_type = 'png'
-                case _:
-                    page_type = 'unknown'
-
-            page_download_url = f'{self._get_page_resource_url()}{gallery_model.media_id}/{index + 1}.{page_type}'
+            page_download_url = f'{self.get_page_resource_url()}/{gallery_model.media_id}/{index + 1}.{page.ft}'
             # 添加下载任务
             download_tasks.append(self.download_resource(
                 url=page_download_url, folder_name=folder_name, ignore_exist_file=ignore_exist_file

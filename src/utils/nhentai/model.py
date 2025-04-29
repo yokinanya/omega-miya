@@ -42,11 +42,31 @@ class NhentaiGalleryTitle(BaseNhentaiModel):
     pretty: str | None
 
 
+type NhentaiGalleryPageType = Literal['j', 'p', 'w']
+
+
 class NhentaiGalleryPage(BaseNhentaiModel):
     """Gallery Page 内容"""
-    t: Literal['j', 'p']
+    t: NhentaiGalleryPageType
     w: int
     h: int
+
+    @staticmethod
+    def convert_page_type(page_type: NhentaiGalleryPageType) -> str:
+        match page_type:
+            case 'j':
+                return 'jpg'
+            case 'p':
+                return 'png'
+            case 'w':
+                return 'webp'
+            case _:
+                return 'unknown'
+
+    @property
+    def ft(self) -> str:
+        """真实文件名类型"""
+        return self.convert_page_type(page_type=self.t)
 
 
 class NhentaiGalleryImages(BaseNhentaiModel):

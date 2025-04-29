@@ -21,6 +21,8 @@ class NhentaiConfig(BaseModel):
     nhentai_csrftoken: str | None = None
     nhentai_sessionid: str | None = None
 
+    nhentai_alternate_galleries_resource_url_subdomain: str = 'i2'
+
     # 默认预览图缩略图大小
     nhentai_default_preview_size: tuple[int, int] = (224, 327)
     # 资源文件配置
@@ -52,6 +54,10 @@ class NhentaiConfig(BaseModel):
     @property
     def default_preview_folder(self) -> TemporaryResource:
         return TemporaryResource(self.nhentai_default_tmp_folder_name, 'preview')
+
+    @property
+    def galleries_resource_url_subdomain(self) -> str:
+        return self.nhentai_alternate_galleries_resource_url_subdomain
 
 
 try:
