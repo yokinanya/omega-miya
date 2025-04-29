@@ -20,7 +20,7 @@ from src.exception import WebSourceException
 from src.utils import BaseCommonAPI, semaphore_gather
 from src.utils.image_utils.template import PreviewImageModel, PreviewImageThumbs, generate_thumbs_preview_image
 from src.utils.zip_utils import ZipUtils
-from .config import comic18_config, comic18_resource_config
+from .config import comic18_config
 from .helper import Comic18ImgOps, Comic18Parser
 from .model import (
     AlbumData,
@@ -140,7 +140,7 @@ class _BaseComic18(BaseCommonAPI):
         """下载任意资源到本地, 保持原始文件名, 直接覆盖同名文件"""
         try:
             file = await cls._download_resource(
-                save_folder=comic18_resource_config.default_download_folder,
+                save_folder=comic18_config.download_folder,
                 url=url, subdir=folder_name, ignore_exist_file=ignore_exist_file
             )
         except WebSourceException as e:
@@ -150,7 +150,7 @@ class _BaseComic18(BaseCommonAPI):
             # 请求过快可能导致 403 被暂时流控了, 暂停一下重试一次
             await async_sleep(3)
             file = await cls._download_resource(
-                save_folder=comic18_resource_config.default_download_folder,
+                save_folder=comic18_config.download_folder,
                 url=url, subdir=folder_name, ignore_exist_file=ignore_exist_file
             )
 
@@ -381,7 +381,7 @@ class Comic18(_BaseComic18):
 
         # 下载目标文件夹
         folder_name = f'album_{self.aid}'
-        download_folder = comic18_resource_config.default_download_folder(folder_name)
+        download_folder = comic18_config.download_folder(folder_name)
 
         # 生成下载任务序列
         download_tasks = [
@@ -409,7 +409,7 @@ class Comic18(_BaseComic18):
         album_data = await self.query_album()
 
         # 执行下载任务
-        download_folder = comic18_resource_config.default_download_folder(f'album_{self.aid}')
+        download_folder = comic18_config.download_folder(f'album_{self.aid}')
         download_result = await self.download_album(ignore_exist_file=ignore_exist_file)
 
         # 归档元数据
@@ -436,7 +436,7 @@ class Comic18(_BaseComic18):
         zip_result = await zip_file.create_7z(files=file_list, password=password_str)
         logger.success(f'Comic18 | Packed album(id={self.aid}) succeed')
 
-        return AlbumPackResult(file=zip_result, password=password_str)
+        return AlbumPackResult(file_path=zip_result.path, password=password_str)
 
     @classmethod
     async def _request_preview_body(cls, request: Comic18PreviewRequestModel) -> PreviewImageThumbs:
@@ -478,12 +478,12 @@ class Comic18(_BaseComic18):
         return await generate_thumbs_preview_image(
             preview=preview,
             preview_size=preview_size,
-            font_path=comic18_resource_config.default_font_file,
+            font_path=comic18_config.default_font,
             header_color=(215, 64, 87),
             hold_ratio=hold_ratio,
             num_of_line=num_of_line,
             limit=limit,
-            output_folder=comic18_resource_config.default_preview_folder
+            output_folder=comic18_config.preview_folder
         )
 
     @classmethod

@@ -8,7 +8,7 @@
 @Software       : PyCharm 
 """
 
-from dataclasses import dataclass
+from typing import Literal
 
 from nonebot import get_plugin_config, logger
 from pydantic import BaseModel, ConfigDict, ValidationError
@@ -21,6 +21,13 @@ class NhentaiConfig(BaseModel):
     nhentai_csrftoken: str | None = None
     nhentai_sessionid: str | None = None
 
+    # 默认预览图缩略图大小
+    nhentai_default_preview_size: tuple[int, int] = (224, 327)
+    # 资源文件配置
+    nhentai_default_font_name: str = 'fzzxhk.ttf'
+    # 默认缓存资源保存路径
+    nhentai_default_tmp_folder_name: Literal['nhentai'] = 'nhentai'
+
     model_config = ConfigDict(extra='ignore')
 
     @property
@@ -30,21 +37,24 @@ class NhentaiConfig(BaseModel):
         else:
             return None
 
+    @property
+    def default_preview_size(self) -> tuple[int, int]:
+        return self.nhentai_default_preview_size
 
-@dataclass
-class NhentaiResourceConfig:
-    """Nhentai 配置"""
-    # 默认字体文件
-    default_font_file: StaticResource = StaticResource('fonts', 'fzzxhk.ttf')
-    # 默认的下载文件路径
-    default_download_folder: TemporaryResource = TemporaryResource('nhentai', 'download')
-    # 预览图生成路径
-    default_preview_img_folder: TemporaryResource = TemporaryResource('nhentai', 'preview')
-    default_preview_size: tuple[int, int] = (224, 327)  # 默认预览图缩略图大小
+    @property
+    def default_font(self) -> StaticResource:
+        return StaticResource('fonts', self.nhentai_default_font_name)
+
+    @property
+    def default_download_folder(self) -> TemporaryResource:
+        return TemporaryResource(self.nhentai_default_tmp_folder_name, 'download')
+
+    @property
+    def default_preview_folder(self) -> TemporaryResource:
+        return TemporaryResource(self.nhentai_default_tmp_folder_name, 'preview')
 
 
 try:
-    nhentai_resource_config = NhentaiResourceConfig()
     nhentai_config = get_plugin_config(NhentaiConfig)
     if not nhentai_config.nhentai_cookies:
         logger.opt(colors=True).debug('<lc>Nhentai</lc> | <ly>未配置 Nhentai Cookies</ly>')
@@ -56,5 +66,4 @@ except ValidationError as e:
 
 __all__ = [
     'nhentai_config',
-    'nhentai_resource_config'
 ]

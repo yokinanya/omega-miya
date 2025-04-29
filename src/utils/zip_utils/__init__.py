@@ -16,7 +16,7 @@ import py7zr
 from nonebot.utils import run_sync
 
 from src.resource import BaseResource, TemporaryResource
-from .config import zip_utils_config, zip_utils_resource_config
+from .config import zip_utils_config
 
 
 class ZipUtils:
@@ -24,7 +24,7 @@ class ZipUtils:
         if folder is not None and folder.is_dir:
             storage_folder: TemporaryResource = folder
         else:
-            storage_folder: TemporaryResource = zip_utils_resource_config.default_storage_folder
+            storage_folder: TemporaryResource = zip_utils_config.default_output_folder
 
         self.file: TemporaryResource = storage_folder(file_name)
 
@@ -40,7 +40,7 @@ class ZipUtils:
         :param files: 被压缩的文件列表
         :param compression: 压缩级别参数
         """
-        compression = zip_utils_config.default_zip_compression if compression is None else compression
+        compression = zip_utils_config.zip_utils_default_zip_compression if compression is None else compression
 
         if self.file.path.suffix != '.zip':
             raise ValueError('File suffix must be ".zip"')

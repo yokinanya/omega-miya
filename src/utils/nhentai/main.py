@@ -17,7 +17,7 @@ from src.exception import WebSourceException
 from src.utils import BaseCommonAPI, semaphore_gather
 from src.utils.image_utils.template import PreviewImageModel, PreviewImageThumbs, generate_thumbs_preview_image
 from src.utils.zip_utils import ZipUtils
-from .config import nhentai_config, nhentai_resource_config
+from .config import nhentai_config
 from .helper import NhentaiParser
 from .model import (
     NhentaiDownloadResult,
@@ -70,7 +70,7 @@ class BaseNhentai(BaseCommonAPI):
     ) -> 'TemporaryResource':
         """下载任意资源到本地, 保持原始文件名, 直接覆盖同名文件"""
         return await cls._download_resource(
-            save_folder=nhentai_resource_config.default_download_folder,
+            save_folder=nhentai_config.default_download_folder,
             url=url,
             subdir=folder_name,
             ignore_exist_file=ignore_exist_file
@@ -154,7 +154,7 @@ class BaseNhentai(BaseCommonAPI):
             cls,
             preview: 'PreviewImageModel',
             *,
-            preview_size: tuple[int, int] = nhentai_resource_config.default_preview_size,
+            preview_size: tuple[int, int] = nhentai_config.default_preview_size,
             hold_ratio: bool = False,
             num_of_line: int = 6,
             limit: int = 1000
@@ -170,12 +170,12 @@ class BaseNhentai(BaseCommonAPI):
         return await generate_thumbs_preview_image(
             preview=preview,
             preview_size=preview_size,
-            font_path=nhentai_resource_config.default_font_file,
+            font_path=nhentai_config.default_font,
             header_color=(215, 64, 87),
             hold_ratio=hold_ratio,
             num_of_line=num_of_line,
             limit=limit,
-            output_folder=nhentai_resource_config.default_preview_img_folder
+            output_folder=nhentai_config.default_preview_folder
         )
 
 
@@ -258,7 +258,7 @@ class NhentaiGallery(Nhentai):
 
         # 下载目标文件夹
         folder_name = f'gallery_{gallery_model.id}'
-        download_folder = nhentai_resource_config.default_download_folder(folder_name)
+        download_folder = nhentai_config.default_download_folder(folder_name)
 
         # 生成下载任务序列
         download_tasks = []
@@ -307,7 +307,7 @@ class NhentaiGallery(Nhentai):
         file_list = download_folder.list_all_files()
         zip_result = await zip_file.create_7z(files=file_list, password=password_str)
 
-        return NhentaiDownloadResult(file=zip_result, password=password_str)
+        return NhentaiDownloadResult(file_path=zip_result.path, password=password_str)
 
 
 __all__ = [

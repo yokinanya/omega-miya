@@ -12,7 +12,7 @@ from typing import TYPE_CHECKING, Any
 
 from src.exception import WebSourceException
 from src.utils import BaseCommonAPI
-from .config import weibo_resource_config
+from .config import weibo_api_config
 from .helper import parse_weibo_card_from_status_page
 from .model import (
     WeiboCard,
@@ -67,7 +67,7 @@ class Weibo(BaseCommonAPI):
     ) -> 'TemporaryResource':
         """下载任意资源到本地, 保持原始文件名, 直接覆盖同名文件"""
         return await cls._download_resource(
-            save_folder=weibo_resource_config.default_download_folder,
+            save_folder=weibo_api_config.default_download_folder,
             url=url,
             subdir=subdir,
             ignore_exist_file=ignore_exist_file

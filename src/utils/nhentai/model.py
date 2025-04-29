@@ -8,13 +8,13 @@
 @Software       : PyCharm 
 """
 
-from dataclasses import dataclass
+from pathlib import Path
 from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, model_validator
 
 from src.compat import AnyHttpUrlStr as AnyHttpUrl
-from src.resource import TemporaryResource
+from src.resource import AnyResource
 
 
 class BaseNhentaiModel(BaseModel):
@@ -93,11 +93,14 @@ class NhentaiPreviewRequestModel(BaseNhentaiModel):
     request_url: AnyHttpUrl
 
 
-@dataclass
-class NhentaiDownloadResult:
+class NhentaiDownloadResult(BaseNhentaiModel):
     """Nhentai 下载结果信息"""
-    file: TemporaryResource
+    file_path: Path
     password: str
+
+    @property
+    def file(self) -> AnyResource:
+        return AnyResource(self.file_path)
 
 
 __all__ = [

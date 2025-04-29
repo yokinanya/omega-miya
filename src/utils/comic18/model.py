@@ -8,12 +8,12 @@
 @Software       : PyCharm 
 """
 
-from dataclasses import dataclass
+from pathlib import Path
 
 from pydantic import BaseModel, ConfigDict
 
 from src.compat import AnyHttpUrlStr as AnyHttpUrl
-from src.resource import TemporaryResource
+from src.resource import AnyResource
 
 
 class BaseComic18Model(BaseModel):
@@ -77,11 +77,14 @@ class BlogsResult(BaseComic18Model):
     """文库搜索结果/分类/排行"""
 
 
-@dataclass
-class AlbumPackResult:
+class AlbumPackResult(BaseComic18Model):
     """漫画下载/打包信息"""
-    file: TemporaryResource
+    file_path: Path
     password: str
+
+    @property
+    def file(self) -> AnyResource:
+        return AnyResource(self.file_path)
 
 
 class Comic18PreviewRequestModel(BaseComic18Model):

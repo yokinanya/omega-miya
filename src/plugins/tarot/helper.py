@@ -17,7 +17,7 @@ from nonebot.utils import run_sync
 from sqlalchemy.exc import NoResultFound
 
 from src.utils.image_utils import ImageTextProcessor
-from .config import tarot_local_resource_config
+from .config import tarot_plugin_config
 from .resources import TarotResource
 
 if TYPE_CHECKING:
@@ -103,7 +103,7 @@ async def generate_tarot_card(
             draw_tarot_img = draw_tarot_img.convert(mode='RGBA')
 
         # 字体
-        font_file = tarot_local_resource_config.default_font_file
+        font_file = tarot_plugin_config.default_font
         title_font = ImageFont.truetype(font_file.resolve_path, width // 10)
         m_title_font = ImageFont.truetype(font_file.resolve_path, width // 20)
         text_font = ImageFont.truetype(font_file.resolve_path, width // 25)
@@ -199,7 +199,7 @@ async def generate_tarot_card(
 
     image_content = await _handle_tarot_card()
     image_file_name = f"tarot_{id_}_{datetime.now().strftime('%Y-%m-%d-%H-%M-%S')}.jpg"
-    save_file = tarot_local_resource_config.default_save_folder(image_file_name)
+    save_file = tarot_plugin_config.default_output_folder(image_file_name)
     async with save_file.async_open('wb') as af:
         await af.write(image_content)
     return save_file

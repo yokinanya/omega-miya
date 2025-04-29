@@ -8,8 +8,9 @@
 @Software       : PyCharm
 """
 
-from dataclasses import dataclass
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Literal
+
+from pydantic import BaseModel, ConfigDict
 
 from src.resource import TemporaryResource
 from src.utils import OmegaRequests
@@ -23,18 +24,22 @@ if TYPE_CHECKING:
     from src.service import OmegaMatcherInterface
 
 
-@dataclass
-class MessageTransferPath:
+class MessageTransferConfig(BaseModel):
     """消息转储缓存配置"""
 
-    # 缓存文件夹
-    default_save_folder: TemporaryResource = TemporaryResource('message_transfer_utils')
+    omega_message_transfer_default_save_folder_name: Literal['message_transfer_utils'] = 'message_transfer_utils'
+
+    model_config = ConfigDict(extra='ignore')
+
+    @property
+    def default_save_folder(self) -> TemporaryResource:
+        return TemporaryResource(self.omega_message_transfer_default_save_folder_name)
 
     def get_target_folder(self, adapter_name: str, seg_type: str) -> TemporaryResource:
         return self.default_save_folder(adapter_name, seg_type)
 
 
-_SAVE_PATH = MessageTransferPath()
+_SAVE_PATH_CONFIG = MessageTransferConfig()
 """媒体文件缓存路径"""
 
 
@@ -48,7 +53,7 @@ class MessageTransferUtils[TM: 'BaseMessage']:
 
     def _generate_resource_file(self, seg_type: str, url: str) -> 'TemporaryResource':
         """生成缓存文件路径"""
-        target_folder = _SAVE_PATH.get_target_folder(adapter_name=self._adapter_name, seg_type=seg_type)
+        target_folder = _SAVE_PATH_CONFIG.get_target_folder(adapter_name=self._adapter_name, seg_type=seg_type)
         file_name = OmegaRequests.hash_url_file_name(url=url)
         return target_folder(file_name)
 

@@ -9,7 +9,6 @@
 """
 
 from collections.abc import Generator
-from dataclasses import dataclass
 from typing import Any, Self
 from urllib.parse import quote
 
@@ -85,27 +84,20 @@ class BilibiliAllCachedCookies(BilibiliCookies):
     bilibili_api_wbi_sub_key: str | None = Field(default=None, alias='sub_key')
 
 
-@dataclass
-class BilibiliLocalResourceConfig:
-    # 默认的缓存资源保存路径
-    default_folder: TemporaryResource = TemporaryResource('bilibili')
-
-    def get_path(self, *args: str) -> 'TemporaryResource':
-        """获取缓存路径"""
-        return self.default_folder(*args)
-
-
 class BilibiliAPIConfigManager:
     """bilibili API 配置"""
 
-    __slots__ = ('_cookies_config', '_resource_config',)
+    __slots__ = ('_cookies_config',)
 
     _cookies_config: 'BilibiliAllCachedCookies'
-    _resource_config: 'BilibiliLocalResourceConfig'
 
     def __init__(self, cookies_config: 'BilibiliAllCachedCookies') -> None:
         self._cookies_config = cookies_config
-        self._resource_config = BilibiliLocalResourceConfig()
+
+    @staticmethod
+    def get_tmp_path(*args: str) -> 'TemporaryResource':
+        """获取缓存路径"""
+        return TemporaryResource('bilibili', *args)
 
     @property
     def bili_cookies(self) -> dict[str, Any]:
@@ -123,7 +115,7 @@ class BilibiliAPIConfigManager:
 
     def get_resource_path(self, *file_name: str) -> 'TemporaryResource':
         """获取缓存资源文件路径"""
-        return self._resource_config.get_path(*file_name)
+        return self.get_tmp_path(*file_name)
 
     def get_config(self, key: str, *, alias: bool = True) -> Any | None:
         """根据 alias 获取配置项"""

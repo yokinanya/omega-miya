@@ -28,13 +28,13 @@ async def generate_thumbs_preview_image(
         preview: 'PreviewImageModel',
         preview_size: tuple[int, int],
         *,
-        font_path: 'BaseResource' = image_utils_config.default_preview_font,
+        font_path: 'BaseResource' = image_utils_config.preview_font,
         header_color: tuple[int, int, int] = (255, 255, 255),
         hold_ratio: bool = False,
         edge_scale: float = 1/32,
         num_of_line: int = 6,
         limit: int = 1000,
-        output_folder: 'TemporaryResource' = image_utils_config.tmp_preview_output_folder
+        output_folder: 'TemporaryResource' = image_utils_config.default_preview_output_folder,
 ) -> 'TemporaryResource':
     """生成多个带说明的缩略图的预览图
 

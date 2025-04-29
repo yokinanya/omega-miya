@@ -10,14 +10,14 @@
 
 from src.resource import StaticResource
 
-from .config import tarot_local_resource_config
+from .config import tarot_plugin_config
 from .model import TarotCards, TarotPack
 
 
 class TarotResource:
     """塔罗牌资源基类"""
     def __init__(self, source_name: str, pack: TarotPack, file_format: str):
-        self.resource_folder: StaticResource = tarot_local_resource_config.image_resource_folder(source_name)
+        self.resource_folder: StaticResource = tarot_plugin_config.default_image_resource_folder(source_name)
         self.pack: TarotPack = pack
         self.file_format: str = file_format
         self.check_source(resource_folder=self.resource_folder, pack=self.pack, file_format=self.file_format)

@@ -59,9 +59,9 @@ class ImageLoader:
         :param alpha: 输出带 alpha 通道的图片
         """
         if font_name is None:
-            font_file = image_utils_config.default_font_file
+            font_file = image_utils_config.default_font
         else:
-            font_file = image_utils_config.default_font_folder(font_name)
+            font_file = image_utils_config.get_custom_name_font(font_name)
 
         # 处理文字层 主体部分
         font_size = image_width // 25
@@ -140,7 +140,7 @@ class ImageTextProcessor:
         """Loads font files specified by paths into memory and returns a dictionary of font objects."""
         fonts = {}
         for name in font_names:
-            font_path = image_utils_config.default_font_folder(name).resolve_path
+            font_path = image_utils_config.get_custom_name_font(name).resolve_path
             font = TTFont(font_path, fontNumber=0)
             fonts[font_path] = font
         return fonts
@@ -331,9 +331,9 @@ class ImageTextProcessor:
     ) -> None:
         """Draws multiple lines of text on an image, handling newline characters and adjusting spacing between lines."""
         fonts = cls.load_fonts(
-            image_utils_config.default_font_file.path.name,
-            image_utils_config.default_emoji_font.path.name,
-            image_utils_config.default_font_folder('msyh.ttc').path.name,
+            image_utils_config.default_font.path.name,
+            image_utils_config.emoji_font.path.name,
+            image_utils_config.get_custom_name_font('msyh.ttc').path.name,
         )
         cls._draw_multiline_text_v3(
             draw,
@@ -396,11 +396,11 @@ class ImageTextProcessor:
         """
         if font is None:
             font = ImageFont.truetype(
-                image_utils_config.default_font_file.resolve_path, image_utils_config.default_font_size
+                image_utils_config.default_font.resolve_path, image_utils_config.default_font_size
             )
         elif isinstance(font, str):
             font = ImageFont.truetype(
-                image_utils_config.default_font_folder(font).resolve_path, image_utils_config.default_font_size
+                image_utils_config.get_custom_name_font(font).resolve_path, image_utils_config.default_font_size
             )
 
         spl_num = 0
@@ -433,7 +433,7 @@ class ImageEffectProcessor:
     ) -> 'TemporaryResource':
         """输出指定格式图片到文件"""
         if isinstance(file, str):
-            save_file = image_utils_config.tmp_output_folder(file)
+            save_file = image_utils_config.default_output_folder(file)
         else:
             save_file = file
 
@@ -490,7 +490,7 @@ class ImageEffectProcessor:
         edge_w = width // 32 if width // 32 <= 10 else 10
         edge_h = height // 32 if height // 32 <= 10 else 10
 
-        font = ImageFont.truetype(image_utils_config.default_font_file.resolve_path, width // 32)
+        font = ImageFont.truetype(image_utils_config.default_font.resolve_path, width // 32)
         text_kwargs = {
             'text': text,
             'font': font,
