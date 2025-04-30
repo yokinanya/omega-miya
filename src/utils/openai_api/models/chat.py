@@ -8,7 +8,9 @@
 @Software       : PyCharm
 """
 
-from typing import Literal
+from typing import Literal, Any
+
+from pydantic import Field, field_validator
 
 from .base import BaseOpenAIModel
 from .message import MessageContent
@@ -25,7 +27,16 @@ class Choice(BaseOpenAIModel):
         'tool_calls',
         'function_call',
         'insufficient_system_resource',
-    ]
+        'not_provided',
+    ] = Field(default='not_provided')
+
+    @field_validator('finish_reason', mode='before')
+    @classmethod
+    def _enforce_no_null_finish_reason(cls, value: Any) -> Any:
+        if value is None:
+            return 'not_provided'
+        else:
+            return value
 
 
 class PromptTokensDetails(BaseOpenAIModel):
