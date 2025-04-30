@@ -5,7 +5,7 @@
 @Project        : nonebot2_miya
 @Description    : 核心管理
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 from datetime import timedelta
@@ -52,7 +52,7 @@ async def handle_parse_args(state: T_State, cmd_arg: Annotated[BaseMessage, Comm
         state.update({f'omega_arg_{index}': arg})
 
 
-@omega.command(tuple(), aliases={'Omega'}, permission=None, priority=10).handle()
+@omega.command((), aliases={'Omega'}, permission=None, priority=10).handle()
 async def handle_hello(matcher: Matcher):
     await matcher.finish('你好呀~\n我是Omega Miya~\n请问您今天要来点喵娘吗?')
 

@@ -2,10 +2,10 @@
 @Author         : Ailitonia
 @Date           : 2021/09/01 1:20
 @FileName       : utils.py
-@Project        : nonebot2_miya 
+@Project        : nonebot2_miya
 @Description    : 塔罗牌图片生成相关模块
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 from datetime import datetime

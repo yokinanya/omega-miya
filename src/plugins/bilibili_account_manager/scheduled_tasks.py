@@ -5,7 +5,7 @@
 @Project        : omega-miya
 @Description    : 账户鉴权信息更新定时任务
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 from nonebot import get_driver, logger

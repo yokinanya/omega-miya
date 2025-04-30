@@ -8,7 +8,7 @@
 @Software       : PyCharm
 """
 
-from typing import Iterable
+from collections.abc import Iterable
 
 from lxml import etree
 from nonebot.log import logger

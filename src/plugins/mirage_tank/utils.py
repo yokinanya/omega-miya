@@ -2,10 +2,10 @@
 @Author         : Ailitonia
 @Date           : 2022/06/07 20:15
 @FileName       : utils.py
-@Project        : nonebot2_miya 
+@Project        : nonebot2_miya
 @Description    : 幻影坦克图片合成工具
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 from collections.abc import Callable
@@ -16,7 +16,7 @@ from nonebot.utils import run_sync
 
 from src.resource import TemporaryResource
 from src.utils import OmegaRequests
-from src.utils.image_utils import ImageLoader, ImageEffectProcessor
+from src.utils.image_utils import ImageEffectProcessor, ImageLoader
 
 _TMP_FOLDER: TemporaryResource = TemporaryResource('mirage_tank')
 """缓存路径"""

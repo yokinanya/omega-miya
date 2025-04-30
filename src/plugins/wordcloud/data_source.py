@@ -69,7 +69,7 @@ async def add_user_dict(content: str) -> None:
     """新增用户词典内容"""
     async with wordcloud_plugin_config.user_dict_file.async_open('a+', encoding='utf-8') as af:
         await af.seek(0, SEEK_SET)
-        exists_user_dicts = set(x.strip() for x in await af.readlines())
+        exists_user_dicts = {x.strip() for x in await af.readlines()}
         if content not in exists_user_dicts:
             await af.seek(0, SEEK_END)
             await af.write(f'{content.strip()}\n')

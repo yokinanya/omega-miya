@@ -2,10 +2,10 @@
 @Author         : Ailitonia
 @Date           : 2022/05/04 18:17
 @FileName       : model.py
-@Project        : nonebot2_miya 
+@Project        : nonebot2_miya
 @Description    : schedule message model
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 from typing import Literal

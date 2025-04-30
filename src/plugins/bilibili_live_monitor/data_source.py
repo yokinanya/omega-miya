@@ -5,7 +5,7 @@
 @Project        : nonebot2_miya
 @Description    : 直播间开播信息
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 from typing import TYPE_CHECKING

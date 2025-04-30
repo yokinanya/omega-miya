@@ -5,7 +5,7 @@
 @Project        : nonebot2_miya
 @Description    : 骰子插件
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 import random
@@ -34,7 +34,7 @@ roll = CommandGroup(
 
 
 @roll.command(
-    tuple(),
+    (),
     aliases={'Roll'},
     handlers=[get_command_str_single_arg_parser_handler('expression')],
 ).got('expression', prompt='请掷骰子: <骰子个数>D<骰子面数>')

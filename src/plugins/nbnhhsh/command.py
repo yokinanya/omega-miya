@@ -18,7 +18,7 @@ from src.params.handler import get_command_str_single_arg_parser_handler
 from src.service import OmegaMatcherInterface as OmMI
 from src.service import enable_processor_state
 from .config import nbnhhsh_plugin_config
-from .data_source import simple_guess, ai_guess
+from .data_source import ai_guess, simple_guess
 
 
 @on_command(

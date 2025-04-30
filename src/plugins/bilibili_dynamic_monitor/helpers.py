@@ -2,10 +2,10 @@
 @Author         : Ailitonia
 @Date           : 2022/05/02 23:52
 @FileName       : utils.py
-@Project        : nonebot2_miya 
+@Project        : nonebot2_miya
 @Description    : Bilibili Dynamic utils
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 from collections.abc import Sequence

@@ -5,7 +5,7 @@
 @Project        : omega-miya
 @Description    : 邮件插件常量
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 from typing import Literal

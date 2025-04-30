@@ -5,7 +5,7 @@
 @Project        : omega-miya
 @Description    : OneBot V11 反撤回插件工具函数
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 from datetime import datetime

@@ -5,7 +5,7 @@
 @Project        : nonebot2_miya
 @Description    : Moe Plugin Consts
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 from typing import Literal

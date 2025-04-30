@@ -5,5 +5,5 @@
 @Project        : nonebot2_miya
 @Description    : 插件模块
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """

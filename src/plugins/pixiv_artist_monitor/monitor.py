@@ -2,10 +2,10 @@
 @Author         : Ailitonia
 @Date           : 2022/04/29 18:41
 @FileName       : monitor.py
-@Project        : nonebot2_miya 
+@Project        : nonebot2_miya
 @Description    : Pixiv User Artwork Update Monitor
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 from nonebot.log import logger

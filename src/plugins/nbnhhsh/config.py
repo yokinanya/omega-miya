@@ -5,7 +5,7 @@
 @Project        : omega-miya
 @Description    : Nbnhhsh 插件配置
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 from typing import Literal

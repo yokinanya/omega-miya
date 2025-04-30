@@ -5,7 +5,7 @@
 @Project        : nonebot2_miya
 @Description    : 幻影坦克图片生成器
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 from nonebot.plugin import PluginMetadata

@@ -5,7 +5,7 @@
 @Project        : nonebot2_miya
 @Description    : 直播间检查工具
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 from datetime import datetime
@@ -121,7 +121,7 @@ async def _format_live_room_update_message(
     send_message = '【bilibili直播间】\n'
     need_url = False
 
-    if isinstance(update_data.update, (BilibiliLiveRoomStartLivingWithUpdateTitle, BilibiliLiveRoomStartLiving)):
+    if isinstance(update_data.update, BilibiliLiveRoomStartLivingWithUpdateTitle | BilibiliLiveRoomStartLiving):
         # 开播
         if isinstance(room_info.live_time, datetime):
             start_time = room_info.live_time.strftime('%Y-%m-%d %H:%M:%S')

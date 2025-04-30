@@ -5,7 +5,7 @@
 @Project        : nonebot2_miya
 @Description    : 工具函数
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 from nonebot.plugin import get_loaded_plugins, get_plugin
@@ -73,7 +73,7 @@ def get_plugin_auth_node(plugin_name: str) -> list[str]:
     if any(s.cooldown for s in (parse_processor_state(m._default_state) for m in plugin.matcher)):
         nodes.append(SKIP_COOLDOWN_PERMISSION_NODE)
 
-    return sorted(list(set(nodes)))
+    return sorted(set(nodes))
 
 
 def list_command_by_priority() -> str:

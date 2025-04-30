@@ -5,7 +5,7 @@
 @Project        : omega-miya
 @Description    : 常量及内置提示词
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 IMAGE_DESC_PROMPT = """# Profile

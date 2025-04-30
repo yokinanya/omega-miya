@@ -5,7 +5,7 @@
 @Project        : nonebot2_miya
 @Description    : 签到插件异常
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 from src.exception import PluginException

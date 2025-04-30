@@ -5,7 +5,7 @@
 @Project        : nonebot2_miya
 @Description    : 数据库手动导入/更新工具
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 from asyncio import sleep as async_sleep

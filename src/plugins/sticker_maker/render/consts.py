@@ -5,7 +5,7 @@
 @Project        : nonebot2_miya
 @Description    : 标签包模板常量
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 from src.resource import StaticResource, TemporaryResource

@@ -17,7 +17,7 @@ from pydantic import BaseModel, ConfigDict
 
 from src.database import SystemSettingDAL, begin_db_session
 from src.utils.crypto import AESEncryptor
-from src.utils.image_utils import ImageLoader, ImageEffectProcessor
+from src.utils.image_utils import ImageEffectProcessor, ImageLoader
 from .consts import (
     DB_ENTITY_SETTING_MODULE_NAME,
     DB_ENTITY_SETTING_PLUGIN_NAME,
@@ -143,7 +143,7 @@ def get_unseen_mail_data(address: str, server_host: str, password: str) -> list[
     """获取未读邮件列表"""
     mail = ImapMailbox(host=server_host, address=address, password=password)
     unseen_mails = mail.get_mail_list(None, 'UNSEEN')
-    result = [x for x in unseen_mails]
+    result = list(unseen_mails)
     return result
 
 

@@ -3,9 +3,9 @@
 @Date           : 2023/7/17 3:51
 @FileName       : __init__
 @Project        : nonebot2_miya
-@Description    : 
+@Description    :
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 from nonebot.plugin import PluginMetadata

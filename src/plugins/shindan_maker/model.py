@@ -3,9 +3,9 @@
 @Date           : 2024/4/25 上午12:20
 @FileName       : model
 @Project        : nonebot2_miya
-@Description    : 
+@Description    :
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 from pydantic import BaseModel, ConfigDict

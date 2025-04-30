@@ -5,7 +5,7 @@
 @Project        : nonebot2_miya
 @Description    : Pixivision plugin
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 from nonebot.plugin import PluginMetadata

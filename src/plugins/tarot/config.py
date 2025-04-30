@@ -2,10 +2,10 @@
 @Author         : Ailitonia
 @Date           : 2021/09/01 1:12
 @FileName       : config.py
-@Project        : nonebot2_miya 
+@Project        : nonebot2_miya
 @Description    : 配置文件
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 from typing import Literal

@@ -472,8 +472,8 @@ class ZhouChecker(AssScriptLineTool):
         self.__style_mode = style_mode
         self.__fx_mode = fx_mode
         self.__is_init = False
-        self.__event_lines: list[AssScriptLine] = list()
-        self.__header_lines: list[AssScriptLine] = list()
+        self.__event_lines: list[AssScriptLine] = []
+        self.__header_lines: list[AssScriptLine] = []
         self.__styles = set()
 
     async def _init_file(self, auto_style: bool = False) -> None:
@@ -559,7 +559,7 @@ class ZhouChecker(AssScriptLineTool):
         flash_count = 0
 
         # 构建event_line字典
-        event_lines = dict()
+        event_lines = {}
         for line in self.__event_lines:
             event_lines[line.event_line_num] = line
 

@@ -14,8 +14,8 @@ from typing import TYPE_CHECKING
 
 from src.utils.openai_api import ChatSession
 from .config import roguelike_story_plugin_config
-from .consts import STORY_CREATE_PROMPT, CONTINUE_PROMPT, SAFE_ROLL_PROMPT, UNLIMITED_ROLL_PROMPT
-from .models import Story, CurrentSituation, NextSituation, RollCondition, RollResults
+from .consts import CONTINUE_PROMPT, SAFE_ROLL_PROMPT, STORY_CREATE_PROMPT, UNLIMITED_ROLL_PROMPT
+from .models import CurrentSituation, NextSituation, RollCondition, RollResults, Story
 
 if TYPE_CHECKING:
     from src.service import OmegaMatcherInterface as OmMI

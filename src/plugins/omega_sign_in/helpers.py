@@ -5,7 +5,7 @@
 @Project        : nonebot2_miya
 @Description    : 签到工具类函数
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 import hashlib

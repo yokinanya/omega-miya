@@ -2,10 +2,10 @@
 @Author         : Ailitonia
 @Date           : 2022/05/04 18:17
 @FileName       : utils.py
-@Project        : nonebot2_miya 
+@Project        : nonebot2_miya
 @Description    : 定时消息工具
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 from typing import TYPE_CHECKING

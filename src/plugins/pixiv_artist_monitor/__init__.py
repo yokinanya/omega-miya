@@ -5,7 +5,7 @@
 @Project        : nonebot2_miya
 @Description    : Pixiv 用户作品助手
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 from nonebot.plugin import PluginMetadata

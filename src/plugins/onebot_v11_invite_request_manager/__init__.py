@@ -5,7 +5,7 @@
 @Project        : nonebot2_miya
 @Description    : 好友与群组邀请管理
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 from nonebot.plugin import PluginMetadata

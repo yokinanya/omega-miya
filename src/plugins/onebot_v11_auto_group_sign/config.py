@@ -5,7 +5,7 @@
 @Project        : nonebot2_miya
 @Description    : 自动群打卡配置
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 from nonebot import get_plugin_config, logger

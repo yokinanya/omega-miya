@@ -2,10 +2,10 @@
 @Author         : Ailitonia
 @Date           : 2021/08/31 21:08
 @FileName       : tarot_typing.py
-@Project        : nonebot2_miya 
+@Project        : nonebot2_miya
 @Description    : 类型
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 from enum import Enum, unique

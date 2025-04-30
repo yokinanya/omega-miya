@@ -2,10 +2,10 @@
 @Author         : Ailitonia
 @Date           : 2022/05/02 23:50
 @FileName       : monitor.py
-@Project        : nonebot2_miya 
+@Project        : nonebot2_miya
 @Description    : Bilibili Dynamic monitor
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 from asyncio import Queue as AsyncQueue

@@ -5,7 +5,7 @@
 @Project        : nonebot2_miya
 @Description    : Nhentai
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 from typing import Annotated
@@ -34,7 +34,7 @@ nhentai = CommandGroup(
 
 
 @nhentai.command(
-    tuple(),
+    (),
     aliases={'nh', 'NH'},
     handlers=[get_command_str_single_arg_parser_handler('gid')],
 ).got('gid', prompt='想要查看哪个作品呢? 请输入作品ID:')

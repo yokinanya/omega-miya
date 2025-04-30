@@ -2,10 +2,10 @@
 @Author         : Ailitonia
 @Date           : 2021/09/01 0:22
 @FileName       : tarot_resources.py
-@Project        : nonebot2_miya 
+@Project        : nonebot2_miya
 @Description    : 卡片资源 同样是硬编码在这里了:(
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 from src.resource import StaticResource
@@ -91,7 +91,7 @@ def get_tarot_resource(resource_name: str | None = None) -> TarotResource:
 
 
 def get_available_tarot_resource() -> list[str]:
-    return [x for x in _INTERNAL_TAROT_RESOURCE.keys()]
+    return list(_INTERNAL_TAROT_RESOURCE.keys())
 
 
 __all__ = [

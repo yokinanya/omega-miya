@@ -2,10 +2,10 @@
 @Author         : Ailitonia
 @Date           : 2022/05/07 21:02
 @FileName       : render.py
-@Project        : nonebot2_miya 
+@Project        : nonebot2_miya
 @Description    : Sticker Renders
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 from collections.abc import Sequence
@@ -16,7 +16,7 @@ import numpy
 from PIL import Image, ImageDraw, ImageEnhance, ImageFont
 
 from src.utils import OmegaRequests
-from src.utils.image_utils import ImageTextProcessor, ImageEffectProcessor
+from src.utils.image_utils import ImageEffectProcessor, ImageTextProcessor
 from src.utils.tencent_cloud_api import TencentTMT
 from .consts import FONT_RESOURCE, STATIC_RESOURCE, TMP_PATH
 from .model import BaseStickerRender

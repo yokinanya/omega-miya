@@ -5,7 +5,7 @@
 @Project        : nonebot2_miya
 @Description    : 更新任务管理
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 from nonebot import get_driver, logger

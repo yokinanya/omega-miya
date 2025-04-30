@@ -5,7 +5,7 @@
 @Project        : nonebot2_miya
 @Description    : 工具类实现, lib-onedice 二次包装
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 from nonebot.utils import run_sync

@@ -5,7 +5,7 @@
 @Project        : nonebot2_miya
 @Description    : bilibili 账户及凭据管理工具
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 from typing import Annotated

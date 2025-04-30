@@ -2,10 +2,10 @@
 @Author         : Ailitonia
 @Date           : 2021/10/07 0:57
 @FileName       : command.py
-@Project        : nonebot2_miya 
+@Project        : nonebot2_miya
 @Description    : 随机口球
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 import functools

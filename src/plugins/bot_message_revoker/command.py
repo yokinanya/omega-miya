@@ -2,10 +2,10 @@
 @Author         : Ailitonia
 @Date           : 2021/07/17 22:36
 @FileName       : omega_recaller.py
-@Project        : nonebot2_miya 
+@Project        : nonebot2_miya
 @Description    : 快速撤回 bot 发送的消息
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 from nonebot.adapters.onebot.v11 import Bot as OneBotV11Bot
@@ -45,7 +45,7 @@ async def handle_recall_onebot_v11(bot: OneBotV11Bot, event: OneBotV11MessageEve
 @self_recall.handle()
 async def handle_recall_telegram(bot: TelegramBot, event: TelegramPrivateMessageEvent | TelegramGroupMessageEvent):
     if event.reply_to_message:
-        if isinstance(event.reply_to_message, (TelegramPrivateMessageEvent, TelegramGroupMessageEvent)):
+        if isinstance(event.reply_to_message, TelegramPrivateMessageEvent | TelegramGroupMessageEvent):
             if bot.self_id == str(event.reply_to_message.from_.id):
                 chat_id = event.reply_to_message.chat.id
                 message_id = event.reply_to_message.message_id

@@ -2,10 +2,10 @@
 @Author         : Ailitonia
 @Date           : 2021/05/30 16:48
 @FileName       : data_source.py
-@Project        : nonebot2_miya 
+@Project        : nonebot2_miya
 @Description    : Http Cat Utils
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 from src.exception import WebSourceException

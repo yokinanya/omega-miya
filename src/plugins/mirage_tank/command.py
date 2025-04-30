@@ -2,10 +2,10 @@
 @Author         : Ailitonia
 @Date           : 2022/06/07 20:13
 @FileName       : mirage_tank
-@Project        : nonebot2_miya 
+@Project        : nonebot2_miya
 @Description    : 幻影坦克图片生成器
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 from typing import Annotated

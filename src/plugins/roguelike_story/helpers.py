@@ -15,6 +15,7 @@ from .consts import INTRO_TEXT
 
 if TYPE_CHECKING:
     from src.service import OmegaMatcherInterface as OmMI
+
     from .models import RollResults
     from .session import StorySession
 

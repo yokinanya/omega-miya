@@ -5,7 +5,7 @@
 @Project        : nonebot2_miya
 @Description    : Bilibili 用户动态订阅插件常量
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 from typing import Literal

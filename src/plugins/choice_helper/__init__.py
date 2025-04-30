@@ -5,7 +5,7 @@
 @Project        : nonebot2_miya
 @Description    : 选择困难症帮助器插件
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 from nonebot.plugin import PluginMetadata

@@ -5,7 +5,7 @@
 @Project        : nonebot2_miya
 @Description    : 来源适配
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 from .booru_artwork import BooruArtworksUpdater
