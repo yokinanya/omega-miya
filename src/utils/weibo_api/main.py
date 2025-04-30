@@ -16,8 +16,8 @@ from .config import weibo_api_config
 from .helper import parse_weibo_card_from_status_page
 from .model import (
     WeiboCard,
-    WeiboCards,
     WeiboCardStatus,
+    WeiboCards,
     WeiboExtend,
     WeiboRealtimeHot,
     WeiboRealtimeHotCard,

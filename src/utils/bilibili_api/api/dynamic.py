@@ -11,7 +11,7 @@
 from typing import Literal
 
 from .base import BilibiliCommon
-from ..models import Dynamics, DynDetail
+from ..models import DynDetail, Dynamics
 
 
 class BilibiliDynamic(BilibiliCommon):

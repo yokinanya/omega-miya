@@ -8,7 +8,6 @@
 @Software       : PyCharm
 """
 
-from collections.abc import Iterable
 from typing import TYPE_CHECKING, Literal, Self
 
 from src.compat import dump_obj_as
@@ -27,8 +26,12 @@ from .models import (
 )
 
 if TYPE_CHECKING:
+    from collections.abc import Iterable
+
     from src.resource import BaseResource
     from src.utils.omega_requests.types import CookieTypes, HeaderTypes, QueryTypes
+
+    type ChatMessage = Message | Iterable[MessageContent]
 
 
 class BaseOpenAIClient(BaseCommonAPI):
@@ -122,7 +125,7 @@ class BaseOpenAIClient(BaseCommonAPI):
     async def create_chat_completion(
             self,
             model: str,
-            message: 'Message' | Iterable['MessageContent'],
+            message: 'ChatMessage',
             *,
             timeout: int = 60,
             **kwargs,

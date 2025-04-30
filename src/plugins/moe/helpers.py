@@ -19,7 +19,7 @@ from src.service import OmegaMessageSegment
 from src.service.artwork_collection import get_artwork_collection, get_artwork_collection_type
 from src.service.artwork_proxy.add_ons.image_ops import ImageOpsMixin
 from .config import moe_plugin_config
-from .consts import ALL_MOE_PLUGIN_ARTWORK_ORIGIN, ALLOW_MOE_PLUGIN_ARTWORK_ORIGIN, ALLOW_R18_NODE
+from .consts import ALLOW_MOE_PLUGIN_ARTWORK_ORIGIN, ALLOW_R18_NODE, ALL_MOE_PLUGIN_ARTWORK_ORIGIN
 
 if TYPE_CHECKING:
     from src.service import OmegaMatcherInterface

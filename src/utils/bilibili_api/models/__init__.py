@@ -9,11 +9,11 @@
 """
 
 from .dynamic import (
-    Dynamics,
-    DynamicType,
     DynData,
     DynDetail,
     DynItemModules,
+    DynamicType,
+    Dynamics,
 )
 from .live import (
     RoomBaseInfo,

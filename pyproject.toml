@@ -158,6 +158,7 @@ ignore = [
     "C901", # complex-structure
     "PT023", # pytest-incorrect-mark-parentheses-style
 ]
+isort.case-sensitive = true
 flake8-quotes.inline-quotes = "single"
 
 
