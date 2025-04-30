@@ -99,7 +99,7 @@ class StorySession:
         self._is_inited = True
         return story
 
-    async def fast_roll(self, action: str) -> RollResults:
+    async def fast_roll(self, action: str, *, current_situation: str = '') -> RollResults:
         """快速掷骰, 无需前文预设"""
         if self.is_processing:
             raise RuntimeError('StorySession is processing')
@@ -115,7 +115,7 @@ class StorySession:
                 model_name=roguelike_story_plugin_config.roguelike_story_plugin_ai_model_name,
                 init_system_message=roll_prompt,
             ).advance_chat(
-                RollCondition(current_situation='', action=action).model_dump_json(),
+                RollCondition(current_situation=current_situation, action=action).model_dump_json(),
                 response_format=roguelike_story_plugin_config.roguelike_story_plugin_ai_json_output,
                 model_type=RollResults,
                 temperature=roguelike_story_plugin_config.roguelike_story_plugin_ai_temperature,
