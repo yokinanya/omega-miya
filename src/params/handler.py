@@ -5,7 +5,7 @@
 @Project        : nonebot2_miya
 @Description    : 通用处理流程
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 from typing import Annotated, Any

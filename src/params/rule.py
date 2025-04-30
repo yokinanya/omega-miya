@@ -5,7 +5,7 @@
 @Project        : nonebot2_miya
 @Description    : 自定义 Rule 依赖注入
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 from nonebot.adapters import Bot as BaseBot
