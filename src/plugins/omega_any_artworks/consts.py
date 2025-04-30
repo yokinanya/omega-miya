@@ -3,7 +3,7 @@
 @Date           : 2024/8/31 上午2:08
 @FileName       : consts
 @Project        : omega-miya
-@Description    : 
+@Description    :
 @GitHub         : https://github.com/Ailitonia
 @Software       : PyCharm
 """

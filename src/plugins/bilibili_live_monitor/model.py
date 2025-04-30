@@ -2,10 +2,10 @@
 @Author         : Ailitonia
 @Date           : 2022/05/03 19:45
 @FileName       : model.py
-@Project        : nonebot2_miya 
+@Project        : nonebot2_miya
 @Description    : Bilibili Dynamic Model
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 from typing import Literal
@@ -36,7 +36,7 @@ class BilibiliLiveRoomStatus(BaseModel):
     def __sub__(self, other) -> 'BilibiliLiveRoomStatusUpdate':
         if isinstance(other, BilibiliLiveRoomStatus):
             differ = set(self.model_dump().items()) - set(other.model_dump().items())
-            differ_data = {k: v for k, v in differ}
+            differ_data = dict(differ)
             differ_data = None if not differ_data else differ_data
             return BilibiliLiveRoomStatusUpdate.model_validate({'is_update': self != other, 'update': differ_data})
         else:
@@ -118,6 +118,10 @@ class BilibiliLiveRoomStatusUpdate(BaseModel):
         if (is_update and update is None) or (not is_update and update is not None):
             raise ValueError('status update info do not match')
         return values
+
+    @property
+    def update_type(self) -> str:
+        return self.update.__class__.__name__ if self.update is not None else 'BilibiliLiveRoomHoldingState'
 
 
 __all__ = [

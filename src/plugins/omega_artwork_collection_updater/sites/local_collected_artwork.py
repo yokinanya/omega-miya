@@ -5,7 +5,7 @@
 @Project        : nonebot2_miya
 @Description    : 本地图片自动更新工具
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 from src.service.artwork_collection import LocalCollectedArtworkCollection

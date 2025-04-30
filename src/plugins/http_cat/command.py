@@ -2,10 +2,10 @@
 @Author         : Ailitonia
 @Date           : 2021/05/30 16:47
 @FileName       : http_cat.py
-@Project        : nonebot2_miya 
+@Project        : nonebot2_miya
 @Description    : Get http cat
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 from typing import Annotated

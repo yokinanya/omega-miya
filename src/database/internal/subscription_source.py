@@ -2,10 +2,10 @@
 @Author         : Ailitonia
 @Date           : 2022/12/04 16:59
 @FileName       : subscription_source.py
-@Project        : nonebot2_miya 
+@Project        : nonebot2_miya
 @Description    : SubscriptionSource DAL
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 from copy import deepcopy

@@ -5,7 +5,7 @@
 @Project        : nonebot2_miya
 @Description    : 表情包助手插件
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 from nonebot.plugin import PluginMetadata

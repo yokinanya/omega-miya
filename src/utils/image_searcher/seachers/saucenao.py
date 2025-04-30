@@ -2,16 +2,15 @@
 @Author         : Ailitonia
 @Date           : 2022/05/08 16:23
 @FileName       : saucenao.py
-@Project        : nonebot2_miya 
+@Project        : nonebot2_miya
 @Description    : Saucenao 识图引擎
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, ClassVar
 
-from nonebot.log import logger
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 from src.compat import AnyUrlStr as AnyUrl
 from src.compat import parse_obj_as
@@ -19,7 +18,8 @@ from ..config import image_searcher_config
 from ..model import BaseImageSearcherAPI, ImageSearchingResult
 
 if TYPE_CHECKING:
-    from nonebot.internal.driver import CookieTypes, HeaderTypes
+    from src.resource import BaseResource
+    from src.utils.omega_common_api.types import CookieTypes, HeaderTypes
 
 
 class BaseSaucenaoModel(BaseModel):
@@ -51,7 +51,7 @@ class SaucenaoResult(BaseSaucenaoModel):
             index_name: str
 
         class _BaseData(BaseSaucenaoModel):
-            ext_urls: list[AnyUrl] | None = None
+            ext_urls: list[AnyUrl] = Field(default_factory=list)
 
             @property
             def data_text(self) -> str:
@@ -151,24 +151,26 @@ class SaucenaoResult(BaseSaucenaoModel):
                 return text
 
         header: _Header
-        data: (_AnimeData |
-               _TwitterData |
-               _NicoData |
-               _PawooData |
-               _PixivData |
-               _EHData |
-               _TitleAuthorData |
-               _DefaultData |
-               _NullData)
+        data: (
+                _AnimeData
+                | _TwitterData
+                | _NicoData
+                | _PawooData
+                | _PixivData
+                | _EHData
+                | _TitleAuthorData
+                | _DefaultData
+                | _NullData
+        )
 
     header: _GlobalStatusHeader
-    results: list[_Result] | None = None
+    results: list[_Result] = Field(default_factory=list)
 
 
 class Saucenao(BaseImageSearcherAPI):
     """Saucenao 识图引擎"""
 
-    _similarity_threshold: int = 60
+    _similarity_threshold: ClassVar[int] = 60
     """搜索结果相似度阈值"""
 
     @classmethod
@@ -181,33 +183,19 @@ class Saucenao(BaseImageSearcherAPI):
 
     @classmethod
     def _get_default_headers(cls) -> 'HeaderTypes':
-        return {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:75.0) Gecko/20100101 Firefox/75.0'}
+        return {'User-Agent': 'PostmanRuntime/7.29.0'}
 
     @classmethod
     def _get_default_cookies(cls) -> 'CookieTypes':
         return None
 
-    @property
-    def api_url(self) -> str:
-        return f'{self._get_root_url()}/search.php'
+    @classmethod
+    def get_api_url(cls) -> str:
+        return f'{cls._get_root_url()}/search.php'
 
-    async def search(self) -> list[ImageSearchingResult]:
-        params = {
-            'output_type': 2,
-            'testmode': 1,
-            'numres': 6,
-            'db': 999,
-            'url': self.image_url
-        }
-        if image_searcher_config.saucenao_api_key:
-            params.update({'api_key': image_searcher_config.saucenao_api_key})
-
-        saucenao_result = SaucenaoResult.model_validate(await self._get_json(url=self.api_url, params=params))
-
-        if saucenao_result.results is None:
-            logger.warning(f'Saucenao | Not result found for image, {saucenao_result.header.message}')
-            return []
-
+    @classmethod
+    def _parse_saucenao_result(cls, saucenao_result: SaucenaoResult) -> list[ImageSearchingResult]:
+        """解析 SaucenaoResult 到 ImageSearchingResult"""
         data = (
             {
                 'source': f'{x.header.index_name}\n{x.data.data_text}',
@@ -215,10 +203,58 @@ class Saucenao(BaseImageSearcherAPI):
                 'similarity': x.header.similarity,
                 'thumbnail': x.header.thumbnail
             }
-            for x in saucenao_result.results if x.header.similarity >= self._similarity_threshold
+            for x in saucenao_result.results if x.header.similarity >= cls._similarity_threshold
         )
 
         return parse_obj_as(list[ImageSearchingResult], data)
+
+    @classmethod
+    async def _search_local_image(cls, image: 'BaseResource') -> list[ImageSearchingResult]:
+        with image.open('rb') as f:
+            files = {
+                'file': (image.path.name, f, 'application/octet-stream'),
+            }
+            params = {
+                'output_type': '2',
+                'numres': '6',
+                'db': '999',
+            }
+            if image_searcher_config.image_searcher_saucenao_api_key:
+                params.update({'api_key': image_searcher_config.image_searcher_saucenao_api_key})
+
+            result = await cls._post_json(cls.get_api_url(), params=params, files=files)  # type: ignore
+
+        return cls._parse_saucenao_result(saucenao_result=SaucenaoResult.model_validate(result))
+
+    @classmethod
+    async def _search_bytes_image(cls, image: bytes) -> list[ImageSearchingResult]:
+        files = {
+            'file': ('blob', image, 'application/octet-stream'),
+        }
+        params = {
+            'output_type': '2',
+            'numres': '6',
+            'db': '999',
+        }
+        if image_searcher_config.image_searcher_saucenao_api_key:
+            params.update({'api_key': image_searcher_config.image_searcher_saucenao_api_key})
+
+        result = await cls._post_json(cls.get_api_url(), params=params, files=files)  # type: ignore
+        return cls._parse_saucenao_result(saucenao_result=SaucenaoResult.model_validate(result))
+
+    @classmethod
+    async def _search_url_image(cls, image: str) -> list[ImageSearchingResult]:
+        params = {
+            'output_type': '2',
+            'numres': '6',
+            'db': '999',
+            'url': image,
+        }
+        if image_searcher_config.image_searcher_saucenao_api_key:
+            params.update({'api_key': image_searcher_config.image_searcher_saucenao_api_key})
+
+        result = await cls._get_json(cls.get_api_url(), params=params)
+        return cls._parse_saucenao_result(saucenao_result=SaucenaoResult.model_validate(result))
 
 
 __all__ = [

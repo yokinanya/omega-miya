@@ -2,10 +2,10 @@
 @Author         : Ailitonia
 @Date           : 2022/12/04 11:57
 @FileName       : friendship.py
-@Project        : nonebot2_miya 
+@Project        : nonebot2_miya
 @Description    : Friendship DAL
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 from datetime import datetime

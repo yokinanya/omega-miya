@@ -2,10 +2,10 @@
 @Author         : Ailitonia
 @Date           : 2021/08/15 1:20
 @FileName       : utils.py
-@Project        : nonebot2_miya 
+@Project        : nonebot2_miya
 @Description    : 统计做图工具
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 from collections.abc import Sequence

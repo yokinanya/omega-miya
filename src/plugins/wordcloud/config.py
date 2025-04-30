@@ -8,7 +8,6 @@
 @Software       : PyCharm
 """
 
-from dataclasses import dataclass
 from typing import Any, Literal
 
 from nonebot import get_plugin_config, logger
@@ -42,7 +41,37 @@ class WordcloudPluginConfig(BaseModel):
     # 生成词云频率的颜色映射图
     wordcloud_plugin_colormap: str = 'plasma'
 
+    # 资源文件配置
+    # 内置的字体文件
+    wordcloud_plugin_default_font_name: str = 'fzzxhk.ttf'
+    # 默认缓存资源保存路径
+    wordcloud_plugin_default_output_folder_name: Literal['wordcloud'] = 'wordcloud'
+
     model_config = ConfigDict(extra='ignore')
+
+    @property
+    def default_font(self) -> StaticResource:
+        return StaticResource('fonts', self.wordcloud_plugin_default_font_name)
+
+    @property
+    def default_stop_words_file(self) -> StaticResource:
+        """默认停用词清单"""
+        return StaticResource('docs', 'wordcloud', 'stop_words', 'default_stop_words.txt')
+
+    @property
+    def user_dict_file(self) -> TemporaryResource:
+        """用户自定义词典"""
+        return TemporaryResource(self.wordcloud_plugin_default_output_folder_name, 'user_dict', 'user_dict.txt')
+
+    @property
+    def default_output_folder(self) -> TemporaryResource:
+        """默认输出路径"""
+        return TemporaryResource(self.wordcloud_plugin_default_output_folder_name, 'output')
+
+    @property
+    def profile_image_folder(self) -> TemporaryResource:
+        """头像缓存路径"""
+        return TemporaryResource(self.wordcloud_plugin_default_output_folder_name, 'profile_image')
 
     @property
     def default_image_size(self) -> tuple[int, int]:
@@ -58,22 +87,7 @@ class WordcloudPluginConfig(BaseModel):
         }
 
 
-@dataclass
-class WordcloudPluginLocalResourceConfig:
-    # 默认字体文件
-    default_font_file = StaticResource('fonts', 'fzzxhk.ttf')
-    # 默认停用词清单
-    default_stop_words_file = StaticResource('docs', 'wordcloud', 'stop_words', 'default_stop_words.txt')
-    # 默认输出路径
-    default_output_dir = TemporaryResource('wordcloud', 'output')
-    # 头像缓存路径
-    profile_image_tmp_dir = TemporaryResource('wordcloud', 'profile_image')
-    # 用户自定义词典位置
-    user_dict_file = TemporaryResource('wordcloud', 'user_dict', 'user_dict.txt')
-
-
 try:
-    wordcloud_plugin_resource_config = WordcloudPluginLocalResourceConfig()
     wordcloud_plugin_config = get_plugin_config(WordcloudPluginConfig)
 except ValidationError as e:
     import sys
@@ -83,5 +97,4 @@ except ValidationError as e:
 
 __all__ = [
     'wordcloud_plugin_config',
-    'wordcloud_plugin_resource_config',
 ]

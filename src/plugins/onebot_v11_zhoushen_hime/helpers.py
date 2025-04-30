@@ -9,7 +9,7 @@
 """
 
 import datetime
-from dataclasses import dataclass
+from pathlib import Path
 
 from nonebot.adapters.onebot.v11 import Bot as OneBotV11Bot
 from nonebot.utils import run_sync
@@ -410,11 +410,10 @@ class HandleResult(BaseModel):
     flash_count: int
 
 
-@dataclass
-class OutputHandleResult:
+class OutputHandleResult(BaseModel):
     """对外输出的处理结果"""
-    output_txt_file: TemporaryResource
-    output_ass_file: TemporaryResource
+    output_txt_file_path: Path
+    output_ass_file_path: Path
     character_count: int
     overlap_count: int
     flash_count: int
@@ -473,8 +472,8 @@ class ZhouChecker(AssScriptLineTool):
         self.__style_mode = style_mode
         self.__fx_mode = fx_mode
         self.__is_init = False
-        self.__event_lines: list[AssScriptLine] = list()
-        self.__header_lines: list[AssScriptLine] = list()
+        self.__event_lines: list[AssScriptLine] = []
+        self.__header_lines: list[AssScriptLine] = []
         self.__styles = set()
 
     async def _init_file(self, auto_style: bool = False) -> None:
@@ -560,7 +559,7 @@ class ZhouChecker(AssScriptLineTool):
         flash_count = 0
 
         # 构建event_line字典
-        event_lines = dict()
+        event_lines = {}
         for line in self.__event_lines:
             event_lines[line.event_line_num] = line
 
@@ -713,8 +712,8 @@ class ZhouChecker(AssScriptLineTool):
 
             await af.writelines([out_header_lines, '\n', out_event_lines])
 
-        result = OutputHandleResult(output_txt_file=output_txt_file,
-                                    output_ass_file=output_ass_file,
+        result = OutputHandleResult(output_txt_file_path=output_txt_file.path,
+                                    output_ass_file_path=output_ass_file.path,
                                     character_count=handle_result.character_count,
                                     overlap_count=handle_result.overlap_count,
                                     flash_count=handle_result.flash_count)
@@ -806,13 +805,13 @@ async def upload_result_file(group_id: int | str, bot: OneBotV11Bot, file_data: 
 
     await bot.call_api('upload_group_file',
                        group_id=group_id, folder=folder_id,
-                       file=file_data.output_txt_file.resolve_path,
-                       name=file_data.output_txt_file.path.name)
+                       file=file_data.output_txt_file_path.resolve().as_posix(),
+                       name=file_data.output_txt_file_path.name)
 
     await bot.call_api('upload_group_file',
                        group_id=group_id, folder=folder_id,
-                       file=file_data.output_ass_file.resolve_path,
-                       name=file_data.output_ass_file.path.name)
+                       file=file_data.output_ass_file_path.resolve().as_posix(),
+                       name=file_data.output_ass_file_path.name)
 
 
 __all__ = [

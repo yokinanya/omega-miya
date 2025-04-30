@@ -3,9 +3,9 @@
 @Date           : 2024/5/24 下午8:40
 @FileName       : import_from_v092
 @Project        : nonebot2_miya
-@Description    : 
+@Description    :
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 from datetime import date, datetime
@@ -16,10 +16,10 @@ from pydantic import BaseModel, ConfigDict
 
 from src.database import BotSelfDAL, SubscriptionSourceDAL, begin_db_session
 from src.resource import TemporaryResource
-from src.service.omega_api import OmegaApi
+from src.service.omega_api import OmegaAPI
 from src.service.omega_base import OmegaEntity
 
-api = OmegaApi(app_name='migration_from_old_version', enable_token_verify=True)
+api = OmegaAPI(app_name='migration_from_old_version', enable_token_verify=True)
 
 
 class DateBaseModel(BaseModel):

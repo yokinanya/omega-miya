@@ -5,7 +5,7 @@
 @Project        : omega-miya
 @Description    : search models
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 from typing import Literal
@@ -387,7 +387,7 @@ class SearchTypeResult(BaseBilibiliResponse):
 
     @property
     def all_results(self) -> list[AllSearchResultType]:
-        return [x for x in self.data.result]
+        return list(self.data.result)
 
 
 __all__ = [

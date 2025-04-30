@@ -5,7 +5,7 @@
 @Project        : nonebot2_miya
 @Description    : 自动群打卡 (go-cqhttp v1.0.0-rc3 以上版本可用)
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 from nonebot.plugin import PluginMetadata

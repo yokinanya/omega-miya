@@ -5,11 +5,11 @@
 @Project        : nonebot2_miya
 @Description    : 自定义 Rule 依赖注入
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
-from nonebot.internal.adapter import Bot as BaseBot
-from nonebot.internal.adapter import Event as BaseEvent
+from nonebot.adapters import Bot as BaseBot
+from nonebot.adapters import Event as BaseEvent
 from nonebot.rule import Rule
 
 from src.database import begin_db_session

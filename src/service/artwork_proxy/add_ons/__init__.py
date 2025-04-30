@@ -5,7 +5,7 @@
 @Project        : omega-miya
 @Description    : Artwork Proxy 附加工具 Mixin 类
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 from .image_ops import ImageOpsMixin, ImageOpsPlusPoolMixin

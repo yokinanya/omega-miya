@@ -2,10 +2,10 @@
 @Author         : Ailitonia
 @Date           : 2022/05/11 22:36
 @FileName       : import_old_version_data.py
-@Project        : nonebot2_miya 
-@Description    : 
+@Project        : nonebot2_miya
+@Description    :
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 import inspect

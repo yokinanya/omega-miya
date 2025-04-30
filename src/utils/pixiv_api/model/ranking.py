@@ -2,10 +2,10 @@
 @Author         : Ailitonia
 @Date           : 2022/04/05 23:15
 @FileName       : ranking.py
-@Project        : nonebot2_miya 
+@Project        : nonebot2_miya
 @Description    : Pixiv Ranking Model
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 from src.compat import AnyHttpUrlStr as AnyHttpUrl

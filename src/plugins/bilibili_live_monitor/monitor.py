@@ -2,10 +2,10 @@
 @Author         : Ailitonia
 @Date           : 2022/05/03 19:41
 @FileName       : monitor.py
-@Project        : nonebot2_miya 
+@Project        : nonebot2_miya
 @Description    : Bilibili Live monitor
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 from nonebot.log import logger

@@ -2,10 +2,10 @@
 @Author         : Ailitonia
 @Date           : 2022/12/04 15:36
 @FileName       : cooldown.py
-@Project        : nonebot2_miya 
+@Project        : nonebot2_miya
 @Description    : Cooldown DAL
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 from datetime import datetime

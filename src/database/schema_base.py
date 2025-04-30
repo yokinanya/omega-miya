@@ -5,7 +5,7 @@
 @Project        : nonebot2_miya
 @Description    : database declarative base
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 from sqlalchemy.ext.asyncio import AsyncAttrs

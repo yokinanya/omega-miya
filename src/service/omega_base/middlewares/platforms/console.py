@@ -5,7 +5,7 @@
 @Project        : nonebot2_miya
 @Description    : nonebot-console 协议适配
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 from typing import Any
@@ -125,6 +125,9 @@ class ConsoleEventDepend[Event_T: ConsoleEvent](BaseEventDepend[ConsoleBot, Even
     def get_user_nickname(self) -> str:
         raise NotImplementedError
 
+    def get_msg_mentioned_user_ids(self) -> list[str]:
+        raise NotImplementedError
+
     def get_msg_image_urls(self) -> list[str]:
         raise NotImplementedError
 
@@ -146,6 +149,9 @@ class ConsoleMessageEventDepend(ConsoleEventDepend[ConsoleMessageEvent]):
 
     def get_user_nickname(self) -> str:
         return self.event.get_user_id()
+
+    def get_msg_mentioned_user_ids(self) -> list[str]:
+        return []
 
     def get_msg_image_urls(self) -> list[str]:
         return []

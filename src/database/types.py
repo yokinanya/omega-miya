@@ -5,7 +5,7 @@
 @Project        : nonebot2_miya
 @Description    : 数据库 types 兼容
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 from sqlalchemy.dialects import mysql, postgresql, sqlite

@@ -2,10 +2,10 @@
 @Author         : Ailitonia
 @Date           : 2022/05/07 20:41
 @FileName       : model.py
-@Project        : nonebot2_miya 
+@Project        : nonebot2_miya
 @Description    : Sticker Render Model
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 import abc

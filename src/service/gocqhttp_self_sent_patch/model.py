@@ -2,10 +2,10 @@
 @Author         : Ailitonia
 @Date           : 2022/05/23 19:51
 @FileName       : model.py
-@Project        : nonebot2_miya 
+@Project        : nonebot2_miya
 @Description    : go-cqhttp message-sent model
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 from typing import Literal, TypeVar, override

@@ -2,10 +2,10 @@
 @Author         : Ailitonia
 @Date           : 2021/06/28 21:42
 @FileName       : data_source.py
-@Project        : nonebot2_miya 
+@Project        : nonebot2_miya
 @Description    : shindan maker data source
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 import itertools
@@ -30,7 +30,7 @@ from .helper import (
 )
 
 if TYPE_CHECKING:
-    from nonebot.internal.driver import CookieTypes
+    from src.utils.omega_common_api.types import CookieTypes
 
     from .model import ShindanMakerResult, ShindanMakerSearchResult
 
@@ -116,7 +116,7 @@ class ShindanMaker(BaseCommonAPI):
         await cls._load_shindan_cache()
 
         _SHINDAN_CACHE.update(data)
-        output_data = {k: v for k, v in sorted(_SHINDAN_CACHE.items(), key=lambda x: x[1])}
+        output_data = dict(sorted(_SHINDAN_CACHE.items(), key=lambda x: x[1]))
 
         async with _SHINDAN_CACHE_FILE.async_open('w', encoding='utf8') as af:
             await af.write(dump_json_as(dict[str, int], output_data))
@@ -180,7 +180,7 @@ class ShindanMaker(BaseCommonAPI):
         ]
         searching_results_group = await semaphore_gather(tasks=searching_tasks, semaphore_num=6, filter_exception=True)
 
-        result = [x for x in itertools.chain(*searching_results_group)]
+        result = list(itertools.chain(*searching_results_group))
 
         await cls._upgrade_shindan_cache(data={item.name: item.id for item in result})
         return result
@@ -198,10 +198,10 @@ class ShindanMaker(BaseCommonAPI):
             )
             for page in range(1, 3) for kw in [keyword, keyword_ht]
         ]
-        searching_tasks = [x for x in itertools.chain(*search_coro_list)]
+        searching_tasks = list(itertools.chain(*search_coro_list))
         searching_results_group = await semaphore_gather(tasks=searching_tasks, semaphore_num=6, filter_exception=True)
 
-        result = [x for x in itertools.chain(*searching_results_group)]
+        result = list(itertools.chain(*searching_results_group))
 
         await cls._upgrade_shindan_cache(data={item.name: item.id for item in result})
         return result

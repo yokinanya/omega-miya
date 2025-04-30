@@ -5,7 +5,7 @@
 @Project        : nonebot2_miya
 @Description    : 签到工具类函数
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 import hashlib
@@ -22,8 +22,8 @@ from pydantic import BaseModel
 from src.compat import parse_json_as, parse_obj_as
 from src.service.artwork_collection import get_artwork_collection, get_artwork_collection_type
 from src.utils import OmegaRequests
-from src.utils.image_utils import ImageUtils
-from .config import sign_in_config, sign_local_resource_config
+from src.utils.image_utils import ImageTextProcessor
+from .config import sign_in_config
 
 if TYPE_CHECKING:
     from src.resource import StaticResource, TemporaryResource
@@ -76,10 +76,10 @@ def _upgrade_fortune_event(*, enforce_origin: bool = False) -> None:
 
     :param enforce_origin: 强制使用原始资源解析事件
     """
-    fortune_event = _load_fortune_event(file=sign_local_resource_config.default_fortune)
+    fortune_event = _load_fortune_event(file=sign_in_config.default_fortune_event)
 
-    if not enforce_origin and sign_local_resource_config.addition_fortune.is_file:
-        addition_event = _load_fortune_event(file=sign_local_resource_config.addition_fortune)
+    if not enforce_origin and sign_in_config.addition_fortune_event.is_file:
+        addition_event = _load_fortune_event(file=sign_in_config.addition_fortune_event)
         fortune_event.extend(addition_event)
 
     global __FORTUNE_EVENT
@@ -194,7 +194,7 @@ async def get_profile_image(interface: 'OmegaMatcherInterface') -> 'TemporaryRes
     """获取用户头像"""
     url = await interface.get_entity_interface().get_entity_profile_image_url()
     image_name = OmegaRequests.hash_url_file_name('signin-head-image', url=url)
-    image_file = sign_local_resource_config.default_save_folder('head_image', image_name)
+    image_file = sign_in_config.default_output_folder('head_image', image_name)
     return await OmegaRequests().download(url=url, file=image_file)
 
 
@@ -322,18 +322,18 @@ async def generate_signin_card(
         draw_top_img = draw_top_img.resize((width, top_img_height))
 
         # 字体
-        bd_font_path = sign_local_resource_config.default_bold_font.resolve_path
+        bd_font_path = sign_in_config.default_bold_font.resolve_path
         bd_font = ImageFont.truetype(bd_font_path, width // 10)
         bd_title_font = ImageFont.truetype(bd_font_path, width // 12)
         bd_text_font = ImageFont.truetype(bd_font_path, width // 18)
 
-        main_font_path = sign_local_resource_config.default_font.resolve_path
+        main_font_path = sign_in_config.default_font.resolve_path
         text_font = ImageFont.truetype(main_font_path, width // 28)
 
-        level_font_path = sign_local_resource_config.default_level_font.resolve_path
+        level_font_path = sign_in_config.default_level_font.resolve_path
         level_font = ImageFont.truetype(level_font_path, width // 20)
 
-        bottom_font_path = sign_local_resource_config.default_footer_font.resolve_path
+        bottom_font_path = sign_in_config.default_footer_font.resolve_path
         bottom_text_font = ImageFont.truetype(bottom_font_path, width // 40)
         remark_text_font = ImageFont.truetype(bottom_font_path, width // 54)
 
@@ -348,27 +348,29 @@ async def generate_signin_card(
             top_text = '晚上好'
         else:
             top_text = '晚安'
-        _, top_text_height = ImageUtils.get_text_size(text=top_text, font=bd_font)
+        _, top_text_height = ImageTextProcessor.get_text_size(text=top_text, font=bd_font)
 
         # 计算好感度等级条
         level = _get_level(friendship=friendship)
         level_text = f'Level {level[0]}'
-        _, level_text_height = ImageUtils.get_text_size(text=level_text, font=level_font)
+        _, level_text_height = ImageTextProcessor.get_text_size(text=level_text, font=level_font)
         fs_text = f'{level[1]}/{level[2]}'
         fs_rat = level[1] / level[2] if level[1] < level[2] else 1
-        fs_text_width, _ = ImageUtils.get_text_size(text=fs_text, font=text_font)
+        fs_text_width, _ = ImageTextProcessor.get_text_size(text=fs_text, font=text_font)
 
         # 日期
         date_text = datetime.now().strftime('%m/%d')
         # 预处理用户文本 包括昵称、好感度、积分
-        user_text_ = ImageUtils.split_multiline_text(text=user_text, width=(width - int(width * 0.125)), font=text_font)
-        _, user_text_height = ImageUtils.get_text_size(text=user_text_, font=text_font)
+        user_text_ = ImageTextProcessor.split_multiline_text(
+            text=user_text, width=(width - int(width * 0.125)), font=text_font
+        )
+        _, user_text_height = ImageTextProcessor.get_text_size(text=user_text_, font=text_font)
 
         # 今日运势
-        _, fortune_text_height = ImageUtils.get_text_size(text=user_fortune.text, font=bd_text_font)
-        _, fortune_star_height = ImageUtils.get_text_size(text=user_fortune.star, font=text_font)
+        _, fortune_text_height = ImageTextProcessor.get_text_size(text=user_fortune.text, font=bd_text_font)
+        _, fortune_star_height = ImageTextProcessor.get_text_size(text=user_fortune.star, font=text_font)
         # 底部文字
-        _, bottom_text_height = ImageUtils.get_text_size(text=f'{"@@##" * 4}\n', font=bottom_text_font)
+        _, bottom_text_height = ImageTextProcessor.get_text_size(text=f'{"@@##" * 4}\n', font=bottom_text_font)
 
         # 总高度
         if draw_fortune:
@@ -514,7 +516,7 @@ async def generate_signin_card(
         return content
 
     file_name = f'sign_in_card_{user_id}_{datetime.now().strftime("%Y-%m-%d-%H-%M-%S")}.jpg'
-    save_file = sign_local_resource_config.default_save_folder('sign_in', file_name)
+    save_file = sign_in_config.default_output_folder('sign_in', file_name)
     file_content = await _handle_signin_card()
     async with save_file.async_open('wb') as af:
         await af.write(file_content)

@@ -5,7 +5,7 @@
 @Project        : nonebot2_miya
 @Description    : 微博 API 集成
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 from .main import Weibo

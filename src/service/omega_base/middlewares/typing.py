@@ -5,13 +5,13 @@
 @Project        : omega-miya
 @Description    : Omega 中间件类型
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 from typing import Literal
 
-from nonebot.internal.adapter import Message as BaseMessage
-from nonebot.internal.adapter import MessageSegment as BaseMessageSegment
+from nonebot.adapters import Message as BaseMessage
+from nonebot.adapters import MessageSegment as BaseMessageSegment
 
 type EntityAcquireType = Literal['event', 'user']
 """从 Event 提取 Entity 对象的类型, event: 事件本身所在场景的对象(群组频道等), user: 触发事件的用户对象"""

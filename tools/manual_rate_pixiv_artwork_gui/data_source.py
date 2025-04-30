@@ -3,7 +3,7 @@
 @Date           : 2024/9/9 23:21
 @FileName       : data_source
 @Project        : ailitonia-toolkit
-@Description    : 
+@Description    :
 @GitHub         : https://github.com/Ailitonia
 @Software       : PyCharm
 """
@@ -34,7 +34,7 @@ if TYPE_CHECKING:
 
     from src.database.internal.artwork_collection import ArtworkCollection as DBArtworkCollection
 
-type SourceOpenFp = str | bytes | PathLike[str] | PathLike[str] | IO[bytes]
+type SourceOpenFp = str | bytes | PathLike[str] | IO[bytes]
 
 
 class OutputPath:

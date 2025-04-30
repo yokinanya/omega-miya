@@ -5,7 +5,7 @@
 @Project        : nonebot2_miya
 @Description    : Omega 平台中间件
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 from . import platforms as platforms

@@ -5,7 +5,7 @@
 @Project        : nonebot2_miya
 @Description    : Nhentai Exception
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 from src.exception import PluginException

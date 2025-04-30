@@ -5,7 +5,7 @@
 @Project        : omega-miya
 @Description    : Danbooru 及其衍生 API (Read requests only)
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 from .config import booru_config as booru_config

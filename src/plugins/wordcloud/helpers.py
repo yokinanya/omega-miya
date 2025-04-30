@@ -24,7 +24,7 @@ from nonebot.utils import run_sync
 from wordcloud import WordCloud
 
 from src.service.artwork_collection import get_artwork_collection, get_artwork_collection_type
-from .config import wordcloud_plugin_config, wordcloud_plugin_resource_config
+from .config import wordcloud_plugin_config
 
 if TYPE_CHECKING:
     from numpy.typing import NDArray
@@ -67,9 +67,9 @@ def _analyse_textrank(message_text: str) -> dict[str, float]:
 def analyse_message(message_text: str) -> dict[str, float]:
     """使用 jieba 分词, 并进行关键词抽取和词频统计"""
     # 设置停用词表和加载用户词典
-    jieba.analyse.set_stop_words(wordcloud_plugin_resource_config.default_stop_words_file.resolve_path)
-    if wordcloud_plugin_resource_config.user_dict_file.is_file:
-        jieba.load_userdict(wordcloud_plugin_resource_config.user_dict_file.resolve_path)
+    jieba.analyse.set_stop_words(wordcloud_plugin_config.default_stop_words_file.resolve_path)
+    if wordcloud_plugin_config.user_dict_file.is_file:
+        jieba.load_userdict(wordcloud_plugin_config.user_dict_file.resolve_path)
 
     # 分词和统计词频
     match wordcloud_plugin_config.wordcloud_plugin_message_analyse_mode:
@@ -156,7 +156,7 @@ def _draw_message_history_wordcloud(
     # 生成词云图片
     wordcloud_options = wordcloud_plugin_config.wordcloud_default_options
     wordcloud_options.update({
-        'font_path': wordcloud_plugin_resource_config.default_font_file.resolve_path,
+        'font_path': wordcloud_plugin_config.default_font.resolve_path,
         'mask': mask,
         'width': width,
         'height': height,
@@ -188,7 +188,7 @@ def _draw_message_history_wordcloud(
 
     # 放置文本内容
     if desc_text is not None:
-        font = ImageFont.truetype(wordcloud_plugin_resource_config.default_font_file.resolve_path, size=height // 54)
+        font = ImageFont.truetype(wordcloud_plugin_config.default_font.resolve_path, size=height // 54)
         ImageDraw.Draw(image_main).multiline_text(
             xy=(width - int(height / 10 * 0.2), int(height / 10 * 9.2)),
             text=desc_text,
@@ -221,7 +221,7 @@ async def draw_message_history_wordcloud(
         desc_text=desc_text,
     )
     output_file_name = f'wordcloud_{hash(wordcloud_image_content)}_{datetime.now().strftime("%Y-%m-%d-%H-%M-%S")}.png'
-    output_file = wordcloud_plugin_resource_config.default_output_dir(output_file_name)
+    output_file = wordcloud_plugin_config.default_output_folder(output_file_name)
 
     async with output_file.async_open('wb') as af:
         await af.write(wordcloud_image_content)

@@ -5,7 +5,7 @@
 @Project        : nonebot2_miya
 @Description    : 自定义 Permission 依赖注入
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 from nonebot.adapters.onebot.v11.permission import GROUP_ADMIN as ONEBOT_V11_GROUP_ADMIN

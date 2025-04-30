@@ -5,7 +5,7 @@
 @Project        : omega-miya
 @Description    : Danbooru Models
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 from datetime import datetime

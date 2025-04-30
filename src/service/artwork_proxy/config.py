@@ -5,7 +5,7 @@
 @Project        : nonebot2_miya
 @Description    : Artwork Proxy Config
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 from src.resource import StaticResource, TemporaryResource

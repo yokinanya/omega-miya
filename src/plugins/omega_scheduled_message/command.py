@@ -10,7 +10,7 @@
 
 from typing import Annotated
 
-from nonebot.internal.adapter import Message as BaseMessage
+from nonebot.adapters import Message as BaseMessage
 from nonebot.log import logger
 from nonebot.params import Arg, ArgStr, Depends
 from nonebot.plugin import CommandGroup

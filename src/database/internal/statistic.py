@@ -2,10 +2,10 @@
 @Author         : Ailitonia
 @Date           : 2022/12/02 22:11
 @FileName       : statistic.py
-@Project        : nonebot2_miya 
+@Project        : nonebot2_miya
 @Description    : Statistic DAL
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 from datetime import datetime

@@ -9,8 +9,9 @@
 """
 
 from nonebot import get_driver, logger
+from nonebot.adapters import Bot as BaseBot
+from nonebot.adapters import Event as BaseEvent
 from nonebot.exception import IgnoredException
-from nonebot.internal.adapter import Bot, Event
 from nonebot.matcher import Matcher
 
 from src.database import begin_db_session
@@ -21,7 +22,7 @@ SUPERUSERS = get_driver().config.superusers
 LOG_PREFIX: str = '<lc>Permission Manager</lc> | '
 
 
-async def preprocessor_global_permission(matcher: Matcher, bot: Bot, event: Event):
+async def preprocessor_global_permission(matcher: Matcher, bot: BaseBot, event: BaseEvent):
     """运行预处理, 检查是否启用全局权限"""
 
     # 跳过非插件创建的 Matcher
@@ -63,7 +64,7 @@ async def preprocessor_global_permission(matcher: Matcher, bot: Bot, event: Even
         raise IgnoredException('权限不足')
 
 
-async def preprocessor_plugin_permission(matcher: Matcher, bot: Bot, event: Event):
+async def preprocessor_plugin_permission(matcher: Matcher, bot: BaseBot, event: BaseEvent):
     """运行预处理, 检查会话对象是否具备插件要求权限"""
 
     # 跳过非插件创建的 Matcher

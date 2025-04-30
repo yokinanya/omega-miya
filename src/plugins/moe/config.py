@@ -2,10 +2,10 @@
 @Author         : Ailitonia
 @Date           : 2021/06/03 22:05
 @FileName       : config.py
-@Project        : nonebot2_miya 
+@Project        : nonebot2_miya
 @Description    : Moe Plugin Config
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 from nonebot import get_plugin_config, logger

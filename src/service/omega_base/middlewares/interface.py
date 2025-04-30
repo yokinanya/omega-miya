@@ -5,24 +5,25 @@
 @Project        : nonebot2_miya
 @Description    : Omega 平台中间件统一接口
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 import asyncio
 import inspect
-from collections.abc import Callable, Coroutine
+from collections.abc import AsyncGenerator, Callable, Coroutine
+from contextlib import asynccontextmanager
 from functools import wraps
 from typing import TYPE_CHECKING, Annotated, Any, NoReturn, Self, cast
 
+from nonebot.adapters import Bot as BaseBot
+from nonebot.adapters import Event as BaseEvent
 from nonebot.exception import FinishedException, PausedException, RejectedException
-from nonebot.internal.adapter import Bot as BaseBot
-from nonebot.internal.adapter import Event as BaseEvent
 from nonebot.log import logger
 from nonebot.matcher import Matcher, current_bot, current_event, current_matcher
 from nonebot.params import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.database import get_db_session
+from src.database import begin_db_session, get_db_session
 from .const import SupportedPlatform, SupportedTarget
 from .exception import AdapterNotSupported, TargetNotSupported
 from .platform_interface import entity_target_register, event_depend_register, message_builder_register
@@ -32,11 +33,12 @@ if TYPE_CHECKING:
     from pathlib import Path
 
     from ..internal import OmegaEntity
+    from ..message import Message as OmegaMessage
     from .platform_interface.entity_target import BaseEntityTarget
     from .platform_interface.event_depend import EventDepend
     from .platform_interface.message_builder import Builder, Extractor
 
-type SentOmegaMessage = BaseSentMessageType['OmegaMessage']
+    type SentOmegaMessage = BaseSentMessageType[OmegaMessage]
 
 
 class OmegaEntityInterface:
@@ -141,7 +143,7 @@ class OmegaEntityInterface:
 class OmegaMatcherInterface:
     """Omega 基于事件 (Event) 的统一接口, 用于在 Event/Matcher 中调用平台 Bot 相关方法和进行流程交互"""
 
-    __slots__ = ('bot', 'event', 'matcher', 'session', 'entity',)
+    __slots__ = ('bot', 'event', 'matcher', 'entity',)
 
     def __init__(
             self,
@@ -154,8 +156,15 @@ class OmegaMatcherInterface:
         self.bot = bot
         self.event = event
         self.matcher = matcher
-        self.session = session
         self.entity = self.get_entity(bot=bot, event=event, session=session, acquire_type=acquire_type)
+
+    @asynccontextmanager
+    async def restart_new_session(self, acquire_type: EntityAcquireType = 'event') -> AsyncGenerator[Self, None]:
+        """使用当前参数重新开始新 session"""
+        async with begin_db_session() as session:
+            yield self.__class__(
+                bot=self.bot, event=self.event, matcher=self.matcher, session=session, acquire_type=acquire_type
+            )
 
     @classmethod
     def get_entity(

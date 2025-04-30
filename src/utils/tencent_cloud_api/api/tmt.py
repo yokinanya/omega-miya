@@ -2,10 +2,10 @@
 @Author         : Ailitonia
 @Date           : 2021/06/05 19:43
 @FileName       : tmt.py
-@Project        : nonebot2_miya 
+@Project        : nonebot2_miya
 @Description    : 腾讯云机器翻译模块
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 from collections.abc import Sequence

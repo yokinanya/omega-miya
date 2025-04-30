@@ -2,10 +2,10 @@
 @Author         : Ailitonia
 @Date           : 2022/04/10 19:03
 @FileName       : config.py
-@Project        : nonebot2_miya 
+@Project        : nonebot2_miya
 @Description    : Tencent Cloud Config
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 from nonebot import get_plugin_config, logger

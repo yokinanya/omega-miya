@@ -5,7 +5,7 @@
 @Project        : omega-miya
 @Description    : 工具类等杂项
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 from .exclimbwuzhi import gen_buvid_fp, gen_uuid_infoc, get_payload

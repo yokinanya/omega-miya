@@ -5,7 +5,7 @@
 @Project        : nonebot2_miya
 @Description    : weibo utils
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 from collections.abc import Iterable

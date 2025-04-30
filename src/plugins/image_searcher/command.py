@@ -12,19 +12,17 @@ from collections.abc import Sequence
 from datetime import datetime
 from typing import TYPE_CHECKING, Annotated
 
-from nonebot import get_driver
 from nonebot.log import logger
-from nonebot.params import ArgStr, Depends, RawCommand
+from nonebot.params import ArgStr, Depends
 from nonebot.plugin import on_command
-from nonebot.typing import T_State
 
 from src.params.handler import get_command_str_single_arg_parser_handler
 from src.resource import StaticResource, TemporaryResource
 from src.service import OmegaMatcherInterface as OmMI
 from src.service import OmegaMessageSegment, enable_processor_state
 from src.utils import OmegaRequests, semaphore_gather
-from src.utils.image_searcher import ComplexImageSearcher, TraceMoe
-from src.utils.image_utils import ImageUtils
+from src.utils.image_searcher import ComplexImageSearcher
+from src.utils.image_utils import ImageEffectProcessor, ImageLoader
 from src.utils.image_utils.template import PreviewImageModel, PreviewImageThumbs, generate_thumbs_preview_image
 
 if TYPE_CHECKING:
@@ -33,39 +31,25 @@ if TYPE_CHECKING:
 
 @on_command(
     'search-image',
-    aliases={'识图', '搜图', '识番', '搜番'},
+    aliases={'识图', '搜图'},
     handlers=[get_command_str_single_arg_parser_handler('image_url', ensure_key=True)],
     priority=10,
     block=True,
     state=enable_processor_state(name='ImageSearcher', level=50)
 ).got('image_url')
 async def handle_search_image(
-        cmd: Annotated[str | None, RawCommand()],
         interface: Annotated[OmMI, Depends(OmMI.depend())],
         image_url: Annotated[str | None, ArgStr('image_url')],
-        state: T_State,
 ) -> None:
-    if cmd:
-        search_mode = cmd.lstrip(''.join(get_driver().config.command_start))
-        state.update({'search_mode': cmd})
-    else:
-        search_mode = state.get('search_mode')
-
     msg_images = interface.get_event_reply_msg_image_urls() + interface.get_event_msg_image_urls()
 
     if image_url is None and not msg_images:
         await interface.reject_arg_reply('image_url', '请发送你想要识别的图片或图片链接:')
 
-    match search_mode:
-        case '识番' | '搜番':
-            searcher = TraceMoe
-        case _:
-            searcher = ComplexImageSearcher
-
     if msg_images:
-        search_coro = searcher(image_url=msg_images[0]).search()
+        search_coro = ComplexImageSearcher(image=msg_images[0]).search()
     elif image_url and image_url.startswith(('http://', 'https://')):
-        search_coro = searcher(image_url=image_url).search()
+        search_coro = ComplexImageSearcher(image=image_url).search()
     else:
         await interface.finish_reply('不是可用的图片或图片链接, 请确认后重试')
 
@@ -112,8 +96,7 @@ async def _fetch_result_as_preview_body(result: 'ImageSearchingResult') -> Previ
 async def _emit_preview_model_from_searching_result(results: Sequence['ImageSearchingResult']) -> PreviewImageModel:
     tasks = [_fetch_result_as_preview_body(result=result) for result in results]
     preview_data = list(await semaphore_gather(tasks=tasks, semaphore_num=6, filter_exception=True))
-    count = len(preview_data)
-    return PreviewImageModel(preview_name='ImageSearcherResults', count=count, previews=preview_data)
+    return PreviewImageModel(preview_name='ImageSearcherResults', previews=preview_data)
 
 
 async def _generate_result_preview_image(results: Sequence['ImageSearchingResult']) -> TemporaryResource:
@@ -135,9 +118,9 @@ async def _generate_result_desc_image(results: Sequence['ImageSearchingResult'])
     preview_txt = '\n\n'.join(
         f'来源: {result.source}\n相似度: {result.similarity if result.similarity else "未知"}\n来源地址:\n{url}'
         for result in results
-        for url in result.source_urls or [None]
+        for url in result.source_urls
     )
-    image: ImageUtils = await ImageUtils.async_init_from_text(text=preview_txt)
+    image = ImageEffectProcessor(await ImageLoader.async_init_from_text(text=preview_txt))
     save_file_name = f'{datetime.now().strftime("%Y%m%d%H%M%S")}_{hash(preview_txt)}.jpg'
     return await image.save(TemporaryResource('image_searcher', 'desc', save_file_name))
 

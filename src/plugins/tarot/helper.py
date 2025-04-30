@@ -2,10 +2,10 @@
 @Author         : Ailitonia
 @Date           : 2021/09/01 1:20
 @FileName       : utils.py
-@Project        : nonebot2_miya 
+@Project        : nonebot2_miya
 @Description    : 塔罗牌图片生成相关模块
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 from datetime import datetime
@@ -16,8 +16,8 @@ from PIL import Image, ImageDraw, ImageFont
 from nonebot.utils import run_sync
 from sqlalchemy.exc import NoResultFound
 
-from src.utils.image_utils import ImageUtils
-from .config import tarot_local_resource_config
+from src.utils.image_utils import ImageTextProcessor
+from .config import tarot_plugin_config
 from .resources import TarotResource
 
 if TYPE_CHECKING:
@@ -103,32 +103,32 @@ async def generate_tarot_card(
             draw_tarot_img = draw_tarot_img.convert(mode='RGBA')
 
         # 字体
-        font_file = tarot_local_resource_config.default_font_file
+        font_file = tarot_plugin_config.default_font
         title_font = ImageFont.truetype(font_file.resolve_path, width // 10)
         m_title_font = ImageFont.truetype(font_file.resolve_path, width // 20)
         text_font = ImageFont.truetype(font_file.resolve_path, width // 25)
 
         # 标题
-        _, title_height = ImageUtils.get_text_size(text=tarot_card.name, font=title_font)
-        _, m_title_height = ImageUtils.get_text_size(text=tarot_card.name, font=m_title_font)
+        _, title_height = ImageTextProcessor.get_text_size(text=tarot_card.name, font=title_font)
+        _, m_title_height = ImageTextProcessor.get_text_size(text=tarot_card.name, font=m_title_font)
 
         # 描述
-        desc_text = ImageUtils.split_multiline_text(
+        desc_text = ImageTextProcessor.split_multiline_text(
             text=tarot_card.desc, width=(width - int(width * 0.125)), font=text_font
         )
-        _, desc_text_height = ImageUtils.get_text_size(text=desc_text, font=text_font)
+        _, desc_text_height = ImageTextProcessor.get_text_size(text=desc_text, font=text_font)
 
         # 正位描述
-        upright_text = ImageUtils.split_multiline_text(
+        upright_text = ImageTextProcessor.split_multiline_text(
             text=tarot_card.upright, width=(width - int(width * 0.125)), font=text_font
         )
-        _, upright_text_height = ImageUtils.get_text_size(text=upright_text, font=text_font)
+        _, upright_text_height = ImageTextProcessor.get_text_size(text=upright_text, font=text_font)
 
         # 逆位描述
-        reversed_text = ImageUtils.split_multiline_text(
+        reversed_text = ImageTextProcessor.split_multiline_text(
             text=tarot_card.reversed, width=(width - int(width * 0.125)), font=text_font
         )
-        _, reversed_text_height = ImageUtils.get_text_size(text=reversed_text, font=text_font)
+        _, reversed_text_height = ImageTextProcessor.get_text_size(text=reversed_text, font=text_font)
 
         # 计算高度
         background_height = int(title_height + m_title_height + tarot_img_height + 0.09375 * width)
@@ -199,7 +199,7 @@ async def generate_tarot_card(
 
     image_content = await _handle_tarot_card()
     image_file_name = f"tarot_{id_}_{datetime.now().strftime('%Y-%m-%d-%H-%M-%S')}.jpg"
-    save_file = tarot_local_resource_config.default_save_folder(image_file_name)
+    save_file = tarot_plugin_config.default_output_folder(image_file_name)
     async with save_file.async_open('wb') as af:
         await af.write(image_content)
     return save_file

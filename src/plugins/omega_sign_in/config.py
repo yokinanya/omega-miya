@@ -2,13 +2,13 @@
 @Author         : Ailitonia
 @Date           : 2021/07/17 2:04
 @FileName       : config.py
-@Project        : nonebot2_miya 
-@Description    : 
+@Project        : nonebot2_miya
+@Description    :
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
-from dataclasses import dataclass
+from typing import Literal
 
 from nonebot import get_plugin_config, logger
 from pydantic import BaseModel, ConfigDict, ValidationError
@@ -17,7 +17,7 @@ from src.resource import StaticResource, TemporaryResource
 from src.service.artwork_collection import ALLOW_ARTWORK_ORIGIN
 
 
-class SignInConfig(BaseModel):
+class SignInPluginConfig(BaseModel):
     """签到插件配置"""
     # 是否启用正则匹配matcher
     # 如果 bot 配置了命令前缀, 但需要额外响应无前缀的 "签到" 等消息, 请将本选项设置为 True
@@ -39,30 +39,48 @@ class SignInConfig(BaseModel):
     # 每日首次签到获取的基础硬币数 同时也是补签所需硬币的倍率基数
     signin_plugin_base_currency: int = 5
 
+    # 资源文件配置
+    # 内置的字体文件
+    signin_plugin_default_font_name: str = 'SourceHanSansSC-Regular.otf'
+    signin_plugin_default_bold_font_name: str = 'SourceHanSansSC-Heavy.otf'
+    signin_plugin_default_level_font_name: str = 'pixel.ttf'
+    signin_plugin_default_footer_font_name: str = 'fzzxhk.ttf'
+    # 默认缓存资源保存路径
+    signin_plugin_default_output_folder_name: Literal['sign_in'] = 'sign_in'
+
     model_config = ConfigDict(extra='ignore')
 
+    @property
+    def default_font(self) -> StaticResource:
+        return StaticResource('fonts', self.signin_plugin_default_font_name)
 
-@dataclass
-class SignLocalResourceConfig:
-    """签到插件文件配置"""
-    # 默认内置的静态资源文件路径
-    default_font_folder: StaticResource = StaticResource('fonts')
-    default_font: StaticResource = default_font_folder('SourceHanSansSC-Regular.otf')
-    default_bold_font: StaticResource = default_font_folder('SourceHanSansSC-Heavy.otf')
-    default_level_font: StaticResource = default_font_folder('pixel.ttf')
-    default_footer_font: StaticResource = default_font_folder('fzzxhk.ttf')
+    @property
+    def default_bold_font(self) -> StaticResource:
+        return StaticResource('fonts', self.signin_plugin_default_bold_font_name)
 
-    # 默认生成的缓存资源保存路径
-    default_save_folder: TemporaryResource = TemporaryResource('sign_in')
+    @property
+    def default_level_font(self) -> StaticResource:
+        return StaticResource('fonts', self.signin_plugin_default_level_font_name)
 
-    # 求签事件资源路径
-    default_fortune: StaticResource = StaticResource('docs', 'fortune', 'event.json')
-    addition_fortune: TemporaryResource = TemporaryResource('fortune', 'event.json')
+    @property
+    def default_footer_font(self) -> StaticResource:
+        return StaticResource('fonts', self.signin_plugin_default_footer_font_name)
+
+    @property
+    def default_output_folder(self) -> TemporaryResource:
+        return TemporaryResource(self.signin_plugin_default_output_folder_name)
+
+    @property
+    def default_fortune_event(self) -> StaticResource:
+        return StaticResource('docs', 'fortune', 'event.json')
+
+    @property
+    def addition_fortune_event(self) -> TemporaryResource:
+        return TemporaryResource('fortune', 'event.json')
 
 
 try:
-    sign_local_resource_config = SignLocalResourceConfig()
-    sign_in_config = get_plugin_config(SignInConfig)
+    sign_in_config = get_plugin_config(SignInPluginConfig)
 except ValidationError as e:
     import sys
     logger.opt(colors=True).critical(f'<r>OmegaSignIn 插件配置格式验证失败</r>, 错误信息:\n{e}')
@@ -71,5 +89,4 @@ except ValidationError as e:
 
 __all__ = [
     'sign_in_config',
-    'sign_local_resource_config',
 ]

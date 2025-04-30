@@ -2,10 +2,10 @@
 @Author         : Ailitonia
 @Date           : 2022/06/07 20:15
 @FileName       : utils.py
-@Project        : nonebot2_miya 
+@Project        : nonebot2_miya
 @Description    : 幻影坦克图片合成工具
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 from collections.abc import Callable
@@ -16,7 +16,7 @@ from nonebot.utils import run_sync
 
 from src.resource import TemporaryResource
 from src.utils import OmegaRequests
-from src.utils.image_utils import ImageUtils
+from src.utils.image_utils import ImageEffectProcessor, ImageLoader
 
 _TMP_FOLDER: TemporaryResource = TemporaryResource('mirage_tank')
 """缓存路径"""
@@ -30,10 +30,10 @@ async def _fetch_image(image_url: str) -> bytes:
     return response.content
 
 
-async def _load_image(image_content: bytes) -> ImageUtils:
-    image = await ImageUtils.async_init_from_bytes(image=image_content)
+async def _load_image(image_content: bytes) -> ImageEffectProcessor:
+    image = await ImageLoader.async_init_from_bytes(image=image_content)
     image = image.convert('RGBA')
-    return image
+    return ImageEffectProcessor(image)
 
 
 async def generate_mirage_tank(
@@ -46,14 +46,12 @@ async def generate_mirage_tank(
     base_image = await _load_image(image_content=base_image_content)
 
     if addition_image_url is None:
-        make_image = await run_sync(factory)(base_image.image)
-        base_image.set_image(image=make_image)
+        base_image.image = await run_sync(factory)(base_image.image)
     else:
         addition_image_content = await _fetch_image(image_url=addition_image_url)
         addition_image = await _load_image(image_content=addition_image_content)
 
-        make_image = await run_sync(factory)(base_image.image, addition_image.image)
-        base_image.set_image(image=make_image)
+        base_image.image = await run_sync(factory)(base_image.image, addition_image.image)
 
     output_file = _TMP_FOLDER(f'{factory.__name__}_{datetime.now().strftime("%Y%m%d%H%M%S")}.png'.strip('_'))
     return await base_image.save(output_file, format_='PNG')
@@ -137,8 +135,8 @@ def _complex_gray(white_image: Image.Image, black_image: Image.Image) -> Image.I
     width = max(white_image.width, black_image.width)
     height = max(white_image.height, black_image.height)
     size = (width, height)
-    white_image = ImageUtils(image=white_image).resize_with_filling(size=size).image
-    black_image = ImageUtils(image=black_image).resize_with_filling(size=size).image
+    white_image = ImageEffectProcessor(image=white_image).resize_with_filling(size=size).image
+    black_image = ImageEffectProcessor(image=black_image).resize_with_filling(size=size).image
 
     # 去色, 作用蒙版改变色阶范围
     white_mask = ImageEnhance.Color(white_image).enhance(0)
@@ -180,8 +178,8 @@ def _complex_color(white_image: Image.Image, black_image: Image.Image) -> Image.
     width = max(white_image.width, black_image.width)
     height = max(white_image.height, black_image.height)
     size = (width, height)
-    white_image = ImageUtils(image=white_image).resize_with_filling(size=size).image
-    black_image = ImageUtils(image=black_image).resize_with_filling(size=size).image
+    white_image = ImageEffectProcessor(image=white_image).resize_with_filling(size=size).image
+    black_image = ImageEffectProcessor(image=black_image).resize_with_filling(size=size).image
 
     # 调整饱和度和亮度
     _ = Image.new(mode='RGBA', size=size, color=(255, 255, 255, 64))
@@ -231,8 +229,8 @@ def _complex_difference(base_image: Image.Image, differ_image: Image.Image) -> I
     width = max(base_image.width, differ_image.width)
     height = max(base_image.height, differ_image.height)
     size = (width, height)
-    base_image = ImageUtils(image=base_image).resize_with_filling(size=size).image
-    differ_image = ImageUtils(image=differ_image).resize_with_filling(size=size).image
+    base_image = ImageEffectProcessor(image=base_image).resize_with_filling(size=size).image
+    differ_image = ImageEffectProcessor(image=differ_image).resize_with_filling(size=size).image
 
     # 转化灰度图, 计算差分作为透明度通道
     differ_mask = ImageEnhance.Color(differ_image).enhance(0)

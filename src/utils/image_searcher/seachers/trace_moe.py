@@ -2,29 +2,29 @@
 @Author         : Ailitonia
 @Date           : 2022/05/08 20:30
 @FileName       : trace_moe.py
-@Project        : nonebot2_miya 
+@Project        : nonebot2_miya
 @Description    : trace.moe 识番引擎
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
-from typing import TYPE_CHECKING
+from collections.abc import Iterable
+from typing import TYPE_CHECKING, ClassVar
 
 from pydantic import BaseModel, Field
 
 from src.compat import AnyUrlStr as AnyUrl
-from src.compat import parse_obj_as
-from src.utils import semaphore_gather
 from ..model import BaseImageSearcherAPI, ImageSearchingResult
 
 if TYPE_CHECKING:
-    from nonebot.internal.driver import CookieTypes, HeaderTypes
+    from src.resource import BaseResource
+    from src.utils.omega_common_api.types import CookieTypes, HeaderTypes
 
 
 class TraceMoeResults(BaseModel):
     anilist: int
     filename: str
-    episode: int | None = None
+    episode: int | list[int] | None = Field(default=None)
     from_: float = Field(alias='from')
     to: float
     similarity: float
@@ -39,37 +39,69 @@ class TraceMoeResult(BaseModel):
     result: list[TraceMoeResults]
 
 
-class AnilistResult(BaseModel):
-    """Anilist 内容"""
+class AnilistTitle(BaseModel):
+    native: str
+    romaji: str | None = None
+    english: str | None = None
+    chinese: str | None = None
 
-    class _Data(BaseModel):
 
-        class _Media(BaseModel):
+class AnilistCoverImage(BaseModel):
+    large: AnyUrl | None = None
+    medium: AnyUrl | None = None
 
-            class _Title(BaseModel):
-                native: str
-                romaji: str | None = None
-                english: str | None = None
-                chinese: str | None = None
 
-            id: int
-            title: _Title
-            isAdult: bool
-            synonyms: list[str]
+class AnilistMedia(BaseModel):
+    id: int
+    title: AnilistTitle
+    type: str
+    format: str
+    status: str
+    season: str | None = Field(default=None)
+    episodes: int | list[int] | None = Field(default=None)
+    duration: int | list[int] | None = Field(default=None)
+    source: str
+    bannerImage: AnyUrl | None = None
+    coverImage: AnilistCoverImage
+    synonyms: list[str] = Field(default_factory=list)
+    isAdult: bool
+    siteUrl: AnyUrl
 
-        Media: _Media
 
-    data: _Data
+class AnilistPage(BaseModel):
+    media: list[AnilistMedia]
+
+
+class AnilistMultiData(BaseModel):
+    Page: AnilistPage
+
+
+class AnilistSingleData(BaseModel):
+    Media: AnilistMedia
+
+
+class AnilistMultiResult(BaseModel):
+    """Anilist 多页结果内容"""
+    data: AnilistMultiData
 
     @property
-    def media(self):
+    def media(self) -> list[AnilistMedia]:
+        return self.data.Page.media
+
+
+class AnilistSingleResult(BaseModel):
+    """Anilist 单作品查询结果内容"""
+    data: AnilistSingleData
+
+    @property
+    def media(self) -> AnilistMedia:
         return self.data.Media
 
 
 class TraceMoe(BaseImageSearcherAPI):
     """trace.moe 识图引擎"""
 
-    _similarity_threshold: float = 0.8
+    _similarity_threshold: ClassVar[float] = 0.8
     """搜索结果相似度阈值"""
 
     @classmethod
@@ -93,24 +125,24 @@ class TraceMoe(BaseImageSearcherAPI):
     def _get_default_cookies(cls) -> 'CookieTypes':
         return None
 
-    @property
-    def api_url(self) -> str:
+    @classmethod
+    def get_api_url(cls) -> str:
         """trace.moe API"""
-        return f'{self._get_root_url()}/search'
+        return f'{cls._get_root_url()}/search'
 
-    @property
-    def anilist_api(self) -> str:
+    @classmethod
+    def _get_anilist_api(cls) -> str:
         """Anilist API"""
         return 'https://graphql.anilist.co'
 
-    @property
-    def anilist_api_cn(self) -> str:
+    @classmethod
+    def _get_anilist_api_cn(cls) -> str:
         """中文 Anilist API"""
         return 'https://trace.moe/anilist'
 
-    @property
-    def anilist_api_query(self) -> str:
-        """Anilist API 请求内容"""
+    @classmethod
+    def _get_anilist_api_single_query(cls) -> str:
+        """Anilist API 单个作品请求内容"""
 
         return r"""
         query ($id: Int) { # Define which variables will be used in the query (id)
@@ -121,39 +153,114 @@ class TraceMoe(BaseImageSearcherAPI):
               romaji
               english
             }
-            isAdult
+            type
+            format
+            status
+            season
+            episodes
+            duration
+            source
+            coverImage {
+              large
+              medium
+            }
             synonyms # chinese titles will always be merged into this array
+            isAdult
+            siteUrl
           }
         }
         """
 
-    async def _handel_anilist_result(self, data: TraceMoeResults) -> ImageSearchingResult:
+    @classmethod
+    def _get_anilist_api_multi_query(cls) -> str:
+        """Anilist API 多个作品请求内容"""
+
+        return r"""
+        query ($ids: [Int]) { # Define which variables will be used in the query (ids)
+          Page(page: 1, perPage: 50) {
+            media(id_in: $ids, type: ANIME) {
+              id
+              title {
+                native # do not query chinese here, the official Anilist API doesn't recognize
+                romaji
+                english
+              }
+              type
+              format
+              status
+              season
+              episodes
+              duration
+              source
+              coverImage {
+                large
+                medium
+              }
+              synonyms # chinese titles will always be merged into this array
+              isAdult
+              siteUrl
+            }
+          }
+        }
+        """
+
+    @classmethod
+    async def _query_anilist_result(cls, anilist_id: int | str) -> AnilistSingleResult:
+        """查询单个作品的 anilist 数据"""
+        params = {'query': cls._get_anilist_api_single_query(), 'variables': {'id': str(anilist_id)}}
+        return AnilistSingleResult.model_validate(await cls._post_json(url=cls._get_anilist_api_cn(), json=params))
+
+    @classmethod
+    async def _query_anilist_multi_result(cls, anilist_ids: Iterable[int | str]) -> AnilistMultiResult:
+        """查询多个作品的 anilist 数据"""
+        params = {'query': cls._get_anilist_api_multi_query(), 'variables': {'ids': [str(x) for x in anilist_ids]}}
+        return AnilistMultiResult.model_validate(await cls._post_json(url=cls._get_anilist_api_cn(), json=params))
+
+    @classmethod
+    async def _handel_anilist_result(cls, data: Iterable[TraceMoeResults]) -> list[ImageSearchingResult]:
         """获取 anilist 数据"""
-        params = {'query': self.anilist_api_query, 'variables': {'id': data.anilist}}
-        anilist_data = AnilistResult.model_validate(await self._post_json(url=self.anilist_api_cn, json=params))
+        anilist_data = await cls._query_anilist_multi_result(anilist_ids=[x.anilist for x in data])
 
-        source = f'trace.moe & Anilist 数据库\n' \
-                 f'原始名称: {anilist_data.media.title.native}\n' \
-                 f'中文名称: {anilist_data.media.title.chinese}\n' \
-                 f'来源文件: {data.filename}\n' \
-                 f'集/季/Episode: {data.episode}\n' \
-                 f'预览图时间位置: {data.from_} - {data.to}\n' \
-                 f'绅士: {anilist_data.media.isAdult}'
-        similarity = str(int(data.similarity * 100))
-        return ImageSearchingResult(source=source, source_urls=None, similarity=similarity, thumbnail=data.image)
-
-    async def search(self) -> list[ImageSearchingResult]:
-        params = {'url': self.image_url}
-        tracemoe_result = TraceMoeResult.model_validate(await self._get_json(url=self.api_url, params=params))
-
-        anilist_tasks = [
-            self._handel_anilist_result(data=x)
-            for x in tracemoe_result.result
-            if x.similarity >= self._similarity_threshold
+        return [
+            ImageSearchingResult(
+                source=(f'trace.moe & Anilist 数据库\n'
+                        f'名称: {media.title.native}\n'
+                        f'{f"中文名称: {media.title.chinese}\n" if media.title.chinese else ""}'
+                        f'类型: {media.type}-{media.format}-{media.source}\n'
+                        f'集/季/Episode: {x.episode}({x.from_}-{x.to})\n'
+                        f'NSFW: {media.isAdult}'),
+                source_urls=[media.siteUrl],
+                thumbnail=x.image,
+                similarity=str(int(x.similarity * 100))
+            )
+            for x in data if x.similarity >= cls._similarity_threshold
+            for media in anilist_data.media if x.anilist == media.id
         ]
-        anilist_result = await semaphore_gather(tasks=anilist_tasks, semaphore_num=5, return_exceptions=False)
 
-        return parse_obj_as(list[ImageSearchingResult], anilist_result)
+    @classmethod
+    async def _search_local_image(cls, image: 'BaseResource') -> list[ImageSearchingResult]:
+        with image.open('rb') as f:
+            files = {
+                'file': (image.path.name, f, 'application/octet-stream'),
+            }
+            result = await cls._post_json(url=cls.get_api_url(), files=files)  # type: ignore
+
+        return await cls._handel_anilist_result(data=TraceMoeResult.model_validate(result).result)
+
+    @classmethod
+    async def _search_bytes_image(cls, image: bytes) -> list[ImageSearchingResult]:
+        files = {
+            'file': ('blob', image, 'application/octet-stream'),
+        }
+        result = await cls._post_json(url=cls.get_api_url(), files=files)  # type: ignore
+
+        return await cls._handel_anilist_result(data=TraceMoeResult.model_validate(result).result)
+
+    @classmethod
+    async def _search_url_image(cls, image: str) -> list[ImageSearchingResult]:
+        params = {'url': image}
+        tracemoe_result = TraceMoeResult.model_validate(await cls._get_json(url=cls.get_api_url(), params=params))
+        return await cls._handel_anilist_result(data=tracemoe_result.result)
 
 
 __all__ = [

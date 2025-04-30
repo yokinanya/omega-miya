@@ -2,10 +2,10 @@
 @Author         : Ailitonia
 @Date           : 2022/04/05 22:53
 @FileName       : searching.py
-@Project        : nonebot2_miya 
+@Project        : nonebot2_miya
 @Description    : Pixiv Searching Model
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 

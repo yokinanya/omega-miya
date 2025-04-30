@@ -9,8 +9,9 @@
 """
 
 from nonebot import get_driver, logger
+from nonebot.adapters import Bot as BaseBot
+from nonebot.adapters import Event as BaseEvent
 from nonebot.exception import IgnoredException
-from nonebot.internal.adapter import Bot, Event
 from nonebot.matcher import Matcher
 
 from src.database import begin_db_session
@@ -22,7 +23,7 @@ CURRENCY_ALIAS: str = '硬币'
 LOG_PREFIX: str = '<lc>Command Cost</lc> | '
 
 
-async def preprocessor_plugin_cost(matcher: Matcher, bot: Bot, event: Event):
+async def preprocessor_plugin_cost(matcher: Matcher, bot: BaseBot, event: BaseEvent):
     """运行预处理, 命令消耗处理"""
 
     # 跳过临时 matcher 避免在命令交互中被不正常触发

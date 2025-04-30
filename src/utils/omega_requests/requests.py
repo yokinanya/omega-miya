@@ -5,11 +5,12 @@
 @Project        : nonebot2_miya
 @Description    : OmegaRequests, 通过对 ForwardDriver 的二次封装实现 HttpClient 功能
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 import hashlib
 import pathlib
+import re
 from asyncio.exceptions import TimeoutError as AsyncTimeoutError
 from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
@@ -31,19 +32,19 @@ from .config import http_proxy_config
 from .utils import cloudflare_clearance_config
 
 if TYPE_CHECKING:
-    from nonebot.internal.driver import (
+    from src.resource import BaseResource
+
+    from .types import (
         ContentTypes,
         CookieTypes,
         DataTypes,
         FilesTypes,
-        HeaderTypes,
         HTTPClientSession,
+        HeaderTypes,
         QueryTypes,
         Response,
         WebSocket,
     )
-
-    from src.resource import BaseResource
 
 
 class OmegaRequests:
@@ -130,6 +131,16 @@ class OmegaRequests:
         name_prefix = '_'.join(prefix) if prefix else 'file'
         new_name = f'{name_prefix}_{name_hash}{name_suffix}'
         return new_name
+
+    @classmethod
+    def get_url_in_text(cls, text: str) -> list[str]:
+        """匹配并提取字符串中的合法 URL"""
+        pattern = re.compile(r'https?://(?:[a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(?:/[^/\s]*)*')
+        parsed_urls = [urlparse(str(x)) for x in re.findall(pattern, text)]
+        return [
+            x.geturl() for x in parsed_urls
+            if all((x.scheme in ['http', 'https'], x.netloc))
+        ]
 
     @classmethod
     def get_default_headers(cls) -> dict[str, str]:
@@ -278,6 +289,64 @@ class OmegaRequests:
     ) -> 'Response':
         setup = Request(
             method='POST',
+            url=url,
+            params=params,
+            headers=self.headers if headers is None else headers,
+            cookies=self.cookies if cookies is None else cookies,
+            content=content,
+            data=data,
+            json=json,
+            files=files,
+            timeout=self.timeout if timeout is None else timeout,
+            proxy=http_proxy_config.proxy_url if use_proxy else None
+        )
+        return await self.request(setup=setup)
+
+    async def put(
+            self,
+            url: str,
+            *,
+            params: 'QueryTypes' = None,
+            headers: 'HeaderTypes' = None,
+            cookies: 'CookieTypes' = None,
+            content: 'ContentTypes' = None,
+            data: 'DataTypes' = None,
+            json: Any = None,
+            files: 'FilesTypes' = None,
+            timeout: float | None = None,
+            use_proxy: bool = True
+    ) -> 'Response':
+        setup = Request(
+            method='PUT',
+            url=url,
+            params=params,
+            headers=self.headers if headers is None else headers,
+            cookies=self.cookies if cookies is None else cookies,
+            content=content,
+            data=data,
+            json=json,
+            files=files,
+            timeout=self.timeout if timeout is None else timeout,
+            proxy=http_proxy_config.proxy_url if use_proxy else None
+        )
+        return await self.request(setup=setup)
+
+    async def delete(
+            self,
+            url: str,
+            *,
+            params: 'QueryTypes' = None,
+            headers: 'HeaderTypes' = None,
+            cookies: 'CookieTypes' = None,
+            content: 'ContentTypes' = None,
+            data: 'DataTypes' = None,
+            json: Any = None,
+            files: 'FilesTypes' = None,
+            timeout: float | None = None,
+            use_proxy: bool = True
+    ) -> 'Response':
+        setup = Request(
+            method='DELETE',
             url=url,
             params=params,
             headers=self.headers if headers is None else headers,

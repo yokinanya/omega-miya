@@ -2,19 +2,19 @@
 @Author         : Ailitonia
 @Date           : 2022/12/03 17:59
 @FileName       : base.py
-@Project        : nonebot2_miya 
+@Project        : nonebot2_miya
 @Description    : Base event Model
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 from typing import TYPE_CHECKING, override
 
-from nonebot.internal.adapter import Event as BaseEvent
+from nonebot.adapters import Event as BaseEvent
 from nonebot.utils import escape_tag
 
 if TYPE_CHECKING:
-    from nonebot.internal.adapter import Message as BaseMessage
+    from nonebot.adapters import Message as BaseMessage
 
 
 class Event(BaseEvent):

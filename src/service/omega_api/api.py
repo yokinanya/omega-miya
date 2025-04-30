@@ -28,7 +28,7 @@ _REGISTERED_APP: set[str] = set()
 """缓存全局已注册 app_name"""
 
 
-class OmegaApi:
+class OmegaAPI:
     """Omega API 应用创建与路由注册"""
 
     def __init__(self, app_name: str, *, enable_token_verify: bool = False) -> None:
@@ -76,7 +76,7 @@ class OmegaApi:
 
         # 检查 app_name 是否已被注册
         if self._app_name in _REGISTERED_APP:
-            raise ValueError(f'OmegaApi service {self._app_name!r} already registered')
+            raise ValueError(f'OmegaAPI service {self._app_name!r} already registered')
         _REGISTERED_APP.add(self._app_name)
 
         # 创建子应用
@@ -139,5 +139,5 @@ class OmegaApi:
 
 
 __all__ = [
-    'OmegaApi',
+    'OmegaAPI',
 ]

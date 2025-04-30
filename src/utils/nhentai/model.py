@@ -5,17 +5,16 @@
 @Project        : nonebot2_miya
 @Description    : Nhentai Models
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
-from dataclasses import dataclass
+from pathlib import Path
 from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, model_validator
 
 from src.compat import AnyHttpUrlStr as AnyHttpUrl
-from src.resource import TemporaryResource
-from src.utils.image_utils.template import PreviewImageModel, PreviewImageThumbs
+from src.resource import AnyResource
 
 
 class BaseNhentaiModel(BaseModel):
@@ -43,11 +42,31 @@ class NhentaiGalleryTitle(BaseNhentaiModel):
     pretty: str | None
 
 
+type NhentaiGalleryPageType = Literal['j', 'p', 'w']
+
+
 class NhentaiGalleryPage(BaseNhentaiModel):
     """Gallery Page 内容"""
-    t: Literal['j', 'p']
+    t: NhentaiGalleryPageType
     w: int
     h: int
+
+    @staticmethod
+    def convert_page_type(page_type: NhentaiGalleryPageType) -> str:
+        match page_type:
+            case 'j':
+                return 'jpg'
+            case 'p':
+                return 'png'
+            case 'w':
+                return 'webp'
+            case _:
+                return 'unknown'
+
+    @property
+    def ft(self) -> str:
+        """真实文件名类型"""
+        return self.convert_page_type(page_type=self.t)
 
 
 class NhentaiGalleryImages(BaseNhentaiModel):
@@ -94,26 +113,19 @@ class NhentaiPreviewRequestModel(BaseNhentaiModel):
     request_url: AnyHttpUrl
 
 
-class NhentaiPreviewBody(PreviewImageThumbs):
-    """Pixiv 作品预览图中的缩略图数据"""
-
-
-class NhentaiPreviewModel(PreviewImageModel):
-    """Pixiv 作品预览图 Model"""
-
-
-@dataclass
-class NhentaiDownloadResult:
+class NhentaiDownloadResult(BaseNhentaiModel):
     """Nhentai 下载结果信息"""
-    file: TemporaryResource
+    file_path: Path
     password: str
+
+    @property
+    def file(self) -> AnyResource:
+        return AnyResource(self.file_path)
 
 
 __all__ = [
     'NhentaiDownloadResult',
     'NhentaiGalleryModel',
     'NhentaiPreviewRequestModel',
-    'NhentaiPreviewBody',
-    'NhentaiPreviewModel',
     'NhentaiSearchingResult'
 ]

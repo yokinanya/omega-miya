@@ -5,7 +5,7 @@
 @Project        : omega-miya
 @Description    : wbi 接口签名及验证
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 import time

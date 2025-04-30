@@ -5,7 +5,7 @@
 @Project        : nonebot2_miya
 @Description    : Omega 定时消息插件
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 from nonebot.plugin import PluginMetadata

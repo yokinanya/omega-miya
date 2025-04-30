@@ -9,7 +9,8 @@
 """
 
 from nonebot import logger
-from nonebot.internal.adapter import Bot, Event
+from nonebot.adapters import Bot as BaseBot
+from nonebot.adapters import Event as BaseEvent
 
 from src.database import begin_db_session
 from src.service import OmegaMatcherInterface
@@ -19,7 +20,7 @@ ENERGY_INCREMENTAL = 0.5
 CURRENCY_INCREMENTAL = 0.125
 
 
-async def postprocessor_friendship(bot: Bot, event: Event):
+async def postprocessor_friendship(bot: BaseBot, event: BaseEvent):
     """事件后处理， 用户好感度处理"""
     user_id = event.get_user_id()
 

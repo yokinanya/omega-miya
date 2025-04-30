@@ -2,10 +2,10 @@
 @Author         : Ailitonia
 @Date           : 2021/08/31 21:05
 @FileName       : tarot.py
-@Project        : nonebot2_miya 
+@Project        : nonebot2_miya
 @Description    : 塔罗插件
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 import random

@@ -3,12 +3,11 @@
 @Date           : 2024/9/9 00:58
 @FileName       : downloader
 @Project        : ailitonia-toolkit
-@Description    : 
+@Description    :
 @GitHub         : https://github.com/Ailitonia
 @Software       : PyCharm
 """
 
-import re
 import sys
 from asyncio import sleep as async_sleep
 from collections.abc import Sequence
@@ -209,13 +208,15 @@ class PixivArtworkDownloader:
         await set_last_follow_illust_pid(pid=now_up_pid)
         logger.success(f'Follow artwork update is all got completed, this time up pid: {now_up_pid}')
 
-    async def _download_user_artworks(self, user_id: int) -> None:
+    async def _download_user_artworks(
+            self,
+            user_id: int,
+            *,
+            download_dir: 'Path | None' = None,
+    ) -> None:
         """下载用户作品"""
 
-        def _rename(user_name: str) -> str:
-            return re.sub(r'\W', '_', user_name)
-
-        # 获取用户作品
+        # 获取用户信息及用户作品列表
         user_data = await PixivUser(uid=user_id).query_user_data()
         logger.info(
             f'Querying user(uid={user_id}, {user_data.name}) artworks list completed, '
@@ -223,30 +224,43 @@ class PixivArtworkDownloader:
         )
         await async_sleep(30)
 
-        rename_username = _rename(user_data.name)
-        output_file_name = f'user_{rename_username}({user_id})_artworks_{datetime.now().strftime("%Y%m%d-%H%M%S")}.txt'
+        output_file_name = f'user_{user_id}_artworks_{datetime.now().strftime("%Y%m%d-%H%M%S")}.txt'
+        meta_file_name = f'user_{user_id}_meta.json'
         self.set_output_file(category='user', filename=output_file_name)
 
         # 获取用户所有作品信息
         await self._handle_output_artworks(pids=user_data.manga_illusts, enable_filter=False)
-
         logger.info(f'Querying user(uid={user_id}, {user_data.name}) artworks data completed, start downloading...')
 
-        download_folder = self.get_output_dir()('user', f'{user_id}-{rename_username}')
-        async with self.output_file.async_open('r', encoding='utf8') as af:
+        # 指定下载路径
+        if download_dir is not None:
+            download_folder = AnyResource(download_dir)(f'user_{user_id}')
+        else:
+            download_folder = self.get_output_dir()('user', f'user_{user_id}')
+
+        # 保存用户 meta 信息
+        async with download_folder(meta_file_name).async_open('w', encoding='utf-8') as maf:
+            await maf.write(user_data.model_dump_json())
+
+        # 执行下载
+        async with self.output_file.async_open('r', encoding='utf-8') as af:
             tasks = [
                 self.download_any_url(url=url, save_folder=download_folder, ignore_exist_file=True)
                 for url in await af.readlines()
             ]
-
         await semaphore_gather(tasks=tasks, semaphore_num=8)
         logger.success(f'Downloading user(uid={user_id}, {user_data.name}) artworks completed')
 
-    async def download_users_artworks_main(self, user_ids: Sequence[int]) -> None:
+    async def download_users_artworks_main(
+            self,
+            user_ids: Sequence[int],
+            *,
+            download_dir: 'Path | None' = None,
+    ) -> None:
         for i, user_id in enumerate(user_ids):
             try:
                 logger.info(f'Querying user(uid={user_id}) artworks, now: {i + 1}/{len(user_ids)}')
-                await self._download_user_artworks(user_id=user_id)
+                await self._download_user_artworks(user_id=user_id, download_dir=download_dir)
                 logger.success(f'Downloading user(uid={user_id}) artworks completed')
             except Exception as e:
                 logger.error(f'Downloading user(uid={user_id}) artworks failed, error: {e}')

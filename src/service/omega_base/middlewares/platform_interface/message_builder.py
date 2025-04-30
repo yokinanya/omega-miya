@@ -5,7 +5,7 @@
 @Project        : omega-miya
 @Description    : 中间件消息构造器
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 import abc
@@ -21,10 +21,12 @@ from ..exception import AdapterNotSupported
 from ..typing import BaseMessageSegType, BaseMessageType, BaseSentMessageType
 
 if TYPE_CHECKING:
-    from nonebot.internal.adapter import Message as BaseMessage
-    from nonebot.internal.adapter import MessageSegment as BaseMessageSegment
+    from nonebot.adapters import Message as BaseMessage
+    from nonebot.adapters import MessageSegment as BaseMessageSegment
 
-    from ...message import Message as OmegaMessage
+    from ...message import Message
+
+    type OmegaMessage = Message
 
 
 class BaseMessageBuilder[SourceMessage_T: BaseMessageType[Any], TargetMessage_T: BaseMessageType[Any]](abc.ABC):

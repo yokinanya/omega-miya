@@ -5,7 +5,7 @@
 @Project        : nonebot2_miya
 @Description    : 收藏的图片、漫画等作品合集, 数据库统一接口
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 from typing import TYPE_CHECKING, Literal, overload

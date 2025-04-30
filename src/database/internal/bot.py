@@ -2,10 +2,10 @@
 @Author         : Ailitonia
 @Date           : 2022/12/02 21:46
 @FileName       : bot.py
-@Project        : nonebot2_miya 
+@Project        : nonebot2_miya
 @Description    : BotSelf DAL
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 from copy import deepcopy
@@ -30,7 +30,7 @@ class BotType(StrEnum):
 
     @classmethod
     def get_supported_adapter_names(cls) -> set[str]:
-        return set(member.value for _, member in cls.__members__.items())
+        return {member.value for _, member in cls.__members__.items()}
 
 
 class BotSelf(BaseDataQueryResultModel):

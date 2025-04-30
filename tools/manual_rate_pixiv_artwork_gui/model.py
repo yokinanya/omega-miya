@@ -3,16 +3,16 @@
 @Date           : 2024/9/8 17:06
 @FileName       : model
 @Project        : ailitonia-toolkit
-@Description    : 
+@Description    :
 @GitHub         : https://github.com/Ailitonia
 @Software       : PyCharm
 """
 
-from typing import Literal, TypeAlias
+from typing import Literal
 
 from pydantic import BaseModel, ConfigDict
 
-ALLOW_ARTWORK_ORIGIN: TypeAlias = Literal[
+type ALLOW_ARTWORK_ORIGIN = Literal[
     'pixiv',
     'danbooru',
     'gelbooru',

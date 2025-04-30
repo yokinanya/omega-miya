@@ -3,7 +3,7 @@
 @Date           : 2024/8/24 下午5:24
 @FileName       : pixiv
 @Project        : nonebot2_miya
-@Description    : 
+@Description    :
 @GitHub         : https://github.com/Ailitonia
 @Software       : PyCharm
 """

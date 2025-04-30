@@ -9,7 +9,8 @@
 """
 
 from nonebot import get_driver, logger
-from nonebot.internal.adapter import Bot, Event
+from nonebot.adapters import Bot as BaseBot
+from nonebot.adapters import Event as BaseEvent
 from nonebot.matcher import Matcher
 from nonebot.message import event_postprocessor, event_preprocessor, run_postprocessor, run_preprocessor
 
@@ -34,14 +35,14 @@ async def handle_universal_on_startup():
 
 
 @event_preprocessor
-async def handle_universal_event_preprocessor(bot: Bot, event: Event):
+async def handle_universal_event_preprocessor(bot: BaseBot, event: BaseEvent):
     """事件预处理"""
     # 处理速率控制
     await preprocessor_rate_limiting(bot=bot, event=event)
 
 
 @run_preprocessor
-async def handle_universal_run_preprocessor(matcher: Matcher, bot: Bot, event: Event):
+async def handle_universal_run_preprocessor(matcher: Matcher, bot: BaseBot, event: BaseEvent):
     """运行预处理"""
     # 处理插件管理
     await preprocessor_plugin_manager(matcher=matcher, event=event)
@@ -63,14 +64,14 @@ async def handle_universal_run_preprocessor(matcher: Matcher, bot: Bot, event: E
 
 
 @run_postprocessor
-async def handle_universal_run_postprocessor(matcher: Matcher, bot: Bot, event: Event):
+async def handle_universal_run_postprocessor(matcher: Matcher, bot: BaseBot, event: BaseEvent):
     """运行后处理"""
     # 处理插件统计
     await postprocessor_statistic(matcher=matcher, bot=bot, event=event)
 
 
 @event_postprocessor
-async def handle_universal_event_postprocessor(bot: Bot, event: Event):
+async def handle_universal_event_postprocessor(bot: BaseBot, event: BaseEvent):
     """运行消息事件后处理"""
     # 处理消息事件
     try:

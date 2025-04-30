@@ -11,8 +11,9 @@
 from datetime import datetime, timedelta
 
 from nonebot import get_driver, logger
+from nonebot.adapters import Bot as BaseBot
+from nonebot.adapters import Event as BaseEvent
 from nonebot.exception import IgnoredException
-from nonebot.internal.adapter import Bot, Event
 from nonebot.matcher import Matcher
 from pydantic import BaseModel
 
@@ -32,7 +33,7 @@ class _CooldownCheckingResult(BaseModel):
     allow_skip: bool
 
 
-async def preprocessor_global_cooldown(matcher: Matcher, bot: Bot, event: Event):
+async def preprocessor_global_cooldown(matcher: Matcher, bot: BaseBot, event: BaseEvent):
     """运行预处理, 冷却全局处理"""
 
     # 跳过非插件创建的 Matcher
@@ -87,7 +88,7 @@ async def preprocessor_global_cooldown(matcher: Matcher, bot: Bot, event: Event)
         raise IgnoredException('全局冷却中')
 
 
-async def preprocessor_plugin_cooldown(matcher: Matcher, bot: Bot, event: Event):
+async def preprocessor_plugin_cooldown(matcher: Matcher, bot: BaseBot, event: BaseEvent):
     """运行预处理, 冷却插件处理"""
 
     # 跳过由 got 等事件处理函数创建临时 matcher 避免冷却在命令交互中被不正常触发

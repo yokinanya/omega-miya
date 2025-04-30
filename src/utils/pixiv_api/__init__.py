@@ -3,7 +3,7 @@
 @Date           : 2022/04/05 22:03
 @FileName       : pixiv_api.py
 @Project        : nonebot2_miya
-@Description    : Pixiv Api
+@Description    : Pixiv API
 @GitHub         : https://github.com/Ailitonia
 @Software       : PyCharm
 """

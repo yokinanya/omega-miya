@@ -5,16 +5,15 @@
 @Project        : nonebot2_miya
 @Description    : 18Comic models
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
-from dataclasses import dataclass
+from pathlib import Path
 
 from pydantic import BaseModel, ConfigDict
 
 from src.compat import AnyHttpUrlStr as AnyHttpUrl
-from src.resource import TemporaryResource
-from src.utils.image_utils.template import PreviewImageModel, PreviewImageThumbs
+from src.resource import AnyResource
 
 
 class BaseComic18Model(BaseModel):
@@ -78,25 +77,20 @@ class BlogsResult(BaseComic18Model):
     """文库搜索结果/分类/排行"""
 
 
-@dataclass
-class AlbumPackResult:
+class AlbumPackResult(BaseComic18Model):
     """漫画下载/打包信息"""
-    file: TemporaryResource
+    file_path: Path
     password: str
+
+    @property
+    def file(self) -> AnyResource:
+        return AnyResource(self.file_path)
 
 
 class Comic18PreviewRequestModel(BaseComic18Model):
     """请求 Comic18PreviewModel 的入参"""
     desc_text: str
     request_url: AnyHttpUrl
-
-
-class Comic18PreviewBody(PreviewImageThumbs):
-    """Pixiv 作品预览图中的缩略图数据"""
-
-
-class Comic18PreviewModel(PreviewImageModel):
-    """Pixiv 作品预览图 Model"""
 
 
 __all__ = [
@@ -107,6 +101,4 @@ __all__ = [
     'AlbumsResult',
     'AlbumPackResult',
     'Comic18PreviewRequestModel',
-    'Comic18PreviewBody',
-    'Comic18PreviewModel',
 ]

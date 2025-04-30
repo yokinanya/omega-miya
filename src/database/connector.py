@@ -2,10 +2,10 @@
 @Author         : Ailitonia
 @Date           : 2022/12/01 20:20
 @FileName       : connector.py
-@Project        : nonebot2_miya 
+@Project        : nonebot2_miya
 @Description    : omega database connector
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 from nonebot.log import logger

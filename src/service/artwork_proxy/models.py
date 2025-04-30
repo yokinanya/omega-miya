@@ -5,7 +5,7 @@
 @Project        : nonebot2_miya
 @Description    : Artwork Proxy Models
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 from enum import IntEnum, unique
@@ -86,22 +86,22 @@ class ArtworkData(BaseArtworkProxyModel):
     @property
     def index_pages(self) -> dict[int, ArtworkPage]:
         """所有图片"""
-        return {k: v for k, v in enumerate(self.pages)}
+        return dict(enumerate(self.pages))
 
     @property
     def preview_pages_url(self) -> dict[int, AnyHttpUrl]:
         """所有预览图"""
-        return {k: v for k, v in enumerate(x.preview_file.url for x in self.pages)}
+        return dict(enumerate(x.preview_file.url for x in self.pages))
 
     @property
     def regular_pages_url(self) -> dict[int, AnyHttpUrl]:
         """所有通常大图"""
-        return {k: v for k, v in enumerate(x.regular_file.url for x in self.pages)}
+        return dict(enumerate(x.regular_file.url for x in self.pages))
 
     @property
     def original_pages_url(self) -> dict[int, AnyHttpUrl]:
         """所有原图"""
-        return {k: v for k, v in enumerate(x.original_file.url for x in self.pages)}
+        return dict(enumerate(x.original_file.url for x in self.pages))
 
 
 class ArtworkPool(BaseArtworkProxyModel):

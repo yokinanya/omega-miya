@@ -5,7 +5,7 @@
 @Project        : nonebot2_miya
 @Description    : Nhentai
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 import random
@@ -15,23 +15,20 @@ from typing import TYPE_CHECKING, Literal
 
 from src.exception import WebSourceException
 from src.utils import BaseCommonAPI, semaphore_gather
-from src.utils.image_utils.template import generate_thumbs_preview_image
+from src.utils.image_utils.template import PreviewImageModel, PreviewImageThumbs, generate_thumbs_preview_image
 from src.utils.zip_utils import ZipUtils
-from .config import nhentai_config, nhentai_resource_config
+from .config import nhentai_config
 from .helper import NhentaiParser
 from .model import (
     NhentaiDownloadResult,
     NhentaiGalleryModel,
-    NhentaiPreviewBody,
-    NhentaiPreviewModel,
     NhentaiPreviewRequestModel,
     NhentaiSearchingResult,
 )
 
 if TYPE_CHECKING:
-    from nonebot.internal.driver import CookieTypes, HeaderTypes
-
     from src.resource import TemporaryResource
+    from src.utils.omega_common_api.types import CookieTypes, HeaderTypes
 
 
 class BaseNhentai(BaseCommonAPI):
@@ -73,32 +70,30 @@ class BaseNhentai(BaseCommonAPI):
     ) -> 'TemporaryResource':
         """下载任意资源到本地, 保持原始文件名, 直接覆盖同名文件"""
         return await cls._download_resource(
-            save_folder=nhentai_resource_config.default_download_folder,
+            save_folder=nhentai_config.default_download_folder,
             url=url,
             subdir=folder_name,
             ignore_exist_file=ignore_exist_file
         )
 
     @classmethod
-    async def _request_preview_body(cls, request: NhentaiPreviewRequestModel) -> NhentaiPreviewBody:
+    async def _request_preview_body(cls, request: NhentaiPreviewRequestModel) -> PreviewImageThumbs:
         """获取生成预览图中每个缩略图的数据"""
         _request_data = await cls._get_resource_as_bytes(url=request.request_url)
-        return NhentaiPreviewBody(desc_text=request.desc_text, preview_thumb=_request_data)
+        return PreviewImageThumbs(desc_text=request.desc_text, preview_thumb=_request_data)
 
     @classmethod
     async def _request_preview_model(
             cls,
             preview_name: str,
             requests: Sequence[NhentaiPreviewRequestModel]
-    ) -> NhentaiPreviewModel:
+    ) -> PreviewImageModel:
         """获取生成预览图所需要的数据模型"""
         _tasks = [cls._request_preview_body(request) for request in requests]
         _requests_data = await semaphore_gather(tasks=_tasks, semaphore_num=30, filter_exception=True)
         _requests_data = list(_requests_data)
-        count = len(_requests_data)
-        return NhentaiPreviewModel.model_validate({
+        return PreviewImageModel.model_validate({
             'preview_name': preview_name,
-            'count': count,
             'previews': _requests_data
         })
 
@@ -107,7 +102,7 @@ class BaseNhentai(BaseCommonAPI):
             cls,
             searching_name: str,
             model: NhentaiSearchingResult
-    ) -> NhentaiPreviewModel:
+    ) -> PreviewImageModel:
         """从搜索结果中获取生成预览图所需要的数据模型"""
         request_list = [
             NhentaiPreviewRequestModel(
@@ -127,18 +122,8 @@ class BaseNhentai(BaseCommonAPI):
             model: NhentaiGalleryModel,
             *,
             use_thumbnail: bool = True
-    ) -> NhentaiPreviewModel:
+    ) -> PreviewImageModel:
         """从作品信息中获取生成预览图所需要的数据模型"""
-
-        def _page_type(type_: str) -> str:
-            match type_:
-                case 'j':
-                    return 'jpg'
-                case 'p':
-                    return 'png'
-                case _:
-                    return 'unknown'
-
         if use_thumbnail:
             request_list = [
                 NhentaiPreviewRequestModel(desc_text=f'Page: {index + 1}', request_url=url)
@@ -148,7 +133,7 @@ class BaseNhentai(BaseCommonAPI):
             request_list = [
                 NhentaiPreviewRequestModel.model_validate({
                     'desc_text': f'Page: {index + 1}',
-                    'request_url': f'https://i.nhentai.net/galleries/{model.media_id}/{index + 1}.{_page_type(data.t)}'
+                    'request_url': f'{NhentaiGallery.get_page_resource_url()}/{model.media_id}/{index + 1}.{data.ft}'
                 })
                 for index, data in enumerate(model.images.pages)
             ]
@@ -157,9 +142,9 @@ class BaseNhentai(BaseCommonAPI):
     @classmethod
     async def generate_nhentai_preview_image(
             cls,
-            preview: NhentaiPreviewModel,
+            preview: 'PreviewImageModel',
             *,
-            preview_size: tuple[int, int] = nhentai_resource_config.default_preview_size,
+            preview_size: tuple[int, int] = nhentai_config.default_preview_size,
             hold_ratio: bool = False,
             num_of_line: int = 6,
             limit: int = 1000
@@ -175,12 +160,12 @@ class BaseNhentai(BaseCommonAPI):
         return await generate_thumbs_preview_image(
             preview=preview,
             preview_size=preview_size,
-            font_path=nhentai_resource_config.default_font_file,
+            font_path=nhentai_config.default_font,
             header_color=(215, 64, 87),
             hold_ratio=hold_ratio,
             num_of_line=num_of_line,
             limit=limit,
-            output_folder=nhentai_resource_config.default_preview_img_folder
+            output_folder=nhentai_config.default_preview_folder
         )
 
 
@@ -235,8 +220,8 @@ class NhentaiGallery(Nhentai):
         return f'<{self.__class__.__name__}(gallery_id={self.gallery_id})>'
 
     @classmethod
-    def _get_page_resource_url(cls) -> str:
-        return 'https://i.nhentai.net/galleries/'
+    def get_page_resource_url(cls) -> str:
+        return f'https://{nhentai_config.galleries_resource_url_subdomain}.nhentai.net/galleries'
 
     async def query_gallery(self) -> NhentaiGalleryModel:
         if not isinstance(self.gallery_model, NhentaiGalleryModel):
@@ -263,20 +248,12 @@ class NhentaiGallery(Nhentai):
 
         # 下载目标文件夹
         folder_name = f'gallery_{gallery_model.id}'
-        download_folder = nhentai_resource_config.default_download_folder(folder_name)
+        download_folder = nhentai_config.default_download_folder(folder_name)
 
         # 生成下载任务序列
         download_tasks = []
         for index, page in enumerate(gallery_model.images.pages):
-            match page.t:
-                case 'j':
-                    page_type = 'jpg'
-                case 'p':
-                    page_type = 'png'
-                case _:
-                    page_type = 'unknown'
-
-            page_download_url = f'{self._get_page_resource_url()}{gallery_model.media_id}/{index + 1}.{page_type}'
+            page_download_url = f'{self.get_page_resource_url()}/{gallery_model.media_id}/{index + 1}.{page.ft}'
             # 添加下载任务
             download_tasks.append(self.download_resource(
                 url=page_download_url, folder_name=folder_name, ignore_exist_file=ignore_exist_file
@@ -312,7 +289,7 @@ class NhentaiGallery(Nhentai):
         file_list = download_folder.list_all_files()
         zip_result = await zip_file.create_7z(files=file_list, password=password_str)
 
-        return NhentaiDownloadResult(file=zip_result, password=password_str)
+        return NhentaiDownloadResult(file_path=zip_result.path, password=password_str)
 
 
 __all__ = [

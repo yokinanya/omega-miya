@@ -155,8 +155,10 @@ tmp/
 # alembic versions
 alembic_scripts/versions/
 
-# private script
-*.private.py
-*.nonpublic.py
+# Ignore private plugins and scripts
+**/private_*/
+**/nonpublic_*/
+**/*.private.py
+**/*.nonpublic.py
 
 # End of https://www.toptal.com/developers/gitignore/api/python

@@ -11,7 +11,9 @@
 from datetime import datetime
 
 from nonebot import logger
-from nonebot.internal.adapter import Bot, Event, Message
+from nonebot.adapters import Bot as BaseBot
+from nonebot.adapters import Event as BaseEvent
+from nonebot.adapters import Message as BaseMessage
 
 from src.compat import dump_json_as
 from src.database import HistoryDAL, begin_db_session
@@ -20,7 +22,7 @@ from src.service import OmegaMatcherInterface
 LOG_PREFIX: str = '<lc>Message History</lc> | '
 
 
-async def postprocessor_history(bot: Bot, event: Event, message: Message):
+async def postprocessor_history(bot: BaseBot, event: BaseEvent, message: BaseMessage):
     """事件后处理, 消息历史记录"""
     if (message_id := getattr(event, 'message_id', None)) is not None:
         message_id = str(message_id)
@@ -29,7 +31,7 @@ async def postprocessor_history(bot: Bot, event: Event, message: Message):
     else:
         message_id = str(hash(message))
 
-    message_raw = dump_json_as(Message, message, encoding='utf-8')
+    message_raw = dump_json_as(BaseMessage, message, encoding='utf-8')
     message_text = message.extract_plain_text()
     if len(message_raw) > 4096:
         logger.opt(colors=True).debug(f'{LOG_PREFIX}message_raw reduced by exceeding field limiting, {message_raw!r}')

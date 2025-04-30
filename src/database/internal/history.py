@@ -2,10 +2,10 @@
 @Author         : Ailitonia
 @Date           : 2022/12/03 11:33
 @FileName       : history.py
-@Project        : nonebot2_miya 
+@Project        : nonebot2_miya
 @Description    : History DAL
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 from datetime import datetime

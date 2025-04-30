@@ -5,7 +5,7 @@
 @Project        : nonebot2_miya
 @Description    : 平台协议适配
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 from . import console as console

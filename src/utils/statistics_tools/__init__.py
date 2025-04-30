@@ -5,7 +5,7 @@
 @Project        : omega-miya
 @Description    : 统计图表生成工具
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 from .plots import create_simple_figure, create_simple_subplots_figure, output_figure

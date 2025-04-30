@@ -5,7 +5,7 @@
 @Project        : nonebot2_miya
 @Description    : 快速撤回 bot 发送的消息
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 from nonebot.plugin import PluginMetadata

@@ -2,16 +2,16 @@
 @Author         : Ailitonia
 @Date           : 2022/05/10 18:43
 @FileName       : model.py
-@Project        : nonebot2_miya 
+@Project        : nonebot2_miya
 @Description    : What to eat model
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 import random
 import re
 from collections.abc import Sequence
-from typing import Literal, TYPE_CHECKING
+from typing import TYPE_CHECKING, Literal
 
 from nonebot.log import logger
 from pydantic import BaseModel
@@ -38,11 +38,11 @@ _TYPE_MENU_TMP: dict[FoodType, list['MenuFood']] = {}
 """分类菜单缓存"""
 
 _MSG_PREFIX: list[str] = [
-    "不知道吃啥的话，不如尝尝这些吧~",
-    "根据今天的好天气，为你推荐这些好吃的~",
-    "还在纠结吃啥吗？不如试试这些~",
-    "想尝试点新东西吗？这里有你的新选择~",
-    "每一餐都是新的冒险，不如试试这些~",
+    '不知道吃啥的话，不如尝尝这些吧~',
+    '根据今天的好天气，为你推荐这些好吃的~',
+    '还在纠结吃啥吗？不如试试这些~',
+    '想尝试点新东西吗？这里有你的新选择~',
+    '每一餐都是新的冒险，不如试试这些~',
 ]
 """消息前缀清单"""
 
@@ -82,9 +82,9 @@ async def _get_menu_random_food(food_type: FoodType | None = None, num: int = 3)
         await _init_menu()
 
     if food_type is None:
-        return random.sample([food for food in _MENU_TMP], k=num)
+        return random.sample(list(_MENU_TMP), k=num)
     else:
-        return random.sample([food for food in _TYPE_MENU_TMP[food_type]], k=num)
+        return random.sample(list(_TYPE_MENU_TMP[food_type]), k=num)
 
 
 async def _get_food_msg(food: MenuFood) -> OmegaMessage:

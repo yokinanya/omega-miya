@@ -5,7 +5,7 @@
 @Project        : nonebot2_miya
 @Description    : 平台 API 及 Entity 方法适配工具
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 import abc
@@ -20,7 +20,7 @@ from ..const import SupportedTarget
 from ..exception import BotNoFound, TargetNotSupported
 
 if TYPE_CHECKING:
-    from nonebot.internal.adapter import Bot as BaseBot
+    from nonebot.adapters import Bot as BaseBot
 
     from ...internal import OmegaEntity
     from ..models import EntityTargetRevokeParams, EntityTargetSendParams

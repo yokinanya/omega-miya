@@ -5,7 +5,7 @@
 @Project        : nonebot2_miya
 @Description    : Gelbooru API (Gelbooru Beta 0.2.5) (Read requests only)
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 import abc
@@ -15,7 +15,7 @@ from src.utils import BaseCommonAPI
 from .models.gelbooru import CommentsData, Post, PostsData, TagsData, UsersData
 
 if TYPE_CHECKING:
-    from nonebot.internal.driver import CookieTypes, HeaderTypes, QueryTypes
+    from src.utils.omega_common_api.types import CookieTypes, HeaderTypes, QueryTypes
 
 
 class BaseGelbooruAPI(BaseCommonAPI, abc.ABC):

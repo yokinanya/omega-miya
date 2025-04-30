@@ -2,10 +2,10 @@
 @Author         : Ailitonia
 @Date           : 2021/06/09 19:10
 @FileName       : command.py
-@Project        : nonebot2_miya 
+@Project        : nonebot2_miya
 @Description    : 好友与群组邀请管理
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 import random

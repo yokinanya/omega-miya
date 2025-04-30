@@ -5,13 +5,13 @@
 @Project        : omega-miya
 @Description    : bilibili 动态相关 API
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 from typing import Literal
 
 from .base import BilibiliCommon
-from ..models import Dynamics, DynDetail
+from ..models import DynDetail, Dynamics
 
 
 class BilibiliDynamic(BilibiliCommon):

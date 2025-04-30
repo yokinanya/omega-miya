@@ -5,7 +5,7 @@
 @Project        : omega-miya
 @Description    : bilibili 直播相关 API
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 from collections.abc import Sequence

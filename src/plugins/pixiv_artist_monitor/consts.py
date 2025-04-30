@@ -5,7 +5,7 @@
 @Project        : nonebot2_miya
 @Description    : Pixiv Plugin Consts
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 from src.database.internal.subscription_source import SubscriptionSourceType

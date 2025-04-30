@@ -5,7 +5,7 @@
 @Project        : omega-miya
 @Description    : Danbooru API (bd0c6a37a81f851bd3e7862b97f7cf2fae7d5381) (Read requests only)
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 import abc
@@ -40,7 +40,7 @@ from .models.danbooru import (
 )
 
 if TYPE_CHECKING:
-    from nonebot.internal.driver import CookieTypes, HeaderTypes, QueryTypes
+    from src.utils.omega_common_api.types import CookieTypes, HeaderTypes, QueryTypes
 
 
 class BaseDanbooruAPI(BaseCommonAPI, abc.ABC):

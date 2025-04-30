@@ -3,9 +3,9 @@
 @Date           : 2024/6/26 上午3:26
 @FileName       : command
 @Project        : nonebot2_miya
-@Description    : 
+@Description    :
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 from typing import Annotated
@@ -34,7 +34,7 @@ jm = CommandGroup(
 
 
 @jm.command(
-    tuple(),
+    (),
     aliases={'JM', '18comic'},
     handlers=[get_command_str_single_arg_parser_handler('aid')],
 ).got('aid', prompt='想要查看哪个作品呢? 请输入作品ID:')

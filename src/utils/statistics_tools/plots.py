@@ -5,7 +5,7 @@
 @Project        : omega-miya
 @Description    : pyplot 图表实例创建工具
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 import sys
@@ -14,7 +14,7 @@ from typing import TYPE_CHECKING
 from matplotlib import font_manager
 from matplotlib import pyplot as plt
 
-from .consts import STATISTICS_TOOLS_RESOURCE
+from .config import statistics_tools_config
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
@@ -23,8 +23,8 @@ if TYPE_CHECKING:
     from src.resource import TemporaryResource
 
 # 添加中文字体
-font_manager.fontManager.addfont(STATISTICS_TOOLS_RESOURCE.default_font_file.path)
-font_manager.fontManager.addfont(STATISTICS_TOOLS_RESOURCE.alternative_font_file.path)
+font_manager.fontManager.addfont(statistics_tools_config.default_font.path)
+font_manager.fontManager.addfont(statistics_tools_config.alternative_font.path)
 
 # 设置字体
 plt.rcParams['font.family'] = ['sans-serif']
@@ -78,7 +78,7 @@ def output_figure(
         **kwargs
 ) -> 'TemporaryResource':
     """保存并导出生成的图表"""
-    output_file = STATISTICS_TOOLS_RESOURCE.default_output_folder(output_filename)
+    output_file = statistics_tools_config.default_output_folder(output_filename)
     with output_file.open('wb') as f:
         fig.savefig(f, dpi=dpi, format=format_, bbox_inches=bbox_inches, **kwargs)
     return output_file

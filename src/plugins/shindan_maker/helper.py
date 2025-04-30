@@ -5,7 +5,7 @@
 @Project        : nonebot2_miya
 @Description    : shindan maker parse tools
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 import re

@@ -11,7 +11,8 @@
 from datetime import datetime
 
 from nonebot import logger
-from nonebot.internal.adapter import Bot, Event
+from nonebot.adapters import Bot as BaseBot
+from nonebot.adapters import Event as BaseEvent
 from nonebot.matcher import Matcher
 
 from src.database import StatisticDAL, begin_db_session
@@ -21,7 +22,7 @@ from ..plugin_utils import parse_processor_state
 LOG_PREFIX: str = '<lc>Statistic</lc> | '
 
 
-async def postprocessor_statistic(matcher: Matcher, bot: Bot, event: Event):
+async def postprocessor_statistic(matcher: Matcher, bot: BaseBot, event: BaseEvent):
     """运行后处理, 统计插件使用信息"""
 
     # 跳过临时会话

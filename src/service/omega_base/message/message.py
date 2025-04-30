@@ -5,7 +5,7 @@
 @Project        : nonebot2_miya
 @Description    : Omega Internal Message
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 from collections.abc import Iterable, Sequence
@@ -14,8 +14,8 @@ from pathlib import Path
 from typing import Any, Union, override
 
 import ujson as json
-from nonebot.internal.adapter import Message as BaseMessage
-from nonebot.internal.adapter import MessageSegment as BaseMessageSegment
+from nonebot.adapters import Message as BaseMessage
+from nonebot.adapters import MessageSegment as BaseMessageSegment
 
 
 @unique

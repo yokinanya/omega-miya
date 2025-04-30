@@ -5,7 +5,7 @@
 @Project        : omega-miya
 @Description    : OneBot V11 反撤回插件配置
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 from nonebot import get_plugin_config, logger

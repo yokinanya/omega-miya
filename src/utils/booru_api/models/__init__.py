@@ -5,7 +5,7 @@
 @Project        : omega-miya
 @Description    : booru models
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 from .danbooru import Artist as DanbooruArtist

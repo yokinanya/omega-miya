@@ -5,13 +5,13 @@
 @Project        : nonebot2_miya
 @Description    : 通用处理流程
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 from typing import Annotated, Any
 
+from nonebot.adapters import Message as BaseMessage
 from nonebot.exception import ParserExit
-from nonebot.internal.adapter import Message
 from nonebot.matcher import Matcher
 from nonebot.params import CommandArg, ShellCommandArgs
 from nonebot.typing import T_Handler, T_State
@@ -31,7 +31,7 @@ def get_command_str_single_arg_parser_handler(
     :return: T_Handler
     """
 
-    async def handle_parse_command_str_single_arg(state: T_State, cmd_arg: Annotated[Message, CommandArg()]):
+    async def handle_parse_command_str_single_arg(state: T_State, cmd_arg: Annotated[BaseMessage, CommandArg()]):
         """首次运行时解析命令参数"""
         single_arg = cmd_arg.extract_plain_text().strip()
         if single_arg:
@@ -58,7 +58,7 @@ def get_command_str_multi_args_parser_handler(
     :return: T_Handler
     """
 
-    async def handle_parse_command_str_multi_args(state: T_State, cmd_arg: Annotated[Message, CommandArg()]):
+    async def handle_parse_command_str_multi_args(state: T_State, cmd_arg: Annotated[BaseMessage, CommandArg()]):
         if ensure_keys_num > 0:
             multi_args = cmd_arg.extract_plain_text().strip().split(maxsplit=ensure_keys_num - 1)
         else:
@@ -91,7 +91,7 @@ def get_command_message_arg_parser_handler(
     :return: T_Handler
     """
 
-    async def handle_parse_command_message_arg(matcher: Matcher, cmd_arg: Annotated[Message, CommandArg()]):
+    async def handle_parse_command_message_arg(matcher: Matcher, cmd_arg: Annotated[BaseMessage, CommandArg()]):
         """首次运行时解析命令参数"""
         message_arg = cmd_arg
         message_class = cmd_arg.__class__

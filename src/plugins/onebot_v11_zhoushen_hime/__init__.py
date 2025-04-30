@@ -5,7 +5,7 @@
 @Project        : nonebot2_miya
 @Description    : 自动审轴姬
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 from nonebot.plugin import PluginMetadata

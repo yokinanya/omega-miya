@@ -5,7 +5,7 @@
 @Project        : omega-miya
 @Description    : 通用 API 基类
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 import abc
@@ -15,7 +15,9 @@ from src.exception import WebSourceException
 from ..omega_requests import OmegaRequests
 
 if TYPE_CHECKING:
-    from nonebot.internal.driver import (
+    from src.resource import TemporaryResource
+
+    from .types import (
         ContentTypes,
         CookieTypes,
         DataTypes,
@@ -24,8 +26,6 @@ if TYPE_CHECKING:
         QueryTypes,
         Response,
     )
-
-    from src.resource import TemporaryResource
 
 
 class BaseCommonAPI(abc.ABC):
@@ -122,7 +122,29 @@ class BaseCommonAPI(abc.ABC):
         )
         response = await requests.get(url=url, params=params)
         if response.status_code != 200:
-            raise WebSourceException(response.status_code, f'{response.request}, status code {response.status_code}')
+            raise WebSourceException(response.status_code, str(response.request), response.content)
+
+        return response
+
+    @classmethod
+    async def _request_delete(
+            cls,
+            url: str,
+            params: 'QueryTypes' = None,
+            *,
+            headers: 'HeaderTypes' = None,
+            cookies: 'CookieTypes' = None,
+            timeout: int = 10,
+            no_headers: bool = False,
+            no_cookies: bool = False,
+    ) -> 'Response':
+        """内部方法, 使用 DELETE 方法请求"""
+        requests = cls._init_omega_requests(
+            headers=headers, cookies=cookies, timeout=timeout, no_headers=no_headers, no_cookies=no_cookies
+        )
+        response = await requests.delete(url=url, params=params)
+        if response.status_code != 200:
+            raise WebSourceException(response.status_code, str(response.request), response.content)
 
         return response
 
@@ -148,7 +170,33 @@ class BaseCommonAPI(abc.ABC):
         )
         response = await requests.post(url=url, params=params, content=content, data=data, json=json, files=files)
         if response.status_code != 200:
-            raise WebSourceException(response.status_code, f'{response.request}, status code {response.status_code}')
+            raise WebSourceException(response.status_code, str(response.request), response.content)
+
+        return response
+
+    @classmethod
+    async def _request_put(
+            cls,
+            url: str,
+            params: 'QueryTypes' = None,
+            *,
+            content: 'ContentTypes' = None,
+            data: 'DataTypes' = None,
+            json: Any = None,
+            files: 'FilesTypes' = None,
+            headers: 'HeaderTypes' = None,
+            cookies: 'CookieTypes' = None,
+            timeout: int = 10,
+            no_headers: bool = False,
+            no_cookies: bool = False,
+    ) -> 'Response':
+        """内部方法, 使用 PUT 方法请求"""
+        requests = cls._init_omega_requests(
+            headers=headers, cookies=cookies, timeout=timeout, no_headers=no_headers, no_cookies=no_cookies
+        )
+        response = await requests.put(url=url, params=params, content=content, data=data, json=json, files=files)
+        if response.status_code != 200:
+            raise WebSourceException(response.status_code, str(response.request), response.content)
 
         return response
 

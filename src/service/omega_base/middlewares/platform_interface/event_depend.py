@@ -5,7 +5,7 @@
 @Project        : omega-miya
 @Description    : 平台事件及对象依赖适配
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 import abc
@@ -13,7 +13,7 @@ from collections.abc import Callable
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Annotated, Any
 
-from nonebot.internal.adapter import Event as BaseEvent
+from nonebot.adapters import Event as BaseEvent
 from nonebot.log import logger
 from nonebot.params import Depends
 
@@ -21,7 +21,7 @@ from src.database import get_db_session
 from ...internal import OmegaEntity
 
 if TYPE_CHECKING:
-    from nonebot.internal.adapter import Bot as BaseBot
+    from nonebot.adapters import Bot as BaseBot
     from sqlalchemy.ext.asyncio import AsyncSession
 
     from ...message import Message as OmegaMessage
@@ -109,6 +109,11 @@ class BaseEventDepend[Bot_T: 'BaseBot', Event_T: 'BaseEvent', Message_T: 'BaseMe
     @abc.abstractmethod
     def get_user_nickname(self) -> str:
         """获取事件用户昵称"""
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def get_msg_mentioned_user_ids(self) -> list[str]:
+        """获取当前事件消息中被 @ 所有用户对象 ID 列表"""
         raise NotImplementedError
 
     @abc.abstractmethod

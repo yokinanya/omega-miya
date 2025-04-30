@@ -11,8 +11,8 @@
 from collections.abc import Iterable
 
 from nonebot import get_driver, get_loaded_plugins, logger
+from nonebot.adapters import Event as BaseEvent
 from nonebot.exception import IgnoredException
-from nonebot.internal.adapter import Event as BaseEvent
 from nonebot.matcher import Matcher
 from nonebot.plugin import Plugin
 from sqlalchemy.exc import NoResultFound

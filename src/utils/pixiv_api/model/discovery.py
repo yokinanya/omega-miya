@@ -2,10 +2,10 @@
 @Author         : Ailitonia
 @Date           : 2022/04/06 1:14
 @FileName       : discovery.py
-@Project        : nonebot2_miya 
+@Project        : nonebot2_miya
 @Description    : Pixiv Discovery Model
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 import random

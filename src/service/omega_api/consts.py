@@ -5,12 +5,12 @@
 @Project        : omega-miya
 @Description    : Omega API 常量
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 from typing import Literal
 
-TOKEN_HEADER_KEY: Literal['X-OmegaApi-Token'] = 'X-OmegaApi-Token'
+TOKEN_HEADER_KEY: Literal['X-OmegaAPI-Token'] = 'X-OmegaAPI-Token'
 """Omega API 身份验证 Token 的 Header Key"""
 
 __all__ = [

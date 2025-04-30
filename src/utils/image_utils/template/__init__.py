@@ -2,10 +2,10 @@
 @Author         : Ailitonia
 @Date           : 2022/12/11 16:32
 @FileName       : template.py
-@Project        : nonebot2_miya 
+@Project        : nonebot2_miya
 @Description    : 常用的图片生成模板
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 from .model import PreviewImageModel, PreviewImageThumbs

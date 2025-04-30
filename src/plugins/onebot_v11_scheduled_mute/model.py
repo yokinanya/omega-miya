@@ -3,7 +3,7 @@
 @Date           : 2024/9/9 19:21
 @FileName       : model
 @Project        : omega-miya
-@Description    : 
+@Description    :
 @GitHub         : https://github.com/Ailitonia
 @Software       : PyCharm
 """

@@ -2,10 +2,10 @@
 @Author         : Ailitonia
 @Date           : 2022/04/08 2:15
 @FileName       : helper.py
-@Project        : nonebot2_miya 
+@Project        : nonebot2_miya
 @Description    : 常用的一些工具函数
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 import re

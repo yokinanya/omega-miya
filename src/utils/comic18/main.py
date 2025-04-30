@@ -5,7 +5,7 @@
 @Project        : nonebot2_miya
 @Description    : 18Comic
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 import random
@@ -18,9 +18,9 @@ from nonebot.log import logger
 
 from src.exception import WebSourceException
 from src.utils import BaseCommonAPI, semaphore_gather
-from src.utils.image_utils.template import generate_thumbs_preview_image
+from src.utils.image_utils.template import PreviewImageModel, PreviewImageThumbs, generate_thumbs_preview_image
 from src.utils.zip_utils import ZipUtils
-from .config import comic18_config, comic18_resource_config
+from .config import comic18_config
 from .helper import Comic18ImgOps, Comic18Parser
 from .model import (
     AlbumData,
@@ -28,15 +28,12 @@ from .model import (
     AlbumPage,
     AlbumPageContent,
     AlbumsResult,
-    Comic18PreviewBody,
-    Comic18PreviewModel,
     Comic18PreviewRequestModel,
 )
 
 if TYPE_CHECKING:
-    from nonebot.internal.driver import CookieTypes, QueryTypes
-
     from src.resource import TemporaryResource
+    from src.utils.omega_common_api.types import CookieTypes, QueryTypes
 
 
 class _BaseComic18(BaseCommonAPI):
@@ -143,7 +140,7 @@ class _BaseComic18(BaseCommonAPI):
         """下载任意资源到本地, 保持原始文件名, 直接覆盖同名文件"""
         try:
             file = await cls._download_resource(
-                save_folder=comic18_resource_config.default_download_folder,
+                save_folder=comic18_config.download_folder,
                 url=url, subdir=folder_name, ignore_exist_file=ignore_exist_file
             )
         except WebSourceException as e:
@@ -153,7 +150,7 @@ class _BaseComic18(BaseCommonAPI):
             # 请求过快可能导致 403 被暂时流控了, 暂停一下重试一次
             await async_sleep(3)
             file = await cls._download_resource(
-                save_folder=comic18_resource_config.default_download_folder,
+                save_folder=comic18_config.download_folder,
                 url=url, subdir=folder_name, ignore_exist_file=ignore_exist_file
             )
 
@@ -384,7 +381,7 @@ class Comic18(_BaseComic18):
 
         # 下载目标文件夹
         folder_name = f'album_{self.aid}'
-        download_folder = comic18_resource_config.default_download_folder(folder_name)
+        download_folder = comic18_config.download_folder(folder_name)
 
         # 生成下载任务序列
         download_tasks = [
@@ -412,7 +409,7 @@ class Comic18(_BaseComic18):
         album_data = await self.query_album()
 
         # 执行下载任务
-        download_folder = comic18_resource_config.default_download_folder(f'album_{self.aid}')
+        download_folder = comic18_config.download_folder(f'album_{self.aid}')
         download_result = await self.download_album(ignore_exist_file=ignore_exist_file)
 
         # 归档元数据
@@ -439,34 +436,32 @@ class Comic18(_BaseComic18):
         zip_result = await zip_file.create_7z(files=file_list, password=password_str)
         logger.success(f'Comic18 | Packed album(id={self.aid}) succeed')
 
-        return AlbumPackResult(file=zip_result, password=password_str)
+        return AlbumPackResult(file_path=zip_result.path, password=password_str)
 
     @classmethod
-    async def _request_preview_body(cls, request: Comic18PreviewRequestModel) -> Comic18PreviewBody:
+    async def _request_preview_body(cls, request: Comic18PreviewRequestModel) -> PreviewImageThumbs:
         """获取生成预览图中每个缩略图的数据"""
         request_data = await cls.request_resource_as_bytes(url=request.request_url)
-        return Comic18PreviewBody(desc_text=request.desc_text, preview_thumb=request_data)
+        return PreviewImageThumbs(desc_text=request.desc_text, preview_thumb=request_data)
 
     @classmethod
     async def _request_preview_model(
             cls,
             preview_name: str,
             requests: Sequence[Comic18PreviewRequestModel],
-    ) -> Comic18PreviewModel:
+    ) -> PreviewImageModel:
         """获取生成预览图所需要的数据模型"""
         _tasks = [cls._request_preview_body(request) for request in requests]
         _requests_data = await semaphore_gather(tasks=_tasks, semaphore_num=30, filter_exception=True)
         _requests_data = list(_requests_data)
-        count = len(_requests_data)
-        return Comic18PreviewModel.model_validate({
+        return PreviewImageModel.model_validate({
             'preview_name': preview_name,
-            'count': count,
             'previews': _requests_data
         })
 
     @staticmethod
     async def _generate_preview_image(
-            preview: Comic18PreviewModel,
+            preview: PreviewImageModel,
             *,
             preview_size: tuple[int, int] = (300, 450),
             hold_ratio: bool = False,
@@ -483,12 +478,12 @@ class Comic18(_BaseComic18):
         return await generate_thumbs_preview_image(
             preview=preview,
             preview_size=preview_size,
-            font_path=comic18_resource_config.default_font_file,
+            font_path=comic18_config.default_font,
             header_color=(215, 64, 87),
             hold_ratio=hold_ratio,
             num_of_line=num_of_line,
             limit=limit,
-            output_folder=comic18_resource_config.default_preview_folder
+            output_folder=comic18_config.preview_folder
         )
 
     @classmethod
@@ -496,7 +491,7 @@ class Comic18(_BaseComic18):
             cls,
             searching_name: str,
             searching_data: Sequence[AlbumsResult],
-    ) -> Comic18PreviewModel:
+    ) -> PreviewImageModel:
         """从搜索结果中获取生成预览图所需要的数据模型"""
         request_list = [
             Comic18PreviewRequestModel(
@@ -510,7 +505,7 @@ class Comic18(_BaseComic18):
         preview_model = await cls._request_preview_model(preview_name=searching_name, requests=request_list)
         return preview_model
 
-    async def _emit_preview_model_from_album_data(self) -> Comic18PreviewModel:
+    async def _emit_preview_model_from_album_data(self) -> PreviewImageModel:
         """从作品信息中获取生成预览图所需要的数据模型"""
         album_data = await self.query_album()
         preview_name = f'18Comic - JM{album_data.aid} - {album_data.title}'
@@ -521,12 +516,12 @@ class Comic18(_BaseComic18):
         for index, file in enumerate(pages):
             async with file.async_open('rb') as af:
                 page_content = await af.read()
-            previews.append(Comic18PreviewBody(
+            previews.append(PreviewImageThumbs(
                 desc_text=f'Page: {index+1} / {count}',
                 preview_thumb=page_content
             ))
 
-        return Comic18PreviewModel(preview_name=preview_name, count=count, previews=previews)
+        return PreviewImageModel(preview_name=preview_name, previews=previews)
 
     async def _generate_album_preview_image(self) -> 'TemporaryResource':
         """生成作品预览图"""
@@ -535,5 +530,5 @@ class Comic18(_BaseComic18):
 
 
 __all__ = [
-    'Comic18'
+    'Comic18',
 ]

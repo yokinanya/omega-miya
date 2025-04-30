@@ -71,7 +71,7 @@ class SocialMediaContentDAL(BaseDataAccessLayerModel[SocialMediaContentOrm, Soci
     async def query_source_not_exists_mids(self, source: str, mids: Sequence[str]) -> list[str]:
         """根据提供的 mids 查询其中不存在于数据库记录中的条目"""
         exists_mids = await self.query_source_exists_mids(source=source, mids=mids)
-        return sorted(list(set(mids) - set(exists_mids)), reverse=True)
+        return sorted(set(mids) - set(exists_mids), reverse=True)
 
     async def query_user_all(self, source: str, uid: str) -> list[SocialMediaContent]:
         """查询指定来源平台指定用户所有记录行"""
@@ -104,7 +104,7 @@ class SocialMediaContentDAL(BaseDataAccessLayerModel[SocialMediaContentOrm, Soci
     async def query_user_not_exists_mids(self, source: str, uid: str, mids: Sequence[str]) -> list[str]:
         """根据提供的 mids 查询对应用户其中不存在于数据库记录中的条目"""
         exists_mids = await self.query_user_exists_mids(source=source, uid=uid, mids=mids)
-        return sorted(list(set(mids) - set(exists_mids)), reverse=True)
+        return sorted(set(mids) - set(exists_mids), reverse=True)
 
     async def add(
             self,

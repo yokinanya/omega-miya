@@ -2,10 +2,10 @@
 @Author         : Ailitonia
 @Date           : 2022/04/10 13:14
 @FileName       : pixivision.py
-@Project        : nonebot2_miya 
+@Project        : nonebot2_miya
 @Description    : Pixivision Model
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 import re

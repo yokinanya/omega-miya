@@ -2,10 +2,10 @@
 @Author         : Ailitonia
 @Date           : 2022/12/10 20:30
 @FileName       : utils.py
-@Project        : nonebot2_miya 
+@Project        : nonebot2_miya
 @Description    : Omega requests handler utils
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 from typing import Any
@@ -20,12 +20,13 @@ class CloudflareClearanceModel(BaseModel):
 
 class DomainCloudflareClearanceCookies(CloudflareClearanceModel):
     cf_clearance: str
-    cf_bm: str | None = Field(None, alias='__cf_bm')
-    cflb: str | None = Field(None, alias='__cflb')
+    cf_bm: str | None = Field(default=None, alias='__cf_bm')
+    cfduid: str | None = Field(default=None, alias='__cfduid')
+    cflb: str | None = Field(default=None, alias='__cflb')
 
 
 class DomainCloudflareClearanceHeaders(CloudflareClearanceModel):
-    user_agent: str | None = Field(None, alias='User-Agent')
+    user_agent: str | None = Field(default=None, alias='User-Agent')
 
 
 class DomainCloudflareClearance(CloudflareClearanceModel):

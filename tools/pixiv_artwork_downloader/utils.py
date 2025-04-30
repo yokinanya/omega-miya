@@ -3,7 +3,7 @@
 @Date           : 2024/9/9 00:53
 @FileName       : utils
 @Project        : ailitonia-toolkit
-@Description    : 
+@Description    :
 @GitHub         : https://github.com/Ailitonia
 @Software       : PyCharm
 """

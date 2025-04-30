@@ -5,7 +5,7 @@
 @Project        : nonebot2_miya
 @Description    : Danbooru 图库统一接口实现
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 import abc

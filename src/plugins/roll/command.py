@@ -5,7 +5,7 @@
 @Project        : nonebot2_miya
 @Description    : 骰子插件
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 import random
@@ -17,11 +17,9 @@ from nonebot.log import logger
 from nonebot.params import ArgStr, Depends
 from nonebot.plugin import CommandGroup
 
-from src.database import AuthSettingDAL
 from src.params.handler import get_command_str_single_arg_parser_handler, get_set_default_state_handler
 from src.service import OmegaMatcherInterface as OmMI
 from src.service import enable_processor_state
-from .consts import ATTR_PREFIX, MODULE_NAME, PLUGIN_NAME
 from .model import RandomDice
 
 roll = CommandGroup(
@@ -30,13 +28,13 @@ roll = CommandGroup(
     block=True,
     state=enable_processor_state(
         name='Roll',
-        level=10
+        level=10,
     ),
 )
 
 
 @roll.command(
-    tuple(),
+    (),
     aliases={'Roll'},
     handlers=[get_command_str_single_arg_parser_handler('expression')],
 ).got('expression', prompt='请掷骰子: <骰子个数>D<骰子面数>')
@@ -103,7 +101,7 @@ async def handle_roll_dice(
     'ra',
     aliases={'rra', '检定'},
     handlers=[get_command_str_single_arg_parser_handler('attr')],
-).got('attr', prompt='请输入需要鉴定的属性/技能名')
+).got('attr', prompt='请输入需要检定的属性/技能名')
 async def handle_roll_attr(
         interface: Annotated[OmMI, Depends(OmMI.depend('user'))],
         attr: Annotated[str, ArgStr('attr')],
@@ -111,34 +109,32 @@ async def handle_roll_attr(
     attr = attr.strip()
 
     try:
-        attr_node = f'{ATTR_PREFIX}{attr}'
-        user_attr = await interface.entity.query_auth_setting(module=MODULE_NAME, plugin=PLUGIN_NAME, node=attr_node)
-        if user_attr.value is None or not user_attr.value.isdigit():
-            raise ValueError('attr value must be isdigit')
-        attr_value = int(user_attr.value)
+        # 尝试获取用户属性值, 若不存在对应属性值时尝试随机获取
+        attr_value = await interface.entity.query_character_attribute(
+            attr_name=attr,
+            default_factory=lambda: random.randint(1, 100),
+        )
+        await interface.entity.commit_session()
     except Exception as e:
         logger.warning(f'Roll | 查询 {interface.entity} 属性 {attr!r} 失败, {e}')
-        await interface.finish_reply(f'你还没有{attr!r}属性/技能, 或属性值异常, 请使用"/rrs {attr}"获取属性/技能后再试')
+        await interface.finish_reply(f'你的{attr!r}属性/技能值异常, 请稍后重试或联系管理员处理')
 
-    roll_result = await RandomDice.simple_roll(1, 100)
-    if roll_result.result_int is None or roll_result.error_message is not None:
-        logger.warning(f'Roll | 投骰异常, {roll_result.error_message}')
-        await interface.finish_reply('掷骰异常, 请稍后重试')
+    roll_result = random.randint(1, 100)
 
     result_msg = '失败~'
-    if roll_result.result_int > 96:
+    if roll_result > 96:
         result_msg = '大失败~'
-    if roll_result.result_int < attr_value:
+    if roll_result < attr_value:
         result_msg = '成功！'
-    if roll_result.result_int < attr_value * 0.5:
+    if roll_result < attr_value * 0.5:
         result_msg = '困难成功！'
-    if roll_result.result_int < attr_value * 0.2:
+    if roll_result < attr_value * 0.2:
         result_msg = '极限成功！'
-    if roll_result.result_int < 4:
+    if roll_result < 4:
         result_msg = '大成功！！'
 
     await interface.finish_reply(
-        f'你进行了【{attr}({attr_value})】检定,\n1D100=>{roll_result.result_int}\n{result_msg}'
+        f'你进行了【{attr}({attr_value})】检定,\n1D100=>{roll_result}\n{result_msg}'
     )
 
 
@@ -152,26 +148,24 @@ async def handle_roll_set_attr(
         attr: Annotated[str, ArgStr('attr')],
 ) -> None:
     attr = attr.strip()
-    attr_node = f'{ATTR_PREFIX}{attr}'
-    attr_cd_event = f'ROLL_{ATTR_PREFIX}{attr}_SETTER_COOLDOWN'
 
     try:
-        is_expired, expired_time = await interface.entity.check_cooldown_expired(cooldown_event=attr_cd_event)
+        is_expired, expired_time = await interface.entity.check_character_attribute_setter_cooldown_expired(
+            attr_name=attr
+        )
         if not is_expired:
-            await interface.send_reply(f'属性{attr!r}重随冷却中!\n冷却到期: {expired_time.strftime("%Y-%m-%d %H:%M:%S")}')
+            await interface.send_reply(
+                f'属性{attr!r}重置冷却中!\n冷却到期: {expired_time.strftime("%Y-%m-%d %H:%M:%S")}'
+            )
             return
 
-        roll_result = await RandomDice.simple_roll(1, 100)
-        if roll_result.result_int is None:
-            raise RuntimeError(f'掷骰异常, {roll_result.error_message}')
+        roll_result = random.randint(1, 100)
 
-        await interface.entity.set_auth_setting(
-            module=MODULE_NAME, plugin=PLUGIN_NAME, node=attr_node, available=1, value=str(roll_result.result_int)
-        )
-        await interface.entity.set_cooldown(cooldown_event=attr_cd_event, expired_time=timedelta(hours=6))
+        await interface.entity.set_character_attribute(attr_name=attr, attr_value=roll_result)
+        await interface.entity.set_character_attribute_setter_cooldown(attr, expired_time=timedelta(hours=6))
         await interface.entity.commit_session()
 
-        await interface.send_reply(f'你获得了{attr!r}属性/技能, 属性/技能值为【{roll_result.result_int}】')
+        await interface.send_reply(f'你获得了{attr!r}属性/技能, 属性/技能值为【{roll_result}】')
     except Exception as e:
         logger.error(f'Roll | 设置 {interface.entity} 属性 {attr!r} 失败, {e}')
         await interface.send_reply(f'随机获取{attr!r}属性/技能失败了, 请稍后重试或联系管理员处理')
@@ -184,16 +178,22 @@ async def handle_roll_set_attr(
 ).got('attr', prompt='请输入需要移除的属性/技能名')
 async def handle_roll_clear_attr(
         interface: Annotated[OmMI, Depends(OmMI.depend('user'))],
-        auth_dal: Annotated[AuthSettingDAL, Depends(AuthSettingDAL.dal_dependence)],
         attr: Annotated[str, ArgStr('attr')],
 ) -> None:
     attr = attr.strip()
-    attr_node = f'{ATTR_PREFIX}{attr}'
 
     try:
-        exist_attr = await interface.entity.query_auth_setting(module=MODULE_NAME, plugin=PLUGIN_NAME, node=attr_node)
-        await auth_dal.delete(id_=exist_attr.id)
-        await auth_dal.commit_session()
+        is_expired, expired_time = await interface.entity.check_character_attribute_setter_cooldown_expired(
+            attr_name=attr
+        )
+        if not is_expired:
+            await interface.send_reply(
+                f'属性{attr!r}重置冷却中!\n冷却到期: {expired_time.strftime("%Y-%m-%d %H:%M:%S")}'
+            )
+            return
+
+        await interface.entity.delete_character_attribute(attribute_name=attr)
+        await interface.entity.commit_session()
 
         await interface.send_reply(f'你移除了{attr!r}属性/技能')
     except Exception as e:
@@ -208,21 +208,18 @@ async def handle_roll_clear_attr(
 ).got('ensure')
 async def handle_roll_clear_all_attr(
         interface: Annotated[OmMI, Depends(OmMI.depend('user'))],
-        auth_dal: Annotated[AuthSettingDAL, Depends(AuthSettingDAL.dal_dependence)],
         ensure: Annotated[str | None, ArgStr('ensure')],
 ) -> None:
     if ensure is None:
         ensure_msg = '即将移除你所有的属性/技能\n\n确认吗?\n【是/否】'
         await interface.reject_arg_reply('ensure', ensure_msg)
     elif ensure in ['是', '确认', 'Yes', 'yes', 'Y', 'y']:
-        exist_attrs = await interface.entity.query_plugin_all_auth_setting(module=MODULE_NAME, plugin=PLUGIN_NAME)
+        exist_attrs = await interface.entity.query_all_character_attribute()
         for attrs in exist_attrs:
-            if attrs.node.startswith(ATTR_PREFIX):
-                await auth_dal.delete(id_=attrs.id)
-        await auth_dal.commit_session()
+            await interface.entity.delete_character_attribute(attribute_name=attrs.node)
+        await interface.entity.commit_session()
 
-        removed_attrs = [x.node.removeprefix(ATTR_PREFIX) for x in exist_attrs if x.node.startswith(ATTR_PREFIX)]
-        await interface.finish_reply(f'你移除了{", ".join(removed_attrs)!r}属性/技能')
+        await interface.finish_reply(f'你移除了{", ".join(x.node for x in exist_attrs)!r}属性/技能')
     else:
         await interface.finish_reply('已取消操作')
 
@@ -230,12 +227,8 @@ async def handle_roll_clear_all_attr(
 @roll.command('show', aliases={'rlsa'}).handle()
 async def handle_show_attr(interface: Annotated[OmMI, Depends(OmMI.depend('user'))]) -> None:
     try:
-        attrs = await interface.entity.query_plugin_all_auth_setting(module=MODULE_NAME, plugin=PLUGIN_NAME)
-        attrs_msg = '\n'.join(
-            f'{attr.node.removeprefix(ATTR_PREFIX)}={attr.value}'
-            for attr in attrs
-            if attr.node.startswith(ATTR_PREFIX)
-        )
+        attrs = await interface.entity.query_all_character_attribute()
+        attrs_msg = '\n'.join(f'{attr.node}={attr.value}' for attr in attrs)
         await interface.send_reply(f'你拥有以下属性/技能:\n{attrs_msg if attrs_msg else "无"}')
     except Exception as e:
         logger.error(f'Roll | 查询 {interface.entity} 属性清单失败, {e}')

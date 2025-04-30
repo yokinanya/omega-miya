@@ -5,7 +5,7 @@
 @Project        : nonebot2_miya
 @Description    : 图库自动更新工具
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 from nonebot.plugin import PluginMetadata

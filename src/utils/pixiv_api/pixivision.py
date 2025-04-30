@@ -3,7 +3,7 @@
 @Date           : 2022/04/05 22:03
 @FileName       : pixivision.py
 @Project        : nonebot2_miya
-@Description    : Pixivision Api
+@Description    : Pixivision API
 @GitHub         : https://github.com/Ailitonia
 @Software       : PyCharm
 """

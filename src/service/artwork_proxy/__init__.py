@@ -5,7 +5,7 @@
 @Project        : nonebot2_miya
 @Description    : 图站 API 及本地图片缓存统一接口
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 from typing import Literal

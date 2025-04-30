@@ -2,10 +2,10 @@
 @Author         : Ailitonia
 @Date           : 2021/10/30 15:22
 @FileName       : command.py
-@Project        : nonebot2_miya 
+@Project        : nonebot2_miya
 @Description    : 今天吃啥
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 from datetime import datetime
