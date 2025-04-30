@@ -177,21 +177,24 @@ class ImageTextProcessor:
     def _draw_text_v2(
             cls,
             draw: 'ImageDraw.ImageDraw',
-            xy: tuple[int, int],
+            xy: tuple[int | float, int | float],
             text: str,
             color: tuple[int, int, int],
             fonts: FontMap,
             size: int,
             anchor: str | None = None,
             align: Literal['left', 'center', 'right'] = 'left',
-    ) -> None:
-        """Draws text on an image at given coordinates, using specified size, color, and fonts."""
+    ) -> tuple[float, float]:
+        """Draws text on an image at given coordinates, using specified size, color, and fonts.
 
-        y_offset = 0
+        :return: the text box size: (float, float)
+        """
+        height = 0.0
+        x_offset = 0
         sentence = cls.merge_chunks(text, fonts)
 
         for words in sentence:
-            xy_ = (xy[0] + y_offset, xy[1])
+            xy_ = (xy[0] + x_offset, xy[1])
 
             font = ImageFont.truetype(words[1], size)
             draw.text(
@@ -205,30 +208,39 @@ class ImageTextProcessor:
             )
 
             box = font.getbbox(words[0])
-            y_offset += box[2] - box[0]
+            x_offset += box[2] - box[0]
+            height = max(height, box[3])
+
+        return x_offset, height
 
     @classmethod
     def _draw_multiline_text_v2(
             cls,
             draw: 'ImageDraw.ImageDraw',
-            xy: tuple[int, int],
+            xy: tuple[int | float, int | float],
             text: str,
             color: tuple[int, int, int],
             fonts: FontMap,
             size: int,
+            spacing: int = 4,
             anchor: str | None = None,
             align: Literal['left', 'center', 'right'] = 'left',
-    ) -> None:
-        """Draws multiple lines of text on an image, handling newline characters and adjusting spacing between lines."""
-        spacing = xy[1]
+    ) -> tuple[float, float]:
+        """Draws multiple lines of text on an image, handling newline characters and adjusting spacing between lines.
+
+        :return: the text box size: (float, float)
+        """
+        weight = 0.0
+        height = 0.0
+        y_offset = 0.0
         lines = text.split('\n')
 
         for line in lines:
             if not line:
                 continue
 
-            mod_cord = (xy[0], spacing)
-            cls._draw_text_v2(
+            mod_cord = (xy[0], xy[1] + y_offset)
+            box = cls._draw_text_v2(
                 draw,
                 xy=mod_cord,
                 text=line,
@@ -238,24 +250,30 @@ class ImageTextProcessor:
                 anchor=anchor,
                 align=align,
             )
-            spacing += size + 5
+            weight = max(weight, box[0])
+            height = max(height, box[1] + y_offset)
+            y_offset += box[1] + spacing
+
+        return weight, height
 
     @classmethod
     def _draw_text_v3(
             cls,
             draw: ImageDraw.ImageDraw,
-            xy: tuple[int, int],
+            xy: tuple[int | float, int | float],
             text: str,
             color: tuple[int, int, int],
             fonts: FontMap,
             size: int,
             anchor: str | None = None,
             align: Literal['left', 'center', 'right'] = 'left',
-    ) -> None:
+    ) -> tuple[float, float]:
         """Draws text on an image at given coordinates, using specified size, color, and fonts.
 
-        Better support for anchor
+        Better support for anchor. (But it's not perfect.)
         Provided by @bradenhilton in: https://github.com/TrueMyst/PillowFontFallback/issues/1
+
+        :return: the text box size: (float, float)
         """
 
         sentence = cls.merge_chunks(text, fonts)
@@ -270,11 +288,12 @@ class ImageTextProcessor:
             })
 
         x_offset = sum(chunk['bbox'][0] for chunk in chunk_data)
-        max_top = max(chunk['bbox'][1] for chunk in chunk_data)
+        min_top = min(chunk['bbox'][1] for chunk in chunk_data)
+        max_bottom = max(chunk['bbox'][3] for chunk in chunk_data)
 
         for chunk in chunk_data:
             draw.text(
-                xy=((xy[0] + x_offset), (xy[1] + max_top)),
+                xy=(xy[0] + x_offset, xy[1]),
                 text=chunk['text'],
                 fill=color,
                 font=chunk['font'],
@@ -284,28 +303,39 @@ class ImageTextProcessor:
             )
             x_offset += chunk['bbox'][2] - chunk['bbox'][0]
 
+        return x_offset, max(max_bottom, max_bottom - min_top)
+
     @classmethod
     def _draw_multiline_text_v3(
             cls,
             draw: 'ImageDraw.ImageDraw',
-            xy: tuple[int, int],
+            xy: tuple[int | float, int | float],
             text: str,
             color: tuple[int, int, int],
             fonts: FontMap,
             size: int,
+            spacing: int = 4,
             anchor: str | None = None,
             align: Literal['left', 'center', 'right'] = 'left',
-    ) -> None:
-        """Draws multiple lines of text on an image, handling newline characters and adjusting spacing between lines."""
-        spacing = xy[1]
+    ) -> tuple[float, float]:
+        """Draws multiple lines of text on an image, handling newline characters and adjusting spacing between lines.
+
+        Better support for anchor. (But it's not perfect.)
+        Provided by @bradenhilton in: https://github.com/TrueMyst/PillowFontFallback/issues/1
+
+        :return: the text box size: (float, float)
+        """
+        weight = 0.0
+        height = 0.0
+        y_offset = 0.0
         lines = text.split('\n')
 
         for line in lines:
             if not line:
                 continue
 
-            mod_cord = (xy[0], spacing)
-            cls._draw_text_v3(
+            mod_cord = (xy[0], xy[1] + y_offset)
+            box = cls._draw_text_v3(
                 draw,
                 xy=mod_cord,
                 text=line,
@@ -315,34 +345,45 @@ class ImageTextProcessor:
                 anchor=anchor,
                 align=align,
             )
-            spacing += size + 5
+            weight = max(weight, box[0])
+            height = max(height, box[1] + y_offset)
+            y_offset += box[1] + spacing
+
+        return weight, height
 
     @classmethod
     def draw_multiline_text(
             cls,
             draw: 'ImageDraw.ImageDraw',
-            xy: tuple[int, int],
+            xy: tuple[int | float, int | float],
             text: str,
             size: int,
             *,
+            fonts: FontMap | None = None,
             color: tuple[int, int, int] = (0, 0, 0),
-            anchor: str | None = None,
-            align: Literal['left', 'center', 'right'] = 'center',
-    ) -> None:
-        """Draws multiple lines of text on an image, handling newline characters and adjusting spacing between lines."""
-        fonts = cls.load_fonts(
-            image_utils_config.default_font.path.name,
-            image_utils_config.emoji_font.path.name,
-            image_utils_config.get_custom_name_font('msyh.ttc').path.name,
-        )
-        cls._draw_multiline_text_v3(
+            spacing: int = 4,
+    ) -> tuple[float, float]:
+        """Draws multiple lines of text on an image, handling newline characters and adjusting spacing between lines.
+
+        To ensure compatibility, the anchor parameter is not allowed, the align parameter is only allowed to be 'left'.
+
+        :return: the text box size: (float, float)
+        """
+        if fonts is None:
+            fonts = cls.load_fonts(
+                image_utils_config.default_font.path.name,
+                image_utils_config.emoji_font.path.name,
+                image_utils_config.get_custom_name_font('msyh.ttc').path.name,
+            )
+        return cls._draw_multiline_text_v3(
             draw,
             xy=xy,
             text=text,
             size=size,
+            spacing=spacing,
             color=color,
-            anchor=anchor,
-            align=align,
+            anchor=None,
+            align='left',
             fonts=fonts,
         )
 
