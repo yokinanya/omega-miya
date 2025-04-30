@@ -3,9 +3,9 @@
 @Date           : 2024/5/12 下午11:39
 @FileName       : output_core_data
 @Project        : omega-miya-dev
-@Description    : 
+@Description    :
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 from datetime import date, datetime

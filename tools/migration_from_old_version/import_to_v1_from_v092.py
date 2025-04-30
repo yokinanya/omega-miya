@@ -3,9 +3,9 @@
 @Date           : 2024/5/24 下午8:40
 @FileName       : import_from_v092
 @Project        : nonebot2_miya
-@Description    : 
+@Description    :
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 from datetime import date, datetime
