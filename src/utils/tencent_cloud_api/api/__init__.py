@@ -5,7 +5,7 @@
 @Project        : nonebot2_miya
 @Description    : tencent cloud api
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 from .nlp import TencentNLP

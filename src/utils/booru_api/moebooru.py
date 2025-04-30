@@ -5,7 +5,7 @@
 @Project        : omega-miya
 @Description    : Moebooru API (Moebooru 1.13.0-1.13.0+update.3, 兼容 Danbooru 1.13) (Read requests only)
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 import abc

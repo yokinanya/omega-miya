@@ -3,12 +3,13 @@
 @Date           : 2025/1/16 14:44:53
 @FileName       : excel_tools.py
 @Project        : omega-miya
-@Description    : 
+@Description    :
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
-from typing import TYPE_CHECKING, Any, Iterable, Self
+from collections.abc import Iterable
+from typing import TYPE_CHECKING, Any, Self
 
 import pandas as pd
 from nonebot.utils import run_sync
@@ -29,7 +30,7 @@ class ExcelTools[DataModel_T: BaseModel]:
         return cls(create_model(
             'ExcelDataModel',
             __config__=ConfigDict(extra='ignore', coerce_numbers_to_str=True),
-            **{field: (str, ...) for field in fields}  # type: ignore
+            **dict.fromkeys(fields, (str, ...))  # type: ignore
         ))
 
     @classmethod
@@ -59,7 +60,7 @@ class ExcelTools[DataModel_T: BaseModel]:
 
     def _dump_excel_data(self, data: Iterable[DataModel_T | dict[str, Any]]) -> 'pd.DataFrame':
         """将模型数据列表转换为 Excel 数据"""
-        parsed_data = map(lambda x: x if isinstance(x, self.data_model) else self.data_model.model_validate(x), data)
+        parsed_data = (x if isinstance(x, self.data_model) else self.data_model.model_validate(x) for x in data)
         return pd.DataFrame([x.model_dump() for x in parsed_data])
 
     def _load_excel_data(self, data: 'pd.DataFrame') -> list[DataModel_T]:

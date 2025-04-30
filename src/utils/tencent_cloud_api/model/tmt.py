@@ -2,10 +2,10 @@
 @Author         : Ailitonia
 @Date           : 2022/04/10 19:48
 @FileName       : tmt.py
-@Project        : nonebot2_miya 
+@Project        : nonebot2_miya
 @Description    : Tencent Cloud TMT Model
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 from .base_model import (

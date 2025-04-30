@@ -18,15 +18,15 @@ import os
 import re
 import shlex
 import subprocess
-from collections.abc import Sequence
-from typing import Any, Callable
+from collections.abc import Callable, Sequence
+from typing import Any
 
 from nonebot.utils import run_sync
 
 type FFProgressHandler = Callable[[FFState], Any]
 
 
-class FFTool(object):
+class FFTool:
     def __init__(
             self,
             executable: str,
@@ -68,8 +68,7 @@ class FFTool(object):
             )
         except OSError as e:
             if e.errno == errno.ENOENT:
-                raise FFExecutableNotFoundError(
-                    "Executable '{0}' not found".format(self.executable))
+                raise FFExecutableNotFoundError(f"Executable '{self.executable}' not found")
             else:
                 raise
 

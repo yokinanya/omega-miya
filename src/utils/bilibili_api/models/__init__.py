@@ -5,7 +5,7 @@
 @Project        : omega-miya
 @Description    : bilibili API 数据模型
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 from .dynamic import (

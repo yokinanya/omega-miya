@@ -2,10 +2,10 @@
 @Author         : Ailitonia
 @Date           : 2022/04/06 2:10
 @FileName       : base_model.py
-@Project        : nonebot2_miya 
+@Project        : nonebot2_miya
 @Description    : Pixiv Base Model
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 from pydantic import BaseModel, ConfigDict

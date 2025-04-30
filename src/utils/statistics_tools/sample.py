@@ -5,7 +5,7 @@
 @Project        : omega-miya
 @Description    : 示范用例
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 import random
@@ -89,7 +89,7 @@ def run_coin_test(times: int = 10) -> 'TemporaryResource':
     fig, ax = create_simple_subplots_figure(figsize=(8, 6))
     data: list[int] = [int(coin_test()[0][-1]) for _ in range(times)]
 
-    count = {k: v for (k, v) in sorted(Counter(data).items(), key=lambda x: x[0])}
+    count = dict(sorted(Counter(data).items(), key=lambda x: x[0]))
     bar = ax.bar([str(x) for x in count.keys()], [int(y) for y in count.values()])
 
     ax.bar_label(bar)

@@ -5,7 +5,7 @@
 @Project        : nonebot2_miya
 @Description    : Nhentai 工具函数
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 import re

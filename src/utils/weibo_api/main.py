@@ -5,7 +5,7 @@
 @Project        : omega-miya
 @Description    : 微博 API
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 from typing import TYPE_CHECKING, Any

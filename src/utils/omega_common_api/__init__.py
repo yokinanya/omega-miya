@@ -5,7 +5,7 @@
 @Project        : omega-miya
 @Description    : 第三方 API 通用请求基类
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 from .api_base import BaseCommonAPI

@@ -2,13 +2,14 @@
 @Author         : Ailitonia
 @Date           : 2022/05/08 15:49
 @FileName       : image_searcher.py
-@Project        : nonebot2_miya 
+@Project        : nonebot2_miya
 @Description    : 图片搜索工具
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
-from typing import TYPE_CHECKING, Iterable
+from collections.abc import Iterable
+from typing import TYPE_CHECKING
 
 from src.utils import semaphore_gather
 from .config import image_searcher_config

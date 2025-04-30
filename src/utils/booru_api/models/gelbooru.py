@@ -5,7 +5,7 @@
 @Project        : nonebot2_miya
 @Description    : Gelbooru models
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 from enum import StrEnum, unique

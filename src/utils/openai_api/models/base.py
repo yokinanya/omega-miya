@@ -5,7 +5,7 @@
 @Project        : omega-miya
 @Description    : openai BaseModel
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 from pydantic import BaseModel, ConfigDict

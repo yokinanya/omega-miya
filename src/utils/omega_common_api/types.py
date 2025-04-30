@@ -5,18 +5,34 @@
 @Project        : omega-miya
 @Description    : OmegaRequests types
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 from ..omega_requests.types import (
     ContentTypes as ContentTypes,
+)
+from ..omega_requests.types import (
     CookieTypes as CookieTypes,
+)
+from ..omega_requests.types import (
     DataTypes as DataTypes,
+)
+from ..omega_requests.types import (
     FilesTypes as FilesTypes,
-    HeaderTypes as HeaderTypes,
+)
+from ..omega_requests.types import (
     HTTPClientSession as HTTPClientSession,
+)
+from ..omega_requests.types import (
+    HeaderTypes as HeaderTypes,
+)
+from ..omega_requests.types import (
     QueryTypes as QueryTypes,
+)
+from ..omega_requests.types import (
     Response as Response,
+)
+from ..omega_requests.types import (
     WebSocket as WebSocket,
 )
 

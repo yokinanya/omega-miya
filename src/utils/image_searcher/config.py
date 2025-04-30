@@ -2,10 +2,10 @@
 @Author         : Ailitonia
 @Date           : 2022/05/08 16:15
 @FileName       : config.py
-@Project        : nonebot2_miya 
+@Project        : nonebot2_miya
 @Description    : Image Searcher Config
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 from typing import Literal

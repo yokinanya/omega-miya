@@ -2,16 +2,16 @@
 @Author         : Ailitonia
 @Date           : 2022/04/17 0:03
 @FileName       : image_util.py
-@Project        : nonebot2_miya 
+@Project        : nonebot2_miya
 @Description    : Image Tools
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 import base64
 import random
 from io import BytesIO
-from typing import TYPE_CHECKING, Literal, Optional, Self
+from typing import TYPE_CHECKING, Literal, Self
 
 from PIL import Image, ImageDraw, ImageEnhance, ImageFilter, ImageFont
 from fontTools.ttLib import TTFont
@@ -182,7 +182,7 @@ class ImageTextProcessor:
             color: tuple[int, int, int],
             fonts: FontMap,
             size: int,
-            anchor: Optional[str] = None,
+            anchor: str | None = None,
             align: Literal['left', 'center', 'right'] = 'left',
     ) -> None:
         """Draws text on an image at given coordinates, using specified size, color, and fonts."""
@@ -216,12 +216,12 @@ class ImageTextProcessor:
             color: tuple[int, int, int],
             fonts: FontMap,
             size: int,
-            anchor: Optional[str] = None,
-            align: Literal["left", "center", "right"] = "left",
+            anchor: str | None = None,
+            align: Literal['left', 'center', 'right'] = 'left',
     ) -> None:
         """Draws multiple lines of text on an image, handling newline characters and adjusting spacing between lines."""
         spacing = xy[1]
-        lines = text.split("\n")
+        lines = text.split('\n')
 
         for line in lines:
             if not line:
@@ -249,8 +249,8 @@ class ImageTextProcessor:
             color: tuple[int, int, int],
             fonts: FontMap,
             size: int,
-            anchor: Optional[str] = None,
-            align: Literal["left", "center", "right"] = "left",
+            anchor: str | None = None,
+            align: Literal['left', 'center', 'right'] = 'left',
     ) -> None:
         """Draws text on an image at given coordinates, using specified size, color, and fonts.
 
@@ -293,8 +293,8 @@ class ImageTextProcessor:
             color: tuple[int, int, int],
             fonts: FontMap,
             size: int,
-            anchor: Optional[str] = None,
-            align: Literal["left", "center", "right"] = "left",
+            anchor: str | None = None,
+            align: Literal['left', 'center', 'right'] = 'left',
     ) -> None:
         """Draws multiple lines of text on an image, handling newline characters and adjusting spacing between lines."""
         spacing = xy[1]
@@ -326,8 +326,8 @@ class ImageTextProcessor:
             size: int,
             *,
             color: tuple[int, int, int] = (0, 0, 0),
-            anchor: Optional[str] = None,
-            align: Literal["left", "center", "right"] = "center",
+            anchor: str | None = None,
+            align: Literal['left', 'center', 'right'] = 'center',
     ) -> None:
         """Draws multiple lines of text on an image, handling newline characters and adjusting spacing between lines."""
         fonts = cls.load_fonts(

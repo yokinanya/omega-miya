@@ -2,10 +2,10 @@
 @Author         : Ailitonia
 @Date           : 2021/07/29 19:29
 @FileName       : process_utils.py
-@Project        : nonebot2_miya 
+@Project        : nonebot2_miya
 @Description    : 异步任务工具
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 import asyncio

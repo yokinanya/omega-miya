@@ -5,7 +5,7 @@
 @Project        : omega-miya
 @Description    : BiliTicket 令牌
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 import hashlib

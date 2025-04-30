@@ -5,7 +5,7 @@
 @Project        : omega-miya
 @Description    : openai API models
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 from .chat import ChatCompletion
@@ -13,7 +13,6 @@ from .embeddings import Embeddings
 from .file import File, FileContent, FileDeleted, FileList
 from .message import Message, MessageContent, MessageRole
 from .model import Model, ModelList
-
 
 __all__ = [
     'ChatCompletion',

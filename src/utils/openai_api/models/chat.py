@@ -5,7 +5,7 @@
 @Project        : omega-miya
 @Description    : openai chat model
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 from typing import Literal

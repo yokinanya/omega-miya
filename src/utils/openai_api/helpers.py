@@ -5,7 +5,7 @@
 @Project        : omega-miya
 @Description    : 本地文件处理
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 import base64

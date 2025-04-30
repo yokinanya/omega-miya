@@ -2,10 +2,10 @@
 @Author         : Ailitonia
 @Date           : 2022/04/10 21:25
 @FileName       : config.py
-@Project        : nonebot2_miya 
+@Project        : nonebot2_miya
 @Description    : ZipUtils config
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 import zipfile

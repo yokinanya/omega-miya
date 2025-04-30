@@ -5,14 +5,13 @@
 @Project        : omega-miya
 @Description    : openai API
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 from .api import BaseOpenAIClient
-from .helpers import encode_local_audio, encode_local_file, encode_local_image, encode_bytes_image
+from .helpers import encode_bytes_image, encode_local_audio, encode_local_file, encode_local_image
 from .models import Message, MessageContent
 from .session import ChatSession
-
 
 __all__ = [
     'BaseOpenAIClient',

@@ -2,10 +2,10 @@
 @Author         : Ailitonia
 @Date           : 2022/05/08 17:04
 @FileName       : iqdb.py
-@Project        : nonebot2_miya 
+@Project        : nonebot2_miya
 @Description    : iqdb 识图引擎
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 from typing import TYPE_CHECKING

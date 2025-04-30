@@ -26,6 +26,7 @@ from .model import AlbumData, AlbumPage, AlbumsResult
 
 if TYPE_CHECKING:
     from lxml.etree import _Element
+
     from src.resource import BaseResource
 
 

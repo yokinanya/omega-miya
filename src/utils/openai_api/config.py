@@ -5,7 +5,7 @@
 @Project        : omega-miya
 @Description    : openai Service Config
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 from nonebot import get_plugin_config, logger

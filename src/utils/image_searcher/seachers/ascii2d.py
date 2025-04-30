@@ -2,10 +2,10 @@
 @Author         : Ailitonia
 @Date           : 2022/05/08 17:29
 @FileName       : ascii2d.py
-@Project        : nonebot2_miya 
+@Project        : nonebot2_miya
 @Description    : ascii2d 识图引擎
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 from typing import TYPE_CHECKING

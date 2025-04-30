@@ -5,7 +5,7 @@
 @Project        : omega-miya
 @Description    : openai file model
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 from .base import BaseOpenAIModel

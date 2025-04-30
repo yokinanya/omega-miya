@@ -2,10 +2,10 @@
 @Author         : Ailitonia
 @Date           : 2022/04/10 19:30
 @FileName       : base_model.py
-@Project        : nonebot2_miya 
+@Project        : nonebot2_miya
 @Description    : Tencent Cloud Base Model
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 from uuid import UUID

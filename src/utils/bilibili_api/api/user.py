@@ -5,7 +5,7 @@
 @Project        : omega-miya
 @Description    : bilibili 用户相关 API
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 from urllib.parse import unquote

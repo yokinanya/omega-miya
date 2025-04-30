@@ -5,7 +5,7 @@
 @Project        : nonebot2_miya
 @Description    : OmegaRequests, 通过对 ForwardDriver 的二次封装实现 HttpClient 功能
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 import hashlib
@@ -32,6 +32,8 @@ from .config import http_proxy_config
 from .utils import cloudflare_clearance_config
 
 if TYPE_CHECKING:
+    from src.resource import BaseResource
+
     from .types import (
         ContentTypes,
         CookieTypes,
@@ -43,8 +45,6 @@ if TYPE_CHECKING:
         Response,
         WebSocket,
     )
-
-    from src.resource import BaseResource
 
 
 class OmegaRequests:

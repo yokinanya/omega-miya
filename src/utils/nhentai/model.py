@@ -5,7 +5,7 @@
 @Project        : nonebot2_miya
 @Description    : Nhentai Models
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 from pathlib import Path

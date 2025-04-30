@@ -2,13 +2,14 @@
 @Author         : Ailitonia
 @Date           : 2022/05/08 20:30
 @FileName       : trace_moe.py
-@Project        : nonebot2_miya 
+@Project        : nonebot2_miya
 @Description    : trace.moe 识番引擎
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
-from typing import TYPE_CHECKING, ClassVar, Iterable
+from collections.abc import Iterable
+from typing import TYPE_CHECKING, ClassVar
 
 from pydantic import BaseModel, Field
 

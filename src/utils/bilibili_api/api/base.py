@@ -5,7 +5,7 @@
 @Project        : omega-miya
 @Description    : bilibili API 基类
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 import re

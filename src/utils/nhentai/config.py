@@ -3,9 +3,9 @@
 @Date           : 2024/6/8 下午6:55
 @FileName       : config
 @Project        : nonebot2_miya
-@Description    : 
+@Description    :
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 from typing import Literal

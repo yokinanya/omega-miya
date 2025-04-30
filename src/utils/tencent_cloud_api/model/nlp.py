@@ -2,10 +2,10 @@
 @Author         : Ailitonia
 @Date           : 2022/04/10 20:07
 @FileName       : nlp.py
-@Project        : nonebot2_miya 
+@Project        : nonebot2_miya
 @Description    : Tencent Cloud NLP Model
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 from typing import Literal

@@ -5,7 +5,7 @@
 @Project        : omega-miya
 @Description    : AnimeTrace 识别引擎
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 from typing import TYPE_CHECKING

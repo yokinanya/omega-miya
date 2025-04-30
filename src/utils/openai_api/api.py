@@ -5,10 +5,11 @@
 @Project        : omega-miya
 @Description    : openai API
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
-from typing import TYPE_CHECKING, Iterable, Literal, Self
+from collections.abc import Iterable
+from typing import TYPE_CHECKING, Literal, Self
 
 from src.compat import dump_obj_as
 from src.utils import BaseCommonAPI

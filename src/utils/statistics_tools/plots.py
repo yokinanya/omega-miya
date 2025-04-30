@@ -5,7 +5,7 @@
 @Project        : omega-miya
 @Description    : pyplot 图表实例创建工具
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 import sys

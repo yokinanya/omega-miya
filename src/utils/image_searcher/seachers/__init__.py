@@ -5,7 +5,7 @@
 @Project        : nonebot2_miya
 @Description    : 图片搜索引擎
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 from typing import TYPE_CHECKING
@@ -19,7 +19,7 @@ from .trace_moe import TraceMoe
 if TYPE_CHECKING:
     from ..model import BaseImageSearcherAPI
 
-AVAILABLE_SEARCHERS: list[type["BaseImageSearcherAPI"]] = [
+AVAILABLE_SEARCHERS: list[type['BaseImageSearcherAPI']] = [
     AnimeTrace,
     Ascii2d,
     Iqdb,

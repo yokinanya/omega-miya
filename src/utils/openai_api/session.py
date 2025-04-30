@@ -5,7 +5,7 @@
 @Project        : omega-miya
 @Description    : 基于 openai API 的服务
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 from typing import TYPE_CHECKING, Any, Literal, Self, overload
@@ -16,10 +16,10 @@ from pydantic import BaseModel
 from src.compat import parse_json_as
 from .api import BaseOpenAIClient
 from .helpers import (
+    encode_bytes_image,
     encode_local_audio,
     encode_local_file,
     encode_local_image,
-    encode_bytes_image,
     fix_broken_generated_json,
 )
 from .models import Message, MessageContent

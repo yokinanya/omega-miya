@@ -5,7 +5,7 @@
 @Project        : omega-miya
 @Description    : bilibili 动态相关 API
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 from typing import Literal

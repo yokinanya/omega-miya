@@ -5,7 +5,7 @@
 @Project        : nonebot2_miya
 @Description    : Gelbooru API (Gelbooru Beta 0.2.5) (Read requests only)
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 import abc

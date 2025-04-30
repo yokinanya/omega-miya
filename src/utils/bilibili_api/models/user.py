@@ -5,7 +5,7 @@
 @Project        : omega-miya
 @Description    : user models
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 from pydantic import Field

@@ -2,10 +2,10 @@
 @Author         : Ailitonia
 @Date           : 2022/04/16 23:59
 @FileName       : helper.py
-@Project        : nonebot2_miya 
+@Project        : nonebot2_miya
 @Description    : 常用的图片生成工具函数
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 from datetime import datetime
@@ -21,6 +21,7 @@ from ..image_util import ImageEffectProcessor, ImageTextProcessor
 
 if TYPE_CHECKING:
     from src.resource import BaseResource, TemporaryResource
+
     from .model import PreviewImageModel
 
 

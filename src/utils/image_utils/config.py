@@ -2,10 +2,10 @@
 @Author         : Ailitonia
 @Date           : 2022/04/10 0:16
 @FileName       : config.py
-@Project        : nonebot2_miya 
+@Project        : nonebot2_miya
 @Description    : Image Utils Config
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 from typing import Literal

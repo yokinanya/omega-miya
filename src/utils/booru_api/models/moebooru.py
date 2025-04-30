@@ -5,7 +5,7 @@
 @Project        : omega-miya
 @Description    : moebooru models
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 from typing import Any, Literal

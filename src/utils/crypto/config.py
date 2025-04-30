@@ -2,10 +2,10 @@
 @Author         : Ailitonia
 @Date           : 2022/04/26 19:18
 @FileName       : config.py
-@Project        : nonebot2_miya 
+@Project        : nonebot2_miya
 @Description    : Encrypt Utils Config
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 import platform

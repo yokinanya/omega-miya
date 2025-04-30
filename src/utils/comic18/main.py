@@ -5,7 +5,7 @@
 @Project        : nonebot2_miya
 @Description    : 18Comic
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 import random

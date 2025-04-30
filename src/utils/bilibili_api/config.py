@@ -5,7 +5,7 @@
 @Project        : omega-miya
 @Description    : bilibili API 配置
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 from collections.abc import Generator
@@ -33,8 +33,7 @@ class BaseConfigModel(BaseModel):
         }
 
     def iter_config(self) -> Generator[tuple[str, str | None], Any, None]:
-        for config_name, config_value in self.model_dump(by_alias=True).items():
-            yield config_name, config_value
+        yield from self.model_dump(by_alias=True).items()
 
 
 class BilibiliLoginCookies(BaseConfigModel):

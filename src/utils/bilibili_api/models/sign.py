@@ -5,7 +5,7 @@
 @Project        : omega-miya
 @Description    : sign models
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 

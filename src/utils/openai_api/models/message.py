@@ -5,11 +5,12 @@
 @Project        : omega-miya
 @Description    : openai message
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
+from collections.abc import Iterable
 from enum import StrEnum, unique
-from typing import Any, Iterable, Literal, Self
+from typing import Any, Literal, Self
 
 from pydantic import Field
 
@@ -205,7 +206,7 @@ class Message(BaseOpenAIModel):
     prefix_messages: list[MessageContent] = Field(default_factory=list)
 
     def clear_chat_messages(self) -> Self:
-        self.chat_messages = list()
+        self.chat_messages = []
         return self
 
     def set_prefix_content(

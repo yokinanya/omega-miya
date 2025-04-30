@@ -2,10 +2,10 @@
 @Author         : Ailitonia
 @Date           : 2022/04/08 19:00
 @FileName       : user.py
-@Project        : nonebot2_miya 
+@Project        : nonebot2_miya
 @Description    : Pixiv User Model
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 from typing import Any
@@ -89,15 +89,15 @@ class PixivUserArtworkDataBody(BasePixivModel):
 
     @property
     def illust_list(self) -> list[int]:
-        return [x for x in self.illusts.keys()]
+        return list(self.illusts.keys())
 
     @property
     def manga_list(self) -> list[int]:
-        return [x for x in self.manga.keys()]
+        return list(self.manga.keys())
 
     @property
     def novel_list(self) -> list[int]:
-        return [x for x in self.novels.keys()]
+        return list(self.novels.keys())
 
 
 class PixivUserArtworkDataModel(BasePixivModel):

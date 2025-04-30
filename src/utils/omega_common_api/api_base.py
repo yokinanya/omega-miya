@@ -5,7 +5,7 @@
 @Project        : omega-miya
 @Description    : 通用 API 基类
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 import abc
@@ -15,6 +15,8 @@ from src.exception import WebSourceException
 from ..omega_requests import OmegaRequests
 
 if TYPE_CHECKING:
+    from src.resource import TemporaryResource
+
     from .types import (
         ContentTypes,
         CookieTypes,
@@ -24,8 +26,6 @@ if TYPE_CHECKING:
         QueryTypes,
         Response,
     )
-
-    from src.resource import TemporaryResource
 
 
 class BaseCommonAPI(abc.ABC):

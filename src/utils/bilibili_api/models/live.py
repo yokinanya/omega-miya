@@ -5,7 +5,7 @@
 @Project        : omega-miya
 @Description    : live models
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 from datetime import datetime

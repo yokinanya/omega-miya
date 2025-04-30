@@ -5,7 +5,7 @@
 @Project        : omega-miya
 @Description    : statistics_tools 模块配置
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 from typing import Literal

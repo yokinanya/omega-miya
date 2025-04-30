@@ -2,10 +2,10 @@
 @Author         : Ailitonia
 @Date           : 2022/05/08 15:50
 @FileName       : model.py
-@Project        : nonebot2_miya 
+@Project        : nonebot2_miya
 @Description    : Image Searcher Model
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 import abc

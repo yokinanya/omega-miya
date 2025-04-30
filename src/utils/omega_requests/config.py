@@ -2,10 +2,10 @@
 @Author         : Ailitonia
 @Date           : 2022/04/05 17:32
 @FileName       : config.py
-@Project        : nonebot2_miya 
+@Project        : nonebot2_miya
 @Description    : HttpFetcher Config
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 from typing import Literal

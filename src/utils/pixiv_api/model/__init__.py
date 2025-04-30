@@ -2,10 +2,10 @@
 @Author         : Ailitonia
 @Date           : 2022/04/05 22:03
 @FileName       : model.py
-@Project        : nonebot2_miya 
+@Project        : nonebot2_miya
 @Description    : Pixiv Model
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 from .artwork import (
