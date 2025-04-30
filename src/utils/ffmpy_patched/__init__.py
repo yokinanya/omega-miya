@@ -35,11 +35,11 @@ class FFTool(object):
             outputs: dict[str, Sequence[str] | str | None] | None = None,
     ) -> None:
         self.executable = executable
-        self._cmd = [executable]
+        self._cmd: list[str] = [executable]
 
         global_options = global_options or []
         if isinstance(global_options, Sequence) and not isinstance(global_options, str):
-            normalized_global_options = []
+            normalized_global_options: list[str] = []
             for opt in global_options:
                 normalized_global_options += shlex.split(opt)
         else:
@@ -49,7 +49,7 @@ class FFTool(object):
         self._cmd += _merge_args_opts(inputs, add_input_option=True)
         self._cmd += _merge_args_opts(outputs)
 
-        self.cmd = subprocess.list2cmdline(self._cmd)
+        self.cmd: str = subprocess.list2cmdline(self._cmd)
         self.process: subprocess.Popen[bytes] | None = None
 
     def __repr__(self) -> str:
@@ -119,7 +119,7 @@ class FFmpeg(FFTool):
 
         ``input_data`` can contain input for FFmpeg in case ``pipe`` protocol is used for input.
         ``stdout`` and ``stderr`` specify where to redirect the ``stdout`` and ``stderr`` of the
-        process. By default no redirection is done, which means all output goes to running shell
+        process. By default, no redirection is done, which means all output goes to running shell
         (this mode should normally only be used for debugging purposes). If FFmpeg ``pipe`` protocol
         is used for output, ``stdout`` must be redirected to a pipe by passing `subprocess.PIPE` as
         ``stdout`` argument.
@@ -149,12 +149,12 @@ class FFmpeg(FFTool):
         return self.run(input_data, stdin, stdout, on_progress)
 
     def wait(self, on_progress: FFProgressHandler | None = None, stderr_ring_size=30):
-        if self.process is None:
+        if self.process is None or self.process.stdin is None or self.process.stderr is None:
             raise RuntimeError('Popen is not init')
 
         stderr_ring = []
         is_running = True
-        stderr_fileno = self.process.stderr.fileno()  # type: ignore
+        stderr_fileno = self.process.stderr.fileno()
         ff_state = FFState()
         while is_running:
             latest_update = os.read(stderr_fileno, self.update_size)
@@ -167,8 +167,8 @@ class FFmpeg(FFTool):
 
         stderr_out = str.join('', stderr_ring)
 
-        self.process.stdin.close()  # type: ignore
-        self.process.stderr.close()  # type: ignore
+        self.process.stdin.close()
+        self.process.stderr.close()
 
         if self.process.returncode != 0:
             raise FFRuntimeError(self.cmd, self.process.returncode, stderr_out)
@@ -190,36 +190,38 @@ class FFState:
         return (f'{self.__class__.__name__}(frame={self.frame!r}, '
                 f'fps={self.fps!r}, size={self.size!r}, time={self.time!r})')
 
-    def consume(self, update):
-        raw_update_dict = {}
+    def consume(self, update: bytes) -> bool:
+        raw_update_dict: dict[str, str] = {}
         for match in re.finditer(r'(?P<key>\S+)=\s*(?P<value>\S+)', update.decode()):
             raw_update_dict[match.group('key')] = match.group('value')
-        updated = self.update_frame(raw_update_dict.get('frame')) + \
-                  self.update_fps(raw_update_dict.get('fps')) + \
-                  self.update_size(raw_update_dict.get('size') or raw_update_dict.get('Lsize', '')) + \
-                  self.update_time(raw_update_dict.get('time', ''))
+        updated: int = (
+                self.update_frame(raw_update_dict.get('frame'))
+                + self.update_fps(raw_update_dict.get('fps'))
+                + self.update_size(raw_update_dict.get('size') or raw_update_dict.get('Lsize', ''))
+                + self.update_time(raw_update_dict.get('time', ''))
+        )
         return updated > 0
 
-    def update_frame(self, raw_frame):
+    def update_frame(self, raw_frame: str | None) -> bool:
         if raw_frame is not None:
             self.frame = int(raw_frame)
             return True
         return False
 
-    def update_fps(self, fps_raw):
+    def update_fps(self, fps_raw: str | None) -> bool:
         if fps_raw is not None:
             self.fps = float(fps_raw)
             return True
         return False
 
-    def update_size(self, raw_size):
+    def update_size(self, raw_size: str) -> bool:
         digits_match = re.match(r'(?P<size_in_kb>\d+)kB', raw_size)
         if digits_match is not None:
             self.size = int(digits_match.group('size_in_kb')) * 1000
             return True
         return False
 
-    def update_time(self, raw_time):
+    def update_time(self, raw_time: str) -> bool:
         time_units_match = re.match(r'(?P<hours>\d+):(?P<minutes>\d+):(?P<seconds>\d+.\d+)', raw_time)
         if time_units_match is not None:
             self.time = (int(time_units_match.group('hours')) * 3600
