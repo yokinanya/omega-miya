@@ -11,7 +11,7 @@
 import abc
 import os
 import sys
-from collections.abc import Generator
+from collections.abc import Callable, Generator
 from contextlib import asynccontextmanager, contextmanager
 from copy import deepcopy
 from datetime import datetime
@@ -22,7 +22,6 @@ from typing import (
     TYPE_CHECKING,
     Any,
     AsyncContextManager,
-    Callable,
     Concatenate,
     ContextManager,
     Literal,
