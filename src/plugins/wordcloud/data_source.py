@@ -60,7 +60,7 @@ async def query_profile_image(bot: 'BaseBot', event: 'BaseEvent', match_user: bo
             entity = OmMI.get_entity(bot, event, session, acquire_type='event')
         url = await OmEI(entity=entity).get_entity_profile_image_url()
 
-    image_name = OmegaRequests.hash_url_file_name('signin-head-image', url=url)
+    image_name = OmegaRequests.hash_url_file_name('wordcloud-head-image', url=url)
     image_file = wordcloud_plugin_config.profile_image_folder(image_name)
     return await OmegaRequests().download(url=url, file=image_file)
 
