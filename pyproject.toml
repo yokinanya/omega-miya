@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "omega-miya"
-version = "1.0.0"
+version = "1.0.1"
 description = "基于 nonebot2 的多平台机器人"
 authors = ["Ailitonia <41713304+Ailitonia@users.noreply.github.com>"]
 license = "MIT"
