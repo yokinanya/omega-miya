@@ -2,10 +2,10 @@
 @Author         : Ailitonia
 @Date           : 2022/12/01 22:04
 @FileName       : table_meta.py
-@Project        : nonebot2_miya 
+@Project        : nonebot2_miya
 @Description    : database table schema
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 from datetime import date, datetime

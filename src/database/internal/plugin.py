@@ -2,10 +2,10 @@
 @Author         : Ailitonia
 @Date           : 2022/12/02 21:48
 @FileName       : plugin.py
-@Project        : nonebot2_miya 
+@Project        : nonebot2_miya
 @Description    : Plugin DAL
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 from datetime import datetime

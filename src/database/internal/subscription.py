@@ -2,10 +2,10 @@
 @Author         : Ailitonia
 @Date           : 2022/12/04 17:18
 @FileName       : subscription.py
-@Project        : nonebot2_miya 
+@Project        : nonebot2_miya
 @Description    : Subscription DAL
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 from datetime import datetime

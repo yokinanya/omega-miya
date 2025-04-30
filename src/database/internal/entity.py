@@ -2,10 +2,10 @@
 @Author         : Ailitonia
 @Date           : 2022/12/03 15:24
 @FileName       : entity.py
-@Project        : nonebot2_miya 
+@Project        : nonebot2_miya
 @Description    : Entity DAL
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 from copy import deepcopy
@@ -46,7 +46,7 @@ class EntityType(StrEnum):
 
     @classmethod
     def get_supported_target_names(cls) -> set[str]:
-        return set(member.value for _, member in cls.__members__.items())
+        return {member.value for _, member in cls.__members__.items()}
 
 
 class Entity(BaseDataQueryResultModel):

@@ -2,10 +2,10 @@
 @Author         : Ailitonia
 @Date           : 2022/12/02 19:28
 @FileName       : utils.py
-@Project        : nonebot2_miya 
+@Project        : nonebot2_miya
 @Description    : Database utils
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 from asyncio import current_task

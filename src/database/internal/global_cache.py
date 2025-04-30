@@ -5,7 +5,7 @@
 @Project        : omega-miya
 @Description    : Global Cache DAL
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 from datetime import datetime, timedelta

@@ -5,7 +5,7 @@
 @Project        : nonebot2_miya
 @Description    : alembic migration tools
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 import pathlib

@@ -2,10 +2,10 @@
 @Author         : Ailitonia
 @Date           : 2022/12/01 20:48
 @FileName       : base.py
-@Project        : nonebot2_miya 
+@Project        : nonebot2_miya
 @Description    : Database Model ABC
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 import abc

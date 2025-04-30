@@ -2,10 +2,10 @@
 @Author         : Ailitonia
 @Date           : 2022/12/01 20:49
 @FileName       : internal.py
-@Project        : nonebot2_miya 
+@Project        : nonebot2_miya
 @Description    : Data access layer model
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 from .artwork_collection import ArtworkCollectionDAL

@@ -2,10 +2,10 @@
 @Author         : Ailitonia
 @Date           : 2022/12/01 20:19
 @FileName       : config.py
-@Project        : nonebot2_miya 
+@Project        : nonebot2_miya
 @Description    : omega database config
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 import os

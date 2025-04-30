@@ -2,10 +2,10 @@
 @Author         : Ailitonia
 @Date           : 2022/12/04 17:40
 @FileName       : artwork_collection.py
-@Project        : nonebot2_miya 
+@Project        : nonebot2_miya
 @Description    : ArtworkCollection DAL
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 from collections.abc import Sequence
@@ -344,7 +344,7 @@ class ArtworkCollectionDAL(BaseDataAccessLayerModel[ArtworkCollectionOrm, Artwor
         exists_aids = await self.query_exists_aids(
             origin=origin, aids=aids, filter_classification=exclude_classification, filter_rating=exclude_rating
         )
-        return sorted(list(set(aids) - set(exists_aids)), reverse=True)
+        return sorted(set(aids) - set(exists_aids), reverse=True)
 
     async def query_all(self) -> list[ArtworkCollection]:
         raise NotImplementedError
