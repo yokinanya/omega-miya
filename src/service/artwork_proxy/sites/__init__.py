@@ -5,7 +5,7 @@
 @Project        : nonebot2_miya
 @Description    : 图库适配
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 from .danbooru import DanbooruArtworkProxy

@@ -5,7 +5,7 @@
 @Project        : omega-miya
 @Description    : Omega API 常量
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 from typing import Literal

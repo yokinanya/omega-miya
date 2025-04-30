@@ -5,7 +5,7 @@
 @Project        : nonebot2_miya
 @Description    : 本地图片适配
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 from typing import TYPE_CHECKING

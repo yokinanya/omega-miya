@@ -5,7 +5,7 @@
 @Project        : omega-miya
 @Description    : 图片处理工具插件
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 import abc
@@ -15,7 +15,7 @@ from typing import TYPE_CHECKING, Literal
 from nonebot.utils import run_sync
 
 from src.utils import semaphore_gather
-from src.utils.image_utils import ImageLoader, ImageEffectProcessor
+from src.utils.image_utils import ImageEffectProcessor, ImageLoader
 from src.utils.image_utils.template import PreviewImageModel, PreviewImageThumbs, generate_thumbs_preview_image
 from .typing import ArtworkProxyAddonsMixin
 from ..models import ArtworkPool

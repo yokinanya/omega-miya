@@ -2,14 +2,15 @@
 @Author         : Ailitonia
 @Date           : 2022/12/05 22:37
 @FileName       : entity.py
-@Project        : nonebot2_miya 
+@Project        : nonebot2_miya
 @Description    : 数据库 Entity 常用方法, 用户/群组/频道等相关操作
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
+from collections.abc import Callable
 from datetime import date, datetime, timedelta
-from typing import TYPE_CHECKING, Callable, Literal, Self
+from typing import TYPE_CHECKING, Literal, Self
 
 from sqlalchemy.exc import NoResultFound
 
@@ -22,14 +23,14 @@ from src.database.internal.sign_in import SignInDAL
 from src.database.internal.subscription import SubscriptionDAL
 from src.database.internal.subscription_source import SubscriptionSource, SubscriptionSourceDAL
 from .consts import (
-    GLOBAL_COOLDOWN_EVENT,
-    SKIP_COOLDOWN_PERMISSION_NODE,
     CHARACTER_ATTRIBUTE_SETTER_COOLDOWN_EVENT_PREFIX,
     CHARACTER_PROFILE_SETTER_COOLDOWN_EVENT_PREFIX,
-    PermissionGlobal,
-    PermissionLevel,
+    GLOBAL_COOLDOWN_EVENT,
+    SKIP_COOLDOWN_PERMISSION_NODE,
     CharacterAttribute,
     CharacterProfile,
+    PermissionGlobal,
+    PermissionLevel,
 )
 
 if TYPE_CHECKING:
@@ -316,7 +317,7 @@ class InternalEntity:
 
         date_now_ordinal = datetime.now().date().toordinal()
         # 先将签到记录中的日期转化为整数便于比较, 去重后由大到小排序
-        all_sign_in_list = sorted(list(set(x.toordinal() for x in sign_in_history)), reverse=True)
+        all_sign_in_list = sorted({x.toordinal() for x in sign_in_history}, reverse=True)
 
         # 如果今日日期不等于已签到日期最大值, 说明今日没有签到, 则连签日数为0
         if date_now_ordinal != all_sign_in_list[0]:
@@ -341,7 +342,7 @@ class InternalEntity:
 
         # 有签到记录则处理签到记录
         # 先将签到记录中的日期转化为整数便于比较, 去重后由大到小排序
-        all_sign_in_list = sorted(list(set(x.toordinal() for x in sign_in_history)), reverse=True)
+        all_sign_in_list = sorted({x.toordinal() for x in sign_in_history}, reverse=True)
 
         # 如果今日日期不等于已签到日期最大值, 说明今日没有签到, 断签日为今日
         if date_now_ordinal != all_sign_in_list[0]:

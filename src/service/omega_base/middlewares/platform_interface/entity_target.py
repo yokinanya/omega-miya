@@ -5,7 +5,7 @@
 @Project        : nonebot2_miya
 @Description    : 平台 API 及 Entity 方法适配工具
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 import abc

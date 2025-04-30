@@ -5,7 +5,7 @@
 @Project        : omega-miya
 @Description    : 空适配, 仅提供基类方法
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 

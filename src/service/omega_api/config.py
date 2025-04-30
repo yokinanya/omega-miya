@@ -5,7 +5,7 @@
 @Project        : omega-miya
 @Description    : Omega API 配置
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 from secrets import token_hex

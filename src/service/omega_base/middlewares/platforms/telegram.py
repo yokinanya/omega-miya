@@ -5,7 +5,7 @@
 @Project        : nonebot2_miya
 @Description    : Telegram 协议适配
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 from collections.abc import Sequence

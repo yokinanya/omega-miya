@@ -5,7 +5,7 @@
 @Project        : omega-miya
 @Description    : 平台操作兼容层
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 from .entity_target import entity_target_register

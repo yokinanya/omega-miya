@@ -5,7 +5,7 @@
 @Project        : omega-miya
 @Description    : 基于 Artwork Proxy 实现数据库与图站接口整合
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 import abc

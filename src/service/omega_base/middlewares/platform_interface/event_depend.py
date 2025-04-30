@@ -5,7 +5,7 @@
 @Project        : omega-miya
 @Description    : 平台事件及对象依赖适配
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 import abc

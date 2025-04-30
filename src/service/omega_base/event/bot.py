@@ -2,10 +2,10 @@
 @Author         : Ailitonia
 @Date           : 2022/12/03 17:58
 @FileName       : bot.py
-@Project        : nonebot2_miya 
+@Project        : nonebot2_miya
 @Description    : Bot Action Event
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 from typing import TYPE_CHECKING, Literal, override

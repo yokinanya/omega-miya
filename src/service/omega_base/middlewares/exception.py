@@ -5,7 +5,7 @@
 @Project        : nonebot2_miya
 @Description    : Omega 平台中间件异常
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 from typing import final

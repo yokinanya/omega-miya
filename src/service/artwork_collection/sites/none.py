@@ -5,7 +5,7 @@
 @Project        : nonebot2_miya
 @Description    : none
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 from typing import TYPE_CHECKING

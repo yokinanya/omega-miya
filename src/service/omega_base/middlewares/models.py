@@ -5,7 +5,7 @@
 @Project        : omega-miya
 @Description    : Omega 中间件数据模型
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 from typing import Any

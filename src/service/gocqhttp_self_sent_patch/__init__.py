@@ -2,10 +2,10 @@
 @Author         : Ailitonia
 @Date           : 2022/05/23 19:50
 @FileName       : gocqhttp_self_sent_patch.py
-@Project        : nonebot2_miya 
+@Project        : nonebot2_miya
 @Description    : go-cqhttp 自身发送消息适配
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 from nonebot.log import logger

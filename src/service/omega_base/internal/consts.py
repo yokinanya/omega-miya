@@ -2,10 +2,10 @@
 @Author         : Ailitonia
 @Date           : 2022/12/02 21:44
 @FileName       : consts.py
-@Project        : nonebot2_miya 
+@Project        : nonebot2_miya
 @Description    : Omega database consts
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 from typing import Literal

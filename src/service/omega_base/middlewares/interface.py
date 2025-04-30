@@ -5,7 +5,7 @@
 @Project        : nonebot2_miya
 @Description    : Omega 平台中间件统一接口
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 import asyncio
@@ -38,8 +38,7 @@ if TYPE_CHECKING:
     from .platform_interface.event_depend import EventDepend
     from .platform_interface.message_builder import Builder, Extractor
 
-
-type SentOmegaMessage = BaseSentMessageType['OmegaMessage']
+    type SentOmegaMessage = BaseSentMessageType[OmegaMessage]
 
 
 class OmegaEntityInterface:

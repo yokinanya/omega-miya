@@ -5,7 +5,7 @@
 @Project        : nonebot2_miya
 @Description    : Artwork Proxy 统一接口实现
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 import abc

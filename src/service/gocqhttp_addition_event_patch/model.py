@@ -5,7 +5,7 @@
 @Project        : nonebot2_miya
 @Description    : Go-cqhttp addition event model
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 from typing import Literal, TypeVar, override

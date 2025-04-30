@@ -2,10 +2,10 @@
 @Author         : Ailitonia
 @Date           : 2022/12/03 17:59
 @FileName       : base.py
-@Project        : nonebot2_miya 
+@Project        : nonebot2_miya
 @Description    : Base event Model
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 from typing import TYPE_CHECKING, override

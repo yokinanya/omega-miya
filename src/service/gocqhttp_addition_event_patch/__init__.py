@@ -5,7 +5,7 @@
 @Project        : nonebot2_miya
 @Description    : Go-cqhttp 事件补丁
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 from nonebot.log import logger

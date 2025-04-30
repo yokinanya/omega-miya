@@ -5,7 +5,7 @@
 @Project        : nonebot2_miya
 @Description    : booru 系列适配
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 from typing import TYPE_CHECKING

@@ -5,7 +5,7 @@
 @Project        : omega-miya
 @Description    : Add-ons models
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 import abc

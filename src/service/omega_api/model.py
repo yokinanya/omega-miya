@@ -2,10 +2,10 @@
 @Author         : Ailitonia
 @Date           : 2022/11/29 19:49
 @FileName       : model.py
-@Project        : nonebot2_miya 
+@Project        : nonebot2_miya
 @Description    : Omega API model
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 from pydantic import BaseModel, ConfigDict, Field

@@ -2,10 +2,10 @@
 @Author         : Ailitonia
 @Date           : 2022/12/03 17:57
 @FileName       : omega_event.py
-@Project        : nonebot2_miya 
+@Project        : nonebot2_miya
 @Description    : Omega Internal event
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 from .base import Event

@@ -2,10 +2,10 @@
 @Author         : Ailitonia
 @Date           : 2022/12/09 21:00
 @FileName       : subscription_source.py
-@Project        : nonebot2_miya 
+@Project        : nonebot2_miya
 @Description    : 数据库订阅源常用方法
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 import abc

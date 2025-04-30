@@ -5,7 +5,7 @@
 @Project        : omega-miya
 @Description    : Omega 全局缓存
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 from datetime import datetime, timedelta

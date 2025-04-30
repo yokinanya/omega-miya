@@ -5,7 +5,7 @@
 @Project        : nonebot2_miya
 @Description    : QQ 适配器频道消息审核处理
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 from typing import Any

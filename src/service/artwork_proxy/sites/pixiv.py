@@ -5,7 +5,7 @@
 @Project        : omega-miya
 @Description    : Pixiv 图库统一接口实现
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 import random
@@ -34,7 +34,7 @@ class _PixivArtworkProxy(BaseArtworkProxy):
     @classmethod
     async def _random(cls, *, limit: int = 20) -> list[str | int]:
         artworks_data = await PixivArtwork.query_discovery_artworks()
-        return [x for x in random.sample(artworks_data.recommend_pids, k=limit)]
+        return list(random.sample(artworks_data.recommend_pids, k=limit))
 
     @classmethod
     async def _search(cls, keyword: str, *, page: int | None = None, **kwargs) -> list[str | int]:

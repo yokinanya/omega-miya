@@ -5,7 +5,7 @@
 @Project        : nonebot2_miya
 @Description    : QQ 官方协议适配
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 from pathlib import Path

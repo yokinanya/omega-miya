@@ -5,7 +5,7 @@
 @Project        : nonebot2_miya
 @Description    : Omega API helpers
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 import inspect

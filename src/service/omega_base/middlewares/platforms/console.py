@@ -5,7 +5,7 @@
 @Project        : nonebot2_miya
 @Description    : nonebot-console 协议适配
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 from typing import Any

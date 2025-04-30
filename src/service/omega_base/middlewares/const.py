@@ -5,7 +5,7 @@
 @Project        : nonebot2_miya
 @Description    : middlewares const
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 from src.database.internal.bot import BotType as SupportedPlatform

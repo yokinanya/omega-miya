@@ -5,7 +5,7 @@
 @Project        : omega-miya
 @Description    : Pixiv 适配
 @GitHub         : https://github.com/Ailitonia
-@Software       : PyCharm 
+@Software       : PyCharm
 """
 
 from typing import TYPE_CHECKING
