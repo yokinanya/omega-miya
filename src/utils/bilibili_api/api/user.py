@@ -41,27 +41,11 @@ class BilibiliUser(BilibiliCommon):
         data = await cls._get_json(url=url)
         return VipInfo.model_validate(data)
 
-    @staticmethod
-    @run_sync
-    def _parse_user_space_w_webid(content: str) -> UserSpaceRenderData:
-        """解析用户页面 __RENDER_DATA__ 内容"""
-        html = etree.HTML(content)
-        render_data = html.xpath('/html/head/script[@id="__RENDER_DATA__"]').pop(0).text
-        return parse_json_as(UserSpaceRenderData, unquote(render_data))
-
-    @classmethod
-    async def _query_user_space_w_webid(cls, mid: int | str) -> UserSpaceRenderData:
-        """获取并解析用户页面 __RENDER_DATA__ 内容"""
-        user_space_url = f'https://space.bilibili.com/{mid}'
-        user_space_page = await cls._get_resource_as_text(url=user_space_url)
-        return await cls._parse_user_space_w_webid(content=user_space_page)
-
     @classmethod
     async def query_user_info(cls, mid: int | str) -> User:
         """获取用户基本信息"""
         url = 'https://api.bilibili.com/x/space/wbi/acc/info'
-        render_data = await cls._query_user_space_w_webid(mid=mid)
-        params = await cls.sign_wbi_params(params={'mid': str(mid), 'w_webid': render_data.access_id})
+        params = await cls.sign_wbi_params(params={'mid': str(mid)})
         data = await cls._get_json(url=url, params=params)
         return User.model_validate(data)
 
