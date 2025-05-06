@@ -93,15 +93,9 @@ class User(BaseBilibiliResponse):
         return self.data.name
 
 
-class UserSpaceRenderData(BaseBilibiliModel):
-    """space.bilibili.com 页面 __RENDER_DATA__ 元素内容"""
-    access_id: str
-
-
 __all__ = [
     'Account',
     'User',
     'UserLiveRoom',
-    'UserSpaceRenderData',
     'VipInfo',
 ]

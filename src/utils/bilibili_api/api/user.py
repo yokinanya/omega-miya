@@ -8,18 +8,11 @@
 @Software       : PyCharm
 """
 
-from urllib.parse import unquote
-
-from lxml import etree
-from nonebot.utils import run_sync
-
-from src.compat import parse_json_as
 from .base import BilibiliCommon
 from ..models import (
     Account,
     User,
     UserSearchResult,
-    UserSpaceRenderData,
     VipInfo,
 )
 
